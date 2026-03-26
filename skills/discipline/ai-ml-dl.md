@@ -12,6 +12,10 @@
 - Boolean 인덱싱 → Float 마스크 곱셈 (shape 고정 유지).
 - pin_memory=True + non_blocking=True, GPU 전송 후 연산.
 
+## 데이터 전처리
+- 전처리 파이프라인과 모델을 분리. 전처리 코드 안에서 모델 학습하지 않는다.
+- train 데이터로 fit한 전처리(스케일러, 인코더 등)를 val/test에 transform만 적용. 역방향 누수 금지.
+
 ## 재현성
 - 시드 고정 (random, numpy, torch, cuda).
 - 환경 기록: Python 버전, 패키지 버전, GPU 모델.
@@ -23,7 +27,8 @@
 ### 분류 (Classification)
 - 베이스라인: majority class.
 - 평가: F1 기반 (accuracy 단독 사용 금지). 클래스 불균형 시 macro F1.
-- 라벨 품질 > 모델 크기. 오분류 패턴 분석이 아키텍처 변경보다 우선.
+- 라벨 품질 > 모델 크기. 첫 모델의 confusion matrix 분석 후, 오분류 패턴이 라벨 노이즈를 시사하면 모델 변경 전에 라벨 검토.
+- 데이터 분할: stratify 사용 권장. 분할 비율과 근거를 기록.
 
 ### 회귀 (Regression)
 - 베이스라인: 평균값 예측.
