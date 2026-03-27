@@ -1,6 +1,6 @@
 # sonmat (손맛)
 
-> 어머니의 손맛. 같은 재료도 누가 만드느냐에 따라 다르다.
+> 엄마한테 레시피 받아서 그대로 했는데, 왜 나만 안 되는 거야?
 
 범용 자율 루프 플러그인 for Claude Code.
 superpowers + gsd + andrej-karpathy-skills를 대체합니다.
