@@ -1,6 +1,6 @@
 # sonmat (손맛)
 
-> 엄마한테 레시피 받아서 그대로 했는데, 왜 나만 안 되는 거야?
+> 엄마가 하면 맛있던데 왜 내가 하면...?
 
 범용 자율 루프 플러그인 for Claude Code.
 superpowers + gsd + andrej-karpathy-skills를 대체합니다.
