@@ -5,6 +5,14 @@
 범용 자율 루프 플러그인 for Claude Code.
 superpowers + gsd + andrej-karpathy-skills를 대체합니다.
 
+### 다른 도구에서도 쓸 수 있어요
+
+| 도구 | 레포 | 설치 |
+|------|------|------|
+| **Claude Code** | 여기 | `claude install-skill jun0-ds/sonmat` |
+| **Gemini CLI** | [sonmat-gemini](https://github.com/jun0-ds/sonmat-gemini) | `gemini extensions install https://github.com/jun0-ds/sonmat-gemini` |
+| **Codex CLI** | [sonmat-codex](https://github.com/jun0-ds/sonmat-codex) | `git clone ... ~/.codex/plugins/sonmat` |
+
 ## 특징
 
 - **System 1/2 이중 프로세스** — 빠른 판단(스킬)과 깊은 분석(워커)을 상황에 따라 자동 전환
