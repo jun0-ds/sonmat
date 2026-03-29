@@ -3,7 +3,7 @@
 > 엄마가 하면 맛있던데 왜 내가 하면...?
 
 범용 자율 루프 플러그인 for Claude Code.
-superpowers + gsd + andrej-karpathy-skills를 대체합니다.
+[superpowers](https://github.com/superpowers-marketplace/superpowers), [GSD(Get Shit Done)](https://github.com/get-shit-done/gsd), [andrej-karpathy-skills](https://github.com/karpathy-skills/andrej-karpathy-skills)를 대체합니다.
 
 ## 특징
 
@@ -19,18 +19,13 @@ sonmat/
 ├── skills/
 │   ├── loop/        # 범용 자율 루프 프로토콜
 │   ├── guard/       # 가드레일 (커밋 전 검증, 스코프 체크)
-│   ├── plan/        # 마일스톤/페이즈 관리 (progress.md)
-│   ├── benchmark/   # 비교실험 프레임워크
-│   └── discipline/  # 도메인별 규율 파일
-│       ├── core.md      # 공통 규율 (항상 적용)
-│       ├── dev.md       # 개발
-│       ├── ai-ml-dl.md  # ML/DL
-│       ├── analysis.md  # 데이터 분석
-│       ├── document.md  # 문서
-│       └── general.md   # 기본값
+│   └── plan/        # 마일스톤/페이즈 관리 (progress.md)
+├── discipline/
+│   ├── core.md      # 공통 규율 (항상 적용)
+│   └── hints.md     # 도메인별 트랩 힌트
 ├── agents/
 │   └── sonmat-worker.md  # System 2 워커 에이전트
-└── hooks/                # 세션 시작 훅 (도메인 1차 판단)
+└── hooks/                # 세션 시작 훅 (자동 업데이트, 호칭, 메모리)
 ```
 
 ## 호칭 설정
@@ -61,18 +56,6 @@ claude plugins install sonmat@sonmat
 
 설치 후 대화를 시작하면 sonmat이 자동으로 동작한다.
 
-### 도메인 자동 판단
-
-태스크 키워드에 따라 도메인이 자동 선택되고 해당 규율이 적용된다.
-
-| 키워드 | 도메인 | 규율 |
-|--------|--------|------|
-| 테스트, 리팩토링, API, 커밋 | dev | TDD, 체계적 디버깅, 코드리뷰 |
-| 학습, F1, 모델, 파인튜닝 | ai-ml-dl | 베이스라인 먼저, 한 번에 하나만 변경 |
-| 데이터, 시각화, 분석, 통계 | analysis | 무결성 확인, 장식용 차트 금지 |
-| 문서, 정리, 목차, 매뉴얼 | document | 용어 통일, 퇴고 규율 |
-| 위에 해당 없음 | general | core.md만 적용 |
-
 ### 루프 실행
 
 반복 작업을 요청하면 기획 질문 루프를 거쳐 루프 정의서를 생성하고 자율 반복을 시작한다.
@@ -100,15 +83,14 @@ claude plugins install sonmat@sonmat
 
 ```markdown
 ## sonmat
-domain: ai-ml-dl
 discipline:
   disable:
-    - "dev.md > TDD"
+    - "hints.md > TDD"
   add:
     - "커밋 전 ruff format 필수"
 ```
 
-## superpowers / gsd / karpathy-skills에서 마이그레이션
+## superpowers / GSD / karpathy-skills에서 마이그레이션
 
 ### 제거
 
@@ -125,9 +107,9 @@ GSD는 훅 기반이므로 `settings.json`에서 관련 훅을 제거한다.
 
 | 기존 | sonmat 대응 |
 |------|-------------|
-| superpowers TDD/디버깅/코드리뷰 | `discipline/dev.md` |
+| superpowers TDD/디버깅/코드리뷰 | `discipline/core.md` + `hints.md` |
 | superpowers brainstorming/writing-plans | `skills/loop/` 기획 질문 루프 |
-| gsd spec → plan → execute | `skills/plan/` + `skills/loop/` |
+| GSD spec → plan → execute | `skills/plan/` + `skills/loop/` |
 | karpathy-skills 코딩 원칙 | `discipline/core.md` |
 
 ### 차이점
