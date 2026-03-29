@@ -5,14 +5,6 @@
 범용 자율 루프 플러그인 for Claude Code.
 superpowers + gsd + andrej-karpathy-skills를 대체합니다.
 
-### 다른 도구에서도 쓸 수 있어요
-
-| 도구 | 레포 | 설치 |
-|------|------|------|
-| **Claude Code** | 여기 | `claude install-skill jun0-ds/sonmat` |
-| **Gemini CLI** | [sonmat-gemini](https://github.com/jun0-ds/sonmat-gemini) | `gemini extensions install https://github.com/jun0-ds/sonmat-gemini` |
-| **Codex CLI** | [sonmat-codex](https://github.com/jun0-ds/sonmat-codex) | `git clone ... ~/.codex/plugins/sonmat` |
-
 ## 특징
 
 - **System 1/2 이중 프로세스** — 빠른 판단(스킬)과 깊은 분석(워커)을 상황에 따라 자동 전환
@@ -40,6 +32,22 @@ sonmat/
 │   └── sonmat-worker.md  # System 2 워커 에이전트
 └── hooks/                # 세션 시작 훅 (도메인 1차 판단)
 ```
+
+## 호칭 설정
+
+세션 시작 시 글로벌 `~/.claude/CLAUDE.md`에 `## 0. 호칭` 섹션이 없으면 쌍방 호칭을 제안한다.
+
+- **수락** — 사용자가 정한 호칭을 `CLAUDE.md`에 기록
+- **거절** — `설정하지 않음`으로 기록하여 다시 묻지 않음
+- **변경** — 언제든 `CLAUDE.md`를 수정하거나 대화에서 요청
+
+관계 방향은 자유:
+
+| 유형 | 예시 |
+|------|------|
+| 대등 | 친구/친구, 동료/동료 |
+| 사용자 > 클로드 | 선배/막내, 형/동생 |
+| 클로드 > 사용자 | 코치/선수, 스승/제자 |
 
 ## 설치
 

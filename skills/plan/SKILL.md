@@ -1,102 +1,91 @@
 ---
 name: plan
-description: 마일스톤/페이즈 관리 — progress.md 기반 프로젝트 진행 추적.
+description: Milestone/phase management — progress.md based project progress tracking.
 ---
 
-# plan 스킬
+# Plan Skill
 
-## 개요
+## Overview
 
-3계층 구조로 프로젝트를 관리한다.
+Manage projects in a 3-tier structure:
 
-- **마일스톤**: 큰 목표 단위 (예: "MVP 출시", "v2.0 완성")
-- **페이즈**: 마일스톤을 구성하는 단계 (예: "설계 완료", "핵심 기능 구현")
-- **태스크**: 페이즈 내 실행 단위 (예: "DB 스키마 작성", "API 엔드포인트 구현")
+- **Milestone**: Major goal unit (e.g., "MVP launch", "v2.0 complete")
+- **Phase**: Steps within a milestone (e.g., "Design done", "Core features implemented")
+- **Task**: Execution units within a phase (e.g., "Write DB schema", "Implement API endpoints")
 
-상태 추적은 `progress.md`의 마크다운 체크박스로, 이력은 git commit으로 관리한다.
-별도 상태 파일, 전용 에이전트, CLI 명령은 사용하지 않는다.
+Track state via markdown checkboxes in `progress.md`. Track history via git commits.
+No separate state files, dedicated agents, or CLI commands.
 
 ---
 
-## progress.md 운영
+## progress.md Operations
 
-### 위치 및 생성
+### Location
+Project root. Create or update as needed. If missing, build through planning questions.
 
-프로젝트 루트에 `progress.md`를 생성하거나 갱신한다.
-파일이 없으면 기획 질문을 통해 새로 만든다.
-
-### 포맷
+### Format
 
 ```markdown
-# 프로젝트 진행
+# Project Progress
 
-## 마일스톤 1: [목표]
-- [x] 페이즈 1: [설명]
-- [ ] 페이즈 2: [설명]
-  - [x] 태스크 1
-  - [ ] 태스크 2
+## Milestone 1: [goal]
+- [x] Phase 1: [description]
+- [ ] Phase 2: [description]
+  - [x] Task 1
+  - [ ] Task 2
 
-## 마일스톤 2: [목표]
-- [ ] 페이즈 3: [설명]
-  - [ ] 태스크 3
-  - [ ] 태스크 4
+## Milestone 2: [goal]
+- [ ] Phase 3: [description]
+  - [ ] Task 3
+  - [ ] Task 4
 ```
 
-### 규칙
-
-- 체크박스 `[x]`가 완료 상태, `[ ]`가 미완료 상태를 나타낸다.
-- 마일스톤 아래 페이즈, 페이즈 아래 태스크 순서로 들여쓴다.
-- 상태 변경 시 `progress.md`를 수정하고 git commit으로 이력을 남긴다.
-- 커밋 메시지 형식: `plan: [페이즈/태스크명] 완료` 또는 `plan: [페이즈명] 시작`
-
----
-
-## 자연어 명령 처리
-
-사용자가 자연어로 명령하면 아래 기준으로 해석하고 실행한다.
-
-### "다음 페이즈 시작해"
-
-1. `progress.md`를 읽어 현재 위치를 파악한다.
-2. 첫 번째 미완료(`[ ]`) 페이즈를 찾는다.
-3. 해당 페이즈의 태스크 목록을 사용자에게 확인한다.
-4. 작업 시작 커밋: `plan: [페이즈명] 시작`
-
-### "진행 상황 알려줘"
-
-1. `progress.md`를 읽어 완료/미완료 항목을 집계한다.
-2. `git log --oneline -20`으로 최근 작업 이력을 파악한다.
-3. 마일스톤별 진척률, 현재 진행 중인 페이즈, 다음 할 일을 요약해서 알려준다.
-
-### "로드맵 짜줘"
-
-스코프가 큰 작업이므로 System 2로 에스컬레이션한다.
-
-기획 질문 루프:
-- 이 프로젝트의 최종 목표가 뭐야?
-- 예상 기간이나 데드라인이 있어?
-- 어느 정도 규모의 마일스톤으로 나눌까?
-- 지금 당장 시작해야 하는 게 있어?
-
-답변을 모아 `progress.md` 초안을 작성하고 사용자에게 검토를 요청한다.
-
-### "이 페이즈 완료"
-
-1. `progress.md`에서 해당 페이즈의 `[ ]`를 `[x]`로 변경한다.
-2. 하위 태스크 중 미완료가 있으면 사용자에게 확인한다.
-3. 완료 커밋: `plan: [페이즈명] 완료`
+### Rules
+- `[x]` = complete, `[ ]` = incomplete.
+- Indent: milestone > phase > task.
+- On state change: update `progress.md` and git commit.
+- Commit format: `plan: [phase/task name] done` or `plan: [phase name] started`
 
 ---
 
-## 마일스톤 수준 기획
+## Natural Language Commands
 
-마일스톤 전체 설계, 로드맵 재구성, 우선순위 조정 등 스코프가 큰 작업은
-System 2로 에스컬레이션하여 기획 질문 루프를 진행한다.
+### "Start next phase"
+1. Read `progress.md` to find current position.
+2. Find first incomplete (`[ ]`) phase.
+3. Confirm task list with user.
+4. Commit: `plan: [phase name] started`
 
-**에스컬레이션 기준:**
-- 새 마일스톤을 추가하거나 기존 마일스톤을 크게 변경하는 경우
-- 여러 페이즈에 걸쳐 영향을 주는 구조 변경이 필요한 경우
-- "로드맵 다시 짜줘", "전략을 바꾸고 싶어" 같은 요청
+### "Show progress"
+1. Read `progress.md` — tally complete/incomplete items.
+2. `git log --oneline -20` for recent history.
+3. Summarize: progress per milestone, current phase, next action.
 
-에스컬레이션 시 현재 `progress.md` 상태를 컨텍스트로 제공하고,
-질문 루프를 통해 합의된 내용을 반영한 새 `progress.md`를 작성한다.
+### "Create roadmap"
+Large scope — escalate to System 2.
+
+Planning questions:
+- What is the end goal?
+- Any deadlines?
+- How large should milestones be?
+- Anything that needs to start immediately?
+
+Draft `progress.md` from answers, present for user review.
+
+### "Mark this phase done"
+1. Change `[ ]` to `[x]` for the phase in `progress.md`.
+2. If incomplete tasks remain under it, confirm with user.
+3. Commit: `plan: [phase name] done`
+
+---
+
+## Milestone-Level Planning
+
+Large-scope work (new milestones, roadmap restructuring, priority changes) → escalate to System 2 and run planning questions.
+
+**Escalation criteria:**
+- Adding or significantly changing milestones
+- Structural changes spanning multiple phases
+- Requests like "redo the roadmap", "change strategy"
+
+On escalation: provide current `progress.md` as context, run planning questions, write updated `progress.md` from consensus.

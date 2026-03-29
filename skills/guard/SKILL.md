@@ -1,116 +1,156 @@
 ---
 name: guard
-description: 가드레일 — 커밋 전 검증, 스코프 체크, 규율 위반 감지.
+description: Guardrails — pre-commit verification, scope checks, discipline violation detection, novel trap flagging.
 ---
 
-# Guard — 가드레일 스킬
+# Guard — Guardrail Skill
 
-작업 중 자동으로 적용되는 System 1 수준의 검증 레이어.
-에이전트를 별도로 스폰하지 않고, 메인 세션에서 즉각 처리한다.
-
----
-
-## 1. 커밋 전 검증
-
-커밋을 실행하기 전에 아래 항목을 순서대로 점검한다.
-
-### 테스트 통과 확인 (dev 도메인)
-- 현재 도메인이 `dev`이면 커밋 전 테스트 실행이 필수.
-- 테스트가 실패하거나 존재하지 않으면 커밋을 중단하고 사용자에게 알린다.
-- "테스트가 없으니 일단 커밋"은 허용하지 않는다.
-
-### 실행 결과로 주장 뒷받침
-- 코드가 동작한다는 주장을 할 때는 실제 실행 결과(로그, 출력, 테스트 통과)로 근거를 제시한다.
-- 추측이나 "아마 될 것 같다" 수준의 발언으로 커밋을 정당화하지 않는다.
-
-### 민감 파일 커밋 방지
-- `.env`, `credentials.*`, `secrets.*`, `*.pem`, `*.key` 등 민감 파일이
-  스테이징 목록에 포함되어 있으면 즉시 경고하고 커밋을 중단한다.
-- `.gitignore`에 해당 파일이 등록되어 있는지도 함께 확인한다.
+Automatic verification layer running in the main session (System 1). No agent spawn.
 
 ---
 
-## 2. 스코프 체크
+## 1. Pre-Commit Verification
 
-### 범위 초과 수정 감지
-- 루프의 `loop.constraints`는 정의서에 명시된 기계적 제약(파일 범위, 시간 등)을 체크한다. guard의 스코프 체크는 정의서에 명시되지 않은 **맥락적 범위 초과**를 감지한다.
-- 요청된 작업 범위를 넘어서는 파일 수정이 발생하면 경고를 출력한다.
-- 예: "버튼 색상 변경" 요청에서 컴포넌트 구조를 통째로 리팩터링하는 행위.
+Before any commit, check in order:
 
-### "이것도 고치면 좋을 것 같은데" 충동 억제
-- 작업 중 관련 없는 코드의 개선점이 눈에 띄어도, 현재 태스크에 집중한다.
-- 부수적인 개선은 메모하되, 현재 커밋에 포함하지 않는다.
-- 미완성 아이디어를 커밋에 끼워 넣는 것은 코드베이스를 오염시킨다.
+### Test pass confirmation
+- If tests exist, run them before commit. Fail → block commit.
+- "No tests, so just commit" is not allowed.
 
-### 스코프 변경 시 사전 확인
-- 작업을 진행하다가 원래 요청보다 더 넓은 범위의 변경이 필요하다고 판단되면,
-  즉시 사용자에게 확인을 요청한다.
-- 무단으로 스코프를 확장하지 않는다.
-- 확인 없이 진행하는 것은 신뢰를 낮추는 행동이다.
+### Claims backed by execution
+- "It works" must be backed by actual output (logs, test results). Not by speculation.
+
+### Sensitive file blocking
+- `.env`, `credentials.*`, `secrets.*`, `*.pem`, `*.key` in staging → immediate block.
+- Also check `.gitignore` coverage.
 
 ---
 
-## 3. 규율 위반 감지
+## 2. Scope Check
 
-### 현재 도메인 규율과 행동 비교
-- 각 도메인(`dev`, `write`, `research` 등)에는 고유한 규율이 있다.
-- 현재 수행 중인 행동이 해당 도메인의 규율 텍스트와 충돌하는지 실시간으로 확인한다.
+### Scope creep detection
+- Flag file changes beyond the requested scope.
+- "This button color change" → refactoring the component tree = scope creep.
 
-### 위반 감지 시 처리
-- 위반이 감지되면 작업을 중단하고 경고를 출력한다.
-- 올바른 행동이 무엇인지 안내한다.
-- 사용자가 명시적으로 예외를 허용하면 진행할 수 있다.
+### Impulse suppression
+- Unrelated improvements noticed during work → note them, don't include in current commit.
 
-### 위반 사례 예시
-| 상황 | 위반 내용 | 안내 |
-|------|-----------|------|
-| dev 도메인 | 테스트 없이 구현 시작 | TDD 규율 적용: 테스트 먼저 작성 |
-| dev 도메인 | 커밋 메시지 없이 `git add .` | 커밋 메시지 작성 및 파일 선별 스테이징 |
-| write 도메인 | 초안 없이 최종본 작성 | 초안 → 퇴고 순서 준수 |
-| any | 민감 파일 스테이징 | 즉시 `git reset HEAD <file>` 안내 |
+### Scope expansion requires confirmation
+- If broader changes are needed, ask the user first. Never expand silently.
 
 ---
 
-## 4. 완료 전 재검토
+## 3. Project Rule Discovery
 
-"다 됐다"고 판단하기 전에, 작업 맥락을 내려놓고 처음 보는 사람 관점에서 전체를 훑는다.
+During work, watch for implicit rules the user assumes you know:
 
-- **전체 diff 재읽기**: 수정한 파일들의 diff를 처음부터 다시 읽는다. 작업 중에는 보이지 않던 실수(오타, 잘못된 값, 빠진 부분)가 이 단계에서 드러난다.
-- **흐름 따라가기**: 변경이 전체 실행 흐름에 미치는 영향을 확인한다. 변경되지 않은 코드를 리뷰하는 것이 아니라, 변경으로 인해 흐름이 어긋나는 경우를 잡는다.
-- **주변 확인**: 수정한 파일 자체가 아니라, 그 파일에 의존하는 쪽을 확인한다. 참조, 설정, 경로, 복사본이 여전히 유효한지. 깨지는 건 항상 하류에서 발생한다.
+- **Direct statement**: "이 프로젝트에서는 항상 X" → propose immediately.
+- **Repeated correction**: Same fix requested 2+ times → MUST propose as rule.
+- **Structural inference**: Config files, test patterns, naming conventions that imply rules.
 
-이 재검토는 루프 종료 시, 커밋 전, 또는 "완료했습니다" 선언 전에 수행한다.
+When spotted:
+```
+💡 Project rule detected: {draft rule}
+   Add to CLAUDE.md? [Yes / No / Rephrase]
+```
+
+Write to `## Project Rules` section in CLAUDE.md only after user confirms.
+This is how the "빈 공간" shrinks over time — rules accumulate from practice, not declaration.
 
 ---
 
-## 5. 경고 심각도
+## 4. Discipline Violation
 
+### Check against core.md + hints.md
+- Compare current actions against the active discipline (core verification principles + domain hints).
+- On violation: stop, warn, suggest the correct action.
+- User can explicitly override.
 
-| 심각도 | 기호 | 대상 | 동작 |
-|--------|------|------|------|
-| **주의** | ⚠️ | 스코프 초과, 규율 위반 | 경고 출력 + 대안 제시. 사용자가 허용하면 진행 가능 |
-| **차단** | 🚨 | 민감 파일 스테이징, 보안 위험 | 즉시 중단. 사용자 허용 후에도 재확인 |
+---
 
-같은 카테고리의 경고가 세션 내 3회 이상 반복되면, 이후부터 한 줄 요약으로 축약한다.
+## 4. Completion Review (Verification Discipline Applied)
 
-## 6. System 1 vs 훅 역할 분담
+Before declaring "done", apply the verification discipline:
 
-| 감지 대상 | 적합한 레이어 | 이유 |
-|-----------|:---:|------|
-| 스코프 크리프 | System 1 (프롬프트) | 맥락 이해 필요 |
-| 충동 억제 | System 1 (프롬프트) | 의도 판단 필요 |
-| 민감 파일 스테이징 | 훅 (PreToolUse) | 패턴 매칭, 100% 보장 필요 |
-| 규율 위반 감지 | System 1 (프롬프트) | 도메인별 맥락 필요 |
+### Break it
+- Re-read the full diff as if trying to find what's wrong.
+- What input would make this code fail? What edge case was missed?
 
-System 1로 처리하는 항목은 프롬프트 지시로 유도하되, 기계적 패턴 매칭이 가능한 항목(민감 파일 등)은 훅 레이어에 위임하는 것이 신뢰도가 높다.
+### Cross it
+- Check downstream: files that depend on what changed. References, config, paths still valid?
+- Does the change work from a different entry point?
 
-## 7. System 1 동작
+### Ground it
+- Was the fix verified by actual execution, or just by reading the code?
+- If only read → run it.
 
-이 가드레일은 **System 1 레벨**에서 자동 적용된다.
+---
 
-- 별도의 에이전트를 스폰하지 않는다.
-- 메인 세션에서 즉각적으로 처리된다.
-- 사용자가 명시적으로 비활성화하지 않는 한, 항상 켜져 있다.
-- 가드레일이 작동했을 때는 무엇을 감지했는지 간결하게 알린다.
+## 5. Novel Trap Flagging + Memory Write
 
-> 가드레일은 작업 속도를 늦추는 것이 아니라, 나중에 생길 문제를 지금 막는 것이다.
+When a verification failure is discovered that is NOT covered by existing hints or memory:
+
+1. **Flag** it as `Novel trap` in the output.
+2. **Describe**: what happened, why existing discipline didn't catch it, what would have caught it.
+3. **Propose** a memory record to the user:
+   - Project-specific lesson → `{project}/.claude/sonmat/{name}.md`
+   - Universal lesson → `~/.claude/sonmat/memory/trap_{name}.md`
+4. **Write** only after user confirms. Use this format:
+
+```markdown
+# Trap: {title}
+
+## Pattern
+{What went wrong and why it wasn't caught}
+
+## Lesson
+{What to do differently — tied to Break/Cross/Ground}
+
+## Applies to
+{When this trap is likely to recur}
+```
+
+**This is not optional.** If guard detects a novel trap and does NOT propose a memory record, the verification discipline was not fully applied. The memory system grows through practice, not pre-definition.
+
+### GitHub feedback (optional)
+
+After writing a memory record, offer to submit it as a GitHub issue to the sonmat repo:
+
+```
+💬 This trap could help other sonmat users. Submit to GitHub?
+   Your privacy is respected — only the abstracted pattern is sent,
+   no conversation content or personal data.
+
+   Below is EXACTLY what will be sent:
+
+   Title: Trap: {title}
+   Pattern: {abstracted pattern}
+   Discovered via: {method}
+
+   [Yes / No / Edit first]
+```
+
+If user approves: `gh issue create --repo jun0-ds/sonmat --template trap-report.md`
+If user wants to edit: show the full issue body, let them modify, then submit.
+**Never send without showing the content first.**
+
+---
+
+## 6. Severity
+
+| Severity | Symbol | Target | Action |
+|----------|--------|--------|--------|
+| **Warning** | ⚠️ | Scope creep, discipline violation | Warn + suggest alternative. Proceed if user allows. |
+| **Block** | 🚨 | Sensitive files, security risk | Immediate stop. Re-confirm even after user allows. |
+
+Same-category warnings repeated 3+ times in a session → collapse to one-line summary.
+
+---
+
+## 7. Operation Mode
+
+This guardrail operates at **System 1 level**:
+- No agent spawn.
+- Runs in main session, immediately.
+- Always on unless user explicitly disables.
+- When triggered, state what was detected concisely.
