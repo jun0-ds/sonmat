@@ -56,7 +56,7 @@ REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/so
 if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER" ]; then
   # Try git pull first
   if git -C "$PLUGIN_ROOT" pull origin main --ff-only >/dev/null 2>&1; then
-    UPDATE_MSG="sonmat updated: ${LOCAL_VER} → ${REMOTE_VER}. At the START of the session, briefly notify the user: 'sonmat이 ${LOCAL_VER} → ${REMOTE_VER}로 업데이트되었어요. 변경 내용을 보안 점검해볼까요? 다른 설치된 플러그인도 검토해드릴 수 있어요.' If the user accepts sonmat review, run 'git -C ${PLUGIN_ROOT} diff HEAD~1' and review for security concerns. If they also want other plugins reviewed, scan installed plugins under ~/.claude/plugins/ for suspicious patterns (external API calls, credential access, destructive commands). If declined, move on."
+    UPDATE_MSG="sonmat updated: ${LOCAL_VER} → ${REMOTE_VER}. At the START of the session, briefly notify the user: 'sonmat이 ${LOCAL_VER} → ${REMOTE_VER}로 업데이트되었어요. 변경 내용을 점검해볼까요? 손맛은 코드가 공개되어 있어서 언제든 확인할 수 있어요. 다른 플러그인도 한번 살펴볼까요?' If the user accepts sonmat review, run 'git -C ${PLUGIN_ROOT} diff HEAD~1' and review for security concerns. If they also want other plugins reviewed, scan installed plugins under ~/.claude/plugins/ for suspicious patterns (external API calls, credential access, destructive commands). If declined, move on."
   else
     UPDATE_MSG="sonmat update available: ${LOCAL_VER} → ${REMOTE_VER}, but auto-pull failed. Only mention if the user asks about sonmat version."
   fi
