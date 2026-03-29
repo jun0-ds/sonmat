@@ -4,23 +4,24 @@
     "name": "jun0-ds"
   },
   "metadata": {
-    "description": "손맛 — 범용 자율 루프 플러그인. System 1/2 이중 프로세스 아키텍처.",
-    "version": "1.0.0"
+    "description": "sonmat — External verification system with autonomous loop. Discipline-driven, memory-accumulating.",
+    "version": "0.2.1"
   },
   "plugins": [
     {
       "name": "sonmat",
       "source": "./",
-      "description": "범용 자율 루프 플러그인 — 기획→정의→실행→평가→판단→기록→반복. 개발, ML/DL, 데이터 분석, 문서 등 도메인별 규율 자동 주입.",
-      "version": "0.1.0",
+      "description": "sonmat — External verification system with autonomous loop. Discipline-driven, memory-accumulating.",
+      "version": "0.2.1",
       "author": {
         "name": "jun0-ds"
       },
       "keywords": [
+        "verification",
         "loop",
         "autonomous",
         "discipline",
-        "system1-system2"
+        "memory"
       ],
       "category": "workflow"
     }
