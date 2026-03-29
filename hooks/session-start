@@ -48,6 +48,20 @@ if [ -d ".claude/sonmat" ]; then
   fi
 fi
 
+# --- Auto-update check ---
+UPDATE_MSG=""
+LOCAL_VER=$(grep '"version"' "$PLUGIN_ROOT/.claude-plugin/plugin.json" 2>/dev/null | head -1 | sed 's/.*"version": *"//;s/".*//')
+REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/sonmat/main/.claude-plugin/plugin.json" | grep '"version"' | head -1 | sed 's/.*"version": *"//;s/".*//')
+
+if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER" ]; then
+  # Try git pull first
+  if git -C "$PLUGIN_ROOT" pull origin main --ff-only >/dev/null 2>&1; then
+    UPDATE_MSG="sonmat updated: ${LOCAL_VER} → ${REMOTE_VER}. At the START of the session, briefly notify the user: 'sonmat이 ${LOCAL_VER} → ${REMOTE_VER}로 업데이트되었어요. 변경 내용을 보안 점검해볼까요?' If the user accepts, review the git diff of the update for security concerns. If declined, move on."
+  else
+    UPDATE_MSG="sonmat update available: ${LOCAL_VER} → ${REMOTE_VER}, but auto-pull failed. Only mention if the user asks about sonmat version."
+  fi
+fi
+
 # --- Check 호칭 (nickname) setup ---
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 NEEDS_NICKNAME=""
@@ -88,6 +102,11 @@ if [ -n "$NEEDS_NICKNAME" ]; then
   CONTEXT="${CONTEXT} 안 정해도 괜찮고, 나중에 언제든 바꿀 수 있어요."
   CONTEXT="${CONTEXT} ---"
   CONTEXT="${CONTEXT} If the user sets nicknames, write a '## 0. 호칭' section to ${GLOBAL_CLAUDE_MD} with the format: '- 사용자 → 클로드: \"X\"' and '- 클로드 → 사용자: \"Y\"'. If the user declines, still write the section with '- 설정하지 않음' so they are not asked again. Either way, mention they can change it anytime."
+fi
+
+# Auto-update result
+if [ -n "$UPDATE_MSG" ]; then
+  CONTEXT="${CONTEXT} ${UPDATE_MSG}"
 fi
 
 for msg in "${MSGS[@]}"; do
