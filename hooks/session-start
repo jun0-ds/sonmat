@@ -94,7 +94,7 @@ CONTEXT="${CONTEXT} PROJECT RULE DISCOVERY: During conversation, watch for impli
 
 # Nickname suggestion
 if [ -n "$NEEDS_NICKNAME" ]; then
-  CONTEXT="${CONTEXT} NICKNAME SETUP: The user has not set up nicknames (호칭) yet. At the START of this session, naturally suggest it once. Use this template:"
+  CONTEXT="${CONTEXT} NICKNAME SETUP: The user has not set up nicknames (호칭) yet. At the START of this session, naturally suggest it once. If there is also an update notification, combine them naturally and add '금방 끝나요!' to reassure. Use this template:"
   CONTEXT="${CONTEXT} ---"
   CONTEXT="${CONTEXT} **서로 호칭을 정해볼까요?**"
   CONTEXT="${CONTEXT} 작업하면서 서로 부를 이름이 있으면 더 자연스러워요."
