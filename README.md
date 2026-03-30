@@ -28,6 +28,32 @@ That's it. Everything else is implementation.
 
 No config. Start talking.
 
+### Platform notes
+
+sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is a polyglot script — cmd.exe runs the batch portion, Unix shells run the bash portion.
+
+**Windows (native)**
+- Claude Code calls `run-hook.cmd` via cmd.exe
+- The script finds Git for Windows bash (`C:\Program Files\Git\bin\bash.exe`) or any bash on PATH
+- No extra setup needed if Git for Windows is installed
+
+**Windows (WSL2) — recommended**
+- Claude Code runs inside WSL2, so hooks execute as plain bash
+- Paths stay Linux-native (`~/.claude/...`) — no cross-filesystem issues
+- `settings.json` hooks should point to the bash script directly:
+  ```json
+  {
+    "type": "command",
+    "command": "bash ~/.claude/plugins/marketplaces/sonmat/hooks/session-start"
+  }
+  ```
+
+**Linux / macOS**
+- Works out of the box. No special config.
+
+**Codex CLI?**
+See [sonmat-codex](https://github.com/jun0-ds/sonmat-codex) — a dedicated port with domain auto-detection and benchmark skill.
+
 ## Design philosophy
 
 1. **Confidence is when you should doubt** — When the model feels sure, that's exactly when it should look for counterexamples. Confidence without verification is just hallucination with good posture.
