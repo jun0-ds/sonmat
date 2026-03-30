@@ -55,62 +55,18 @@ You (main session)
 
 Not a file reference. Not a hook that might fire. Actual rules in the actual prompt. The worker can't skip what's in its own prompt.
 
-### Autonomous loop
+### Loop & escalation
 
-```
-Plan → Define → Execute → Evaluate → Judge → Record → Repeat/Exit
-```
-
-Judgment: keep / discard / refine. Not blind repetition.
-
-### Escalation
-
-| Level | Action |
-|-------|--------|
-| L0 | Skill handles it directly |
-| L1 | Pause, double-check |
-| L2 | Spawn worker with discipline |
-| L3 | Spawn parallel workers |
-
-Triggers: surprise results, repeated failures, missing references, rule conflicts. Automatic — you don't decide when to escalate.
+`Plan → Execute → Evaluate → Judge → Repeat/Exit` — with automatic escalation when things go wrong (L0 skill → L1 pause → L2 worker spawn → L3 parallel workers).
 
 ### Structure
 
 ```
 sonmat/
-├── skills/
-│   ├── loop/        # autonomous loop engine
-│   ├── guard/       # pre-commit checks, scope control
-│   └── plan/        # milestone/phase tracking (progress.md)
-├── discipline/
-│   ├── core.md      # always-on verification rules
-│   └── hints.md     # domain-specific trap hints
-├── agents/
-│   └── sonmat-worker.md  # System 2 worker with discipline
-└── hooks/                # session start (auto-update, naming, memory)
-```
-
-### Naming (optional)
-
-On first session, sonmat suggests a mutual nickname between you and Claude. A small thing that changes how collaboration feels.
-
-| Style | Example |
-|-------|---------|
-| Equal | friend / friend |
-| You > Claude | senior / junior |
-| Claude > You | coach / player |
-
-### Override
-
-Add to your project's CLAUDE.md:
-
-```markdown
-## sonmat
-discipline:
-  disable:
-    - "hints.md > TDD"
-  add:
-    - "run ruff format before commit"
+├── skills/          # loop, guard, plan
+├── discipline/      # core.md (verification) + hints.md (domain traps)
+├── agents/          # sonmat-worker (System 2, discipline-injected)
+└── hooks/           # session start
 ```
 
 ## Coming from other plugins?
@@ -125,13 +81,6 @@ Every popular Claude Code plugin shares the same gap: rules stay in the main ses
 | ultrathink | ✓ | ✗ ([#25591](https://github.com/anthropics/claude-code/issues/25591)) |
 
 Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/8395), [claude-code#22022](https://github.com/anthropics/claude-code/issues/22022)
-
-```bash
-# uninstall
-claude plugins uninstall superpowers@superpowers-marketplace
-claude plugins uninstall andrej-karpathy-skills@karpathy-skills
-# For GSD, remove related hooks from settings.json
-```
 
 | Before | After (sonmat) |
 |--------|---------------|
