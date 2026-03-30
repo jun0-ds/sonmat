@@ -2,10 +2,46 @@
 
 > 엄마가 하면 맛있던데 왜 내가 하면...?
 
-범용 자율 루프 플러그인 for Claude Code.
-[superpowers](https://github.com/superpowers-marketplace/superpowers), [GSD(Get Shit Done)](https://github.com/get-shit-done/gsd), [andrej-karpathy-skills](https://github.com/karpathy-skills/andrej-karpathy-skills)를 대체합니다.
+A universal autonomous loop plugin for Claude Code.
+Replaces [superpowers](https://github.com/obra/superpowers) + [GSD](https://github.com/gsd-build/gsd-2) + [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
 
-## 특징
+## Why sonmat?
+
+Every popular Claude Code plugin shares the same blind spot: **discipline doesn't reach the workers.**
+
+When Claude Code spawns subagents, they start with a blank slate. Your carefully crafted rules, coding standards, and verification habits stay in the main session — the workers that do the actual work never see them.
+
+This isn't a minor gap. It's the root cause of inconsistent output, silent failures, and subagents that rationalize skipping the rules you set.
+
+### What existing plugins miss
+
+| Plugin | Main session rules | Worker discipline | Auto-escalation | Domain-aware |
+|--------|-------------------|-------------------|-----------------|--------------|
+| [superpowers](https://github.com/obra/superpowers) | Yes | **No** ([#237](https://github.com/obra/superpowers/issues/237)) | No | No |
+| [gsd](https://github.com/gsd-build/gsd-2) | Yes (spec-driven) | Unclear | No | No |
+| [karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) | Yes (CLAUDE.md) | **No** | No | No |
+| ultrathink | Yes (keyword) | **No** ([#25591](https://github.com/anthropics/claude-code/issues/25591)) | No | No |
+| **sonmat** | Yes | **Yes** | **Yes** | **Yes** |
+
+The core issue is well-documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/8395) — subagents don't inherit user rules. SessionStart hooks only fire for the main session ([superpowers#237](https://github.com/obra/superpowers/issues/237)). CLAUDE.md access from subagents is unreliable ([claude-code#22022](https://github.com/anthropics/claude-code/issues/22022)).
+
+### How sonmat solves it
+
+1. **Discipline injection into workers** — `sonmat-worker` agents receive `core.md` + domain-specific discipline as part of their dispatch prompt. Not a suggestion. Not a file reference. Actual text in the prompt.
+2. **Automatic escalation** — Surprise, repeated failure, missing references, or rule conflicts trigger escalation from L0 (skill) → L1 (pause) → L2 (worker spawn) → L3 (parallel workers). You don't have to decide when to spawn agents.
+3. **Domain-aware traps** — Dev, ML/DL, analysis, and document domains each have their own non-obvious pitfalls. A "TDD-first" rule is useless in a data analysis task. sonmat loads the right traps for the right domain.
+4. **"Confidence is the signal to begin, not to stop"** — The core verification attitude. Every worker must Break it (find failure conditions), Cross it (verify via independent path), and Ground it (execute, don't just read).
+
+## Design Philosophy
+
+sonmat is built on four principles:
+
+- **Doubt at the moment of certainty** — When the model feels confident, that's precisely when verification matters most. Confidence without counterexample search is just hallucination with good posture.
+- **Rules that don't propagate don't exist** — A coding standard that only lives in the main session is decoration. sonmat injects discipline into every worker at dispatch time.
+- **Autonomy is not abandonment** — Autonomous loops need guardrails. The escalation system (L0–L3) ensures the agent asks for help at the right moment, not too early (interrupting flow) or too late (compounding errors).
+- **Every domain has its own traps** — "Write tests first" is great for dev but meaningless for data analysis. "One change at a time" is critical for ML but overkill for documentation. Domain-specific hints catch what universal rules miss.
+
+## Features
 
 - **System 1/2 이중 프로세스** — 빠른 판단(스킬)과 깊은 분석(워커)을 상황에 따라 자동 전환
 - **범용 루프 엔진** — 개발, ML/DL, 데이터 분석, 문서, 글쓰기 등 도메인별 자율 반복
