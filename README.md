@@ -47,7 +47,11 @@ sonmat/
 ## 설치
 
 ```bash
-claude plugins install sonmat@sonmat
+# 1. 마켓플레이스 등록
+/plugin marketplace add jun0-ds/sonmat
+
+# 2. 플러그인 설치
+/plugin install sonmat@sonmat
 ```
 
 별도 init 과정이나 설정 파일 생성은 필요 없다.
