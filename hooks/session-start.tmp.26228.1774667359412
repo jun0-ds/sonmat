@@ -1,0 +1,80 @@
+#!/bin/bash
+# sonmat session-start hook
+
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+USER_SONMAT="$HOME/.claude/sonmat"
+MSGS=()
+
+# --- Auto-create project CLAUDE.md (git repos only) ---
+if [ -d ".git" ] && [ ! -f "CLAUDE.md" ]; then
+  cat > CLAUDE.md << 'TEMPLATE'
+# CLAUDE.md
+
+> 글로벌 지침(`~/.claude/CLAUDE.md`) 상속: 사고규율, 검증규율, 호칭, Python/uv 규칙 등.
+
+## Project Rules
+
+<!-- 대화 중 발견된 프로젝트 규칙이 여기에 추가됩니다. -->
+TEMPLATE
+  MSGS+=("CLAUDE.md auto-created — review and customize.")
+fi
+
+# --- Auto-create project sonmat memory directory ---
+if [ -d ".git" ] && [ ! -d ".claude/sonmat" ]; then
+  mkdir -p .claude/sonmat
+fi
+
+# --- Auto-create user-level sonmat directory ---
+if [ ! -d "$USER_SONMAT" ]; then
+  mkdir -p "$USER_SONMAT/memory"
+fi
+
+# --- Read global memory index ---
+GLOBAL_MEMORY=""
+if [ -f "$USER_SONMAT/memory/README.md" ]; then
+  # Collect trap/insight file names as a brief index
+  MEMORY_FILES=$(find "$USER_SONMAT/memory" -name "trap_*.md" -o -name "insight_*.md" 2>/dev/null | while read f; do basename "$f" .md; done | tr '\n' ', ' | sed 's/,$//')
+  if [ -n "$MEMORY_FILES" ]; then
+    GLOBAL_MEMORY="Global sonmat memory (${USER_SONMAT}/memory/): ${MEMORY_FILES}. Read relevant trap/insight files before starting work that may be affected."
+  fi
+fi
+
+# --- Read project memory ---
+PROJECT_MEMORY=""
+if [ -d ".claude/sonmat" ]; then
+  PROJECT_FILES=$(find .claude/sonmat -name "*.md" 2>/dev/null | while read f; do basename "$f" .md; done | tr '\n' ', ' | sed 's/,$//')
+  if [ -n "$PROJECT_FILES" ]; then
+    PROJECT_MEMORY="Project sonmat memory (.claude/sonmat/): ${PROJECT_FILES}. Read these before starting — they contain project-specific lessons."
+  fi
+fi
+
+# --- Build context message ---
+CONTEXT="sonmat MANDATORY. Apply verification discipline (Break it / Cross it / Ground it) and domain hints to ALL work."
+CONTEXT="${CONTEXT} Guard runs automatically on completion."
+CONTEXT="${CONTEXT} Discipline: ${PLUGIN_ROOT}/discipline/core.md + hints.md."
+
+# Memory read instructions
+if [ -n "$GLOBAL_MEMORY" ]; then
+  CONTEXT="${CONTEXT} ${GLOBAL_MEMORY}"
+fi
+if [ -n "$PROJECT_MEMORY" ]; then
+  CONTEXT="${CONTEXT} ${PROJECT_MEMORY}"
+fi
+
+# Memory write instructions
+CONTEXT="${CONTEXT} MEMORY WRITE RULE: When guard flags a novel trap or loop retrospective discovers a lesson — record it. Project-specific lesson -> .claude/sonmat/{name}.md. Universal lesson -> ${USER_SONMAT}/memory/trap_{name}.md or insight_{name}.md. Always ask user before writing."
+
+for msg in "${MSGS[@]}"; do
+  CONTEXT="${CONTEXT} ${msg}"
+done
+
+# Escape for JSON
+CONTEXT=$(echo "$CONTEXT" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g')
+
+cat << EOF
+{
+  "hookSpecificOutput": {
+    "additionalContext": "${CONTEXT}"
+  }
+}
+EOF

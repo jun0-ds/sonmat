@@ -1,125 +1,108 @@
 # sonmat (손맛)
 
-> 엄마가 하면 맛있던데 왜 내가 하면...?
+> 엄마 손맛은 맛있는데 왜 내가 하면..?
 
-A universal autonomous loop plugin for Claude Code.
-Replaces [superpowers](https://github.com/obra/superpowers) + [GSD](https://github.com/gsd-build/gsd-2) + [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills).
+> Your AI is confident. Your AI is wrong. And neither of you noticed.
 
-## Why sonmat?
+sonmat teaches both of you to doubt and fix.
 
-Every popular Claude Code plugin shares the same blind spot: **discipline doesn't reach the workers.**
+## What this is
 
-When Claude Code spawns subagents, they start with a blank slate. Your carefully crafted rules, coding standards, and verification habits stay in the main session — the workers that do the actual work never see them.
+A Claude Code plugin that builds the habit of **doubting and correcting** — on both sides.
 
-This isn't a minor gap. It's the root cause of inconsistent output, silent failures, and subagents that rationalize skipping the rules you set.
+Your AI delivers answers with confidence but no verification. You accept them because they sound right. Nobody checks. Errors compound silently.
 
-### What existing plugins miss
+sonmat breaks this cycle:
 
-| Plugin | Main session rules | Worker discipline | Auto-escalation | Domain-aware |
-|--------|-------------------|-------------------|-----------------|--------------|
-| [superpowers](https://github.com/obra/superpowers) | Yes | **No** ([#237](https://github.com/obra/superpowers/issues/237)) | No | No |
-| [gsd](https://github.com/gsd-build/gsd-2) | Yes (spec-driven) | Unclear | No | No |
-| [karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) | Yes (CLAUDE.md) | **No** | No | No |
-| ultrathink | Yes (keyword) | **No** ([#25591](https://github.com/anthropics/claude-code/issues/25591)) | No | No |
-| **sonmat** | Yes | **Yes** | **Yes** | **Yes** |
+- **For the AI** — injects a verification discipline into every agent, including subagents. Break it (find where it fails), Cross it (verify independently), Ground it (execute, don't assume).
+- **For you** — surfaces the AI's reasoning transparently so you can actually judge instead of just trusting.
 
-The core issue is well-documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/8395) — subagents don't inherit user rules. SessionStart hooks only fire for the main session ([superpowers#237](https://github.com/obra/superpowers/issues/237)). CLAUDE.md access from subagents is unreliable ([claude-code#22022](https://github.com/anthropics/claude-code/issues/22022)).
+That's it. Everything else is implementation.
 
-### How sonmat solves it
+## Install
 
-1. **Discipline injection into workers** — `sonmat-worker` agents receive `core.md` + domain-specific discipline as part of their dispatch prompt. Not a suggestion. Not a file reference. Actual text in the prompt.
-2. **Automatic escalation** — Surprise, repeated failure, missing references, or rule conflicts trigger escalation from L0 (skill) → L1 (pause) → L2 (worker spawn) → L3 (parallel workers). You don't have to decide when to spawn agents.
-3. **Domain-aware traps** — Dev, ML/DL, analysis, and document domains each have their own non-obvious pitfalls. A "TDD-first" rule is useless in a data analysis task. sonmat loads the right traps for the right domain.
-4. **"Confidence is the signal to begin, not to stop"** — The core verification attitude. Every worker must Break it (find failure conditions), Cross it (verify via independent path), and Ground it (execute, don't just read).
+```bash
+/plugin marketplace add jun0-ds/sonmat
+/plugin install sonmat@sonmat
+```
 
-## Design Philosophy
+No config. Start talking.
 
-sonmat is built on four principles:
+## Design philosophy
 
-- **Doubt at the moment of certainty** — When the model feels confident, that's precisely when verification matters most. Confidence without counterexample search is just hallucination with good posture.
-- **Rules that don't propagate don't exist** — A coding standard that only lives in the main session is decoration. sonmat injects discipline into every worker at dispatch time.
-- **Autonomy is not abandonment** — Autonomous loops need guardrails. The escalation system (L0–L3) ensures the agent asks for help at the right moment, not too early (interrupting flow) or too late (compounding errors).
-- **Every domain has its own traps** — "Write tests first" is great for dev but meaningless for data analysis. "One change at a time" is critical for ML but overkill for documentation. Domain-specific hints catch what universal rules miss.
+1. **Confidence is when you should doubt** — When the model feels sure, that's exactly when it should look for counterexamples. Confidence without verification is just hallucination with good posture.
 
-## Features
+2. **Rules that don't propagate don't exist** — Discipline only in the main session is decoration. sonmat injects it into every worker at dispatch time.
 
-- **System 1/2 이중 프로세스** — 빠른 판단(스킬)과 깊은 분석(워커)을 상황에 따라 자동 전환
-- **범용 루프 엔진** — 개발, ML/DL, 데이터 분석, 문서, 글쓰기 등 도메인별 자율 반복
-- **경량 규율 주입** — core.md + 도메인 규율이 워커에 실제로 전달됨
-- **사용자 성장 구조** — 판단 근거 투명 공개, 커스텀 표면 안내, 적시 제안
+3. **Autonomy ≠ abandonment** — Autonomous loops need guardrails. Escalation kicks in at the right moment — not too early, not too late.
 
-## 구조
+4. **Every domain has its own traps** — "Write tests first" is vital for dev, meaningless for data analysis. "One change at a time" is essential for ML, overkill for docs.
+
+## How it works
+
+### Discipline injection
+
+When Claude spawns a subagent, sonmat attaches the discipline directly to the worker's prompt:
+
+```
+You (main session)
+  → spawns sonmat-worker
+      ↳ task description
+      ↳ core discipline (verification attitude)
+      ↳ domain-specific traps (dev / ML / analysis / doc)
+      ↳ must report: surprises, errors, conflicts
+```
+
+Not a file reference. Not a hook that might fire. Actual rules in the actual prompt. The worker can't skip what's in its own prompt.
+
+### Autonomous loop
+
+```
+Plan → Define → Execute → Evaluate → Judge → Record → Repeat/Exit
+```
+
+Judgment: keep / discard / refine. Not blind repetition.
+
+### Escalation
+
+| Level | Action |
+|-------|--------|
+| L0 | Skill handles it directly |
+| L1 | Pause, double-check |
+| L2 | Spawn worker with discipline |
+| L3 | Spawn parallel workers |
+
+Triggers: surprise results, repeated failures, missing references, rule conflicts. Automatic — you don't decide when to escalate.
+
+### Structure
 
 ```
 sonmat/
 ├── skills/
-│   ├── loop/        # 범용 자율 루프 프로토콜
-│   ├── guard/       # 가드레일 (커밋 전 검증, 스코프 체크)
-│   └── plan/        # 마일스톤/페이즈 관리 (progress.md)
+│   ├── loop/        # autonomous loop engine
+│   ├── guard/       # pre-commit checks, scope control
+│   └── plan/        # milestone/phase tracking (progress.md)
 ├── discipline/
-│   ├── core.md      # 공통 규율 (항상 적용)
-│   └── hints.md     # 도메인별 트랩 힌트
+│   ├── core.md      # always-on verification rules
+│   └── hints.md     # domain-specific trap hints
 ├── agents/
-│   └── sonmat-worker.md  # System 2 워커 에이전트
-└── hooks/                # 세션 시작 훅 (자동 업데이트, 호칭, 메모리)
+│   └── sonmat-worker.md  # System 2 worker with discipline
+└── hooks/                # session start (auto-update, naming, memory)
 ```
 
-## 호칭 설정
+### Naming (optional)
 
-세션 시작 시 글로벌 `~/.claude/CLAUDE.md`에 `## 0. 호칭` 섹션이 없으면 쌍방 호칭을 제안한다.
+On first session, sonmat suggests a mutual nickname between you and Claude. A small thing that changes how collaboration feels.
 
-- **수락** — 사용자가 정한 호칭을 `CLAUDE.md`에 기록
-- **거절** — `설정하지 않음`으로 기록하여 다시 묻지 않음
-- **변경** — 언제든 `CLAUDE.md`를 수정하거나 대화에서 요청
+| Style | Example |
+|-------|---------|
+| Equal | friend / friend |
+| You > Claude | senior / junior |
+| Claude > You | coach / player |
 
-관계 방향은 자유:
+### Override
 
-| 유형 | 예시 |
-|------|------|
-| 대등 | 친구/친구, 동료/동료 |
-| 사용자 > 클로드 | 선배/막내, 형/동생 |
-| 클로드 > 사용자 | 코치/선수, 스승/제자 |
-
-## 설치
-
-```bash
-# 1. 마켓플레이스 등록
-/plugin marketplace add jun0-ds/sonmat
-
-# 2. 플러그인 설치
-/plugin install sonmat@sonmat
-```
-
-별도 init 과정이나 설정 파일 생성은 필요 없다.
-
-## 사용법
-
-설치 후 대화를 시작하면 sonmat이 자동으로 동작한다.
-
-### 루프 실행
-
-반복 작업을 요청하면 기획 질문 루프를 거쳐 루프 정의서를 생성하고 자율 반복을 시작한다.
-
-```
-[기획] → [정의] → [실행] → [평가] → [판단] → [기록] → [반복/종료]
-```
-
-판단은 keep(확정) / discard(폐기) / refine(부분 수정) 3단계.
-
-### 에스컬레이션
-
-예상 외 결과, 반복 실패, 참조 누락, 규율 충돌 시 자동으로 System 2로 에스컬레이션한다.
-
-| 레벨 | 동작 |
-|------|------|
-| L0 | System 1 — 스킬로 바로 실행 |
-| L1 | 멈추고 한 번 더 확인 |
-| L2 | sonmat-worker 스폰 (규율 주입) |
-| L3 | 복수 워커 병렬 스폰 |
-
-### 규율 오버라이드
-
-프로젝트 CLAUDE.md에 `## sonmat` 섹션을 추가하여 도메인 고정, 규율 비활성화, 추가 규율을 설정할 수 있다:
+Add to your project's CLAUDE.md:
 
 ```markdown
 ## sonmat
@@ -127,37 +110,36 @@ discipline:
   disable:
     - "hints.md > TDD"
   add:
-    - "커밋 전 ruff format 필수"
+    - "run ruff format before commit"
 ```
 
-## superpowers / GSD / karpathy-skills에서 마이그레이션
+## Coming from other plugins?
 
-### 제거
+Every popular Claude Code plugin shares the same gap: rules stay in the main session. Subagents start blank.
 
-기존 플러그인을 비활성화한다:
+| Plugin | Main session rules | Rules reach workers? |
+|--------|-------------------|---------------------|
+| [superpowers](https://github.com/obra/superpowers) | ✓ | ✗ ([#237](https://github.com/obra/superpowers/issues/237)) |
+| [GSD](https://github.com/gsd-build/gsd-2) | ✓ | unclear |
+| [karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) | ✓ | ✗ |
+| ultrathink | ✓ | ✗ ([#25591](https://github.com/anthropics/claude-code/issues/25591)) |
+
+Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/8395), [claude-code#22022](https://github.com/anthropics/claude-code/issues/22022)
 
 ```bash
+# uninstall
 claude plugins uninstall superpowers@superpowers-marketplace
 claude plugins uninstall andrej-karpathy-skills@karpathy-skills
+# For GSD, remove related hooks from settings.json
 ```
 
-GSD는 훅 기반이므로 `settings.json`에서 관련 훅을 제거한다.
-
-### 대응 관계
-
-| 기존 | sonmat 대응 |
-|------|-------------|
-| superpowers TDD/디버깅/코드리뷰 | `discipline/core.md` + `hints.md` |
-| superpowers brainstorming/writing-plans | `skills/loop/` 기획 질문 루프 |
+| Before | After (sonmat) |
+|--------|---------------|
+| superpowers TDD/debug/review | `discipline/core.md` + `hints.md` |
+| superpowers brainstorming | `skills/loop/` planning questions |
 | GSD spec → plan → execute | `skills/plan/` + `skills/loop/` |
-| karpathy-skills 코딩 원칙 | `discipline/core.md` |
+| karpathy-skills principles | `discipline/core.md` |
 
-### 차이점
+## License
 
-- sonmat은 규율을 워커에 실제로 주입한다. 기존 플러그인은 메인 세션에만 적용되었다.
-- 루프 정의서로 반복 작업을 자율 관리한다. 기존에는 수동으로 반복을 지시해야 했다.
-- 에스컬레이션이 자동이다. 기존에는 사용자가 판단하여 에이전트를 스폰했다.
-
-## 라이선스
-
-MIT — `LICENSE` 파일 참조.
+MIT — see `LICENSE`.
