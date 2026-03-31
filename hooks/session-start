@@ -62,15 +62,6 @@ if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER
   fi
 fi
 
-# --- Device identification ---
-DEVICE_CONTEXT=""
-CURRENT_HOST=$(hostname 2>/dev/null)
-case "$CURRENT_HOST" in
-  LAPTOP-3BO9CJH0) DEVICE_CONTEXT="Current device: 메인 노트북 (주력 개발, 창작). Windows (WSL2)." ;;
-  DESKTOP-E59NQS7) DEVICE_CONTEXT="Current device: 서브 노트북 (이동용). Windows (WSL2)." ;;
-  larchive-gpu-dev) DEVICE_CONTEXT="Current device: 회사 GPU 서버 (dev). AI 개발/실험." ;;
-  larchive-gpu-prod) DEVICE_CONTEXT="Current device: 회사 GPU 서버 (prod). CAUTION: production environment — be extra careful with file modifications and deletions." ;;
-esac
 
 # --- Check 호칭 (nickname) setup ---
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
@@ -86,9 +77,6 @@ fi
 # --- Build context message ---
 CONTEXT="sonmat MANDATORY. Apply verification discipline (Break it / Cross it / Ground it) and domain hints to ALL work."
 CONTEXT="${CONTEXT} Guard runs automatically on completion."
-if [ -n "$DEVICE_CONTEXT" ]; then
-  CONTEXT="${CONTEXT} ${DEVICE_CONTEXT}"
-fi
 CONTEXT="${CONTEXT} Discipline: ${PLUGIN_ROOT}/discipline/core.md + hints.md."
 
 # Memory read instructions
