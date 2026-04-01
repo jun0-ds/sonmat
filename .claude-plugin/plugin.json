@@ -1,7 +1,7 @@
 {
   "name": "sonmat",
   "description": "sonmat — External verification system with autonomous loop. Discipline-driven, memory-accumulating.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": {
     "name": "jun0-ds"
   },

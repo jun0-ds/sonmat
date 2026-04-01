@@ -123,7 +123,7 @@ Not a file reference. Not a hook that might fire. Actual rules in the actual pro
 
 ```
 sonmat/
-├── skills/          # loop, guard, plan
+├── skills/          # loop, guard, plan, inspect
 ├── discipline/      # core.md (verification) + hints.md (domain traps)
 ├── agents/          # sonmat-worker (System 2, discipline-injected)
 └── hooks/           # session start
