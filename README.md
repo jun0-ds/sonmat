@@ -26,7 +26,7 @@ That's it. Everything else is implementation.
 /plugin install sonmat@sonmat
 ```
 
-No config. Start talking.
+On first session, sonmat plants a reference block in your `~/.claude/CLAUDE.md` automatically. Start talking.
 
 ### Platform notes
 
@@ -100,20 +100,18 @@ Claude Code handles this automatically via its plugin system. For other CLIs, th
 
 ## How it works
 
-### Discipline injection
+### Discipline loading
 
-When Claude spawns a subagent, sonmat attaches the discipline directly to the worker's prompt:
+sonmat uses a **prompt-first** architecture — no runtime hook injection.
 
 ```
-You (main session)
-  → spawns sonmat-worker
-      ↳ task description
-      ↳ core discipline (verification attitude)
-      ↳ domain-specific traps (dev / ML / analysis / doc)
-      ↳ must report: surprises, errors, conflicts
+CLAUDE.md (always loaded)
+  └─ sonmat section (paths to discipline files)
+       └─ core.md — verification rules (Break / Cross / Ground)
+       └─ hints.md — domain-specific traps
 ```
 
-Not a file reference. Not a hook that might fire. Actual rules in the actual prompt. The worker can't skip what's in its own prompt.
+On first session, the hook plants a sonmat reference block in `~/.claude/CLAUDE.md`. After that, the hook outputs nothing — Claude reads the discipline through the normal CLAUDE.md loading path. Zero additionalContext overhead.
 
 ### Loop & escalation
 
@@ -126,7 +124,7 @@ sonmat/
 ├── skills/          # loop, guard, plan, inspect
 ├── discipline/      # core.md (verification) + hints.md (domain traps)
 ├── agents/          # sonmat-worker (System 2, discipline-injected)
-└── hooks/           # session start
+└── hooks/           # session start (side effects only, zero prompt injection)
 ```
 
 ## Coming from other plugins?

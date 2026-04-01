@@ -32,6 +32,7 @@ sonmat follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| `0.4.0` | 2026-04-01 | Prompt-first architecture — hook additionalContext → 0, discipline via CLAUDE.md → core.md reference chain |
 | `0.3.2` | 2026-04-01 | Inspect suggestion system — concrete trigger conditions, task-scoped activation, auto-off |
 | `0.3.1` | 2026-04-01 | Add `/inspect` skill (deep inspection mode), prompt-first architecture principle |
 | `0.3.0` | 2026-04-01 | Multi-CLI support (Codex/Gemini), sonmat as single directory, embed discipline in instruction files |
