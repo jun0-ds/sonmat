@@ -60,8 +60,8 @@ Each CLI has its own equivalent of `CLAUDE.md`:
 | CLI | Global instruction file | Where to put sonmat files |
 |-----|------------------------|--------------------------|
 | Claude Code | `CLAUDE.md` | Plugin install (see above) |
-| Codex | `AGENTS.md` | `~/.codex/` |
-| Gemini CLI | `GEMINI.md` | `~/.gemini/` |
+| Codex | `AGENTS.md` | `~/.codex/sonmat/` |
+| Gemini CLI | `GEMINI.md` | `~/.gemini/sonmat/` |
 | Other | Whatever file your CLI reads as its main guide | Copy there |
 
 **Setup (non-Claude CLIs):**
@@ -71,15 +71,19 @@ Paste the following into your first conversation with the AI. It will set up son
 ```
 Install sonmat into your environment.
 
-1. Clone https://github.com/jun0-ds/sonmat and copy discipline/, skills/, agents/
-   into your config directory (Codex: ~/.codex/, Gemini: ~/.gemini/).
+1. Clone https://github.com/jun0-ds/sonmat into your config directory
+   as a single directory (Codex: ~/.codex/sonmat/, Gemini: ~/.gemini/sonmat/).
+   Keep it as one unit — sonmat is a unified verification system,
+   not a collection of separate files.
 
-2. Embed the contents of discipline/core.md and discipline/hints.md directly into
-   your main instruction file (Codex: AGENTS.md, Gemini: GEMINI.md).
+2. Read sonmat/discipline/core.md and sonmat/discipline/hints.md,
+   then embed their contents directly into your main instruction file
+   (Codex: AGENTS.md, Gemini: GEMINI.md).
    Do NOT use file references like "see core.md" — paste the actual content,
    because references may be ignored.
 
-3. List the skills/ paths in your instruction file so you can use them when needed.
+3. List the sonmat/skills/ paths in your instruction file
+   so you can use them when needed.
 ```
 
 Claude Code handles this automatically via its plugin system. For other CLIs, the AI sets itself up — you just give it the instruction.
