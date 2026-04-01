@@ -66,43 +66,23 @@ Each CLI has its own equivalent of `CLAUDE.md`:
 
 **Setup (non-Claude CLIs):**
 
-1. Copy `discipline/` and `skills/` into your CLI's config directory:
-   ```bash
-   git clone https://github.com/jun0-ds/sonmat.git /tmp/sonmat
-   cp -r /tmp/sonmat/discipline /tmp/sonmat/skills /tmp/sonmat/agents ~/.codex/  # or ~/.gemini/
-   rm -rf /tmp/sonmat
-   ```
+Paste the following into your first conversation with the AI. It will set up sonmat in its own environment:
 
-2. **Embed the core discipline directly** into your CLI's instruction file (`AGENTS.md`, `GEMINI.md`, etc.). File references like "see discipline/core.md" are weak — the model may or may not read them. Paste the content into the instruction file so the model can't skip it:
+```
+sonmat을 네 환경에 설치해줘.
 
-   ```markdown
-   ## Core Discipline (sonmat)
+1. https://github.com/jun0-ds/sonmat 클론해서 discipline/, skills/, agents/ 를
+   네 설정 디렉토리에 복사해 (Codex: ~/.codex/, Gemini: ~/.gemini/)
 
-   ### Verification
+2. 네 메인 가이드 파일 (Codex: AGENTS.md, Gemini: GEMINI.md) 에
+   discipline/core.md 와 discipline/hints.md 내용을 직접 넣어.
+   파일 참조("see core.md")가 아니라 내용 자체를 붙여넣기 해야 해 —
+   참조만 하면 안 읽을 수 있으니까.
 
-   **Attitude: Confidence is the signal to begin, not to stop.**
-   When you feel certain about a result, that certainty is information about your
-   psychology, not about reality.
+3. skills/ 경로도 가이드 파일에 명시해서 필요할 때 쓸 수 있게 해.
+```
 
-   **Directions:**
-   1. **Break it**: Construct the conditions under which your conclusion fails.
-   2. **Cross it**: Reach the same conclusion through an independent path.
-   3. **Ground it**: Go to the source. Run the code, read the data, observe the system.
-
-   ### Transparency
-   - State the trigger on escalation: why did you switch to System 2?
-   - State the rationale on judgment: why keep/discard/refine?
-
-   ### Domain Hints
-   (paste from discipline/hints.md — include what's relevant to your work)
-
-   ### Skills
-   - `skills/guard/` — pre-commit verification
-   - `skills/loop/` — autonomous loop with escalation
-   - `skills/plan/` — milestone/phase management
-   ```
-
-   Claude Code handles this automatically via its plugin system. For other CLIs, you are the plugin.
+Claude Code handles this automatically via its plugin system. For other CLIs, the AI sets itself up — you just give it the instruction.
 
 3. Adapt hooks to your CLI's format if needed.
 
