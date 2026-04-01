@@ -66,15 +66,45 @@ Each CLI has its own equivalent of `CLAUDE.md`:
 
 **Setup (non-Claude CLIs):**
 
-1. Copy `discipline/` and `skills/` into your CLI's config directory
-2. Reference them in your CLI's instruction file, e.g.:
+1. Copy `discipline/` and `skills/` into your CLI's config directory:
+   ```bash
+   git clone https://github.com/jun0-ds/sonmat.git /tmp/sonmat
+   cp -r /tmp/sonmat/discipline /tmp/sonmat/skills /tmp/sonmat/agents ~/.codex/  # or ~/.gemini/
+   rm -rf /tmp/sonmat
    ```
-   See discipline/core.md for verification rules.
-   See discipline/hints.md for domain-specific traps.
-   ```
-3. Adapt hooks to your CLI's format if needed
 
-No adapter code, no special format — just markdown.
+2. **Embed the core discipline directly** into your CLI's instruction file (`AGENTS.md`, `GEMINI.md`, etc.). File references like "see discipline/core.md" are weak — the model may or may not read them. Paste the content into the instruction file so the model can't skip it:
+
+   ```markdown
+   ## Core Discipline (sonmat)
+
+   ### Verification
+
+   **Attitude: Confidence is the signal to begin, not to stop.**
+   When you feel certain about a result, that certainty is information about your
+   psychology, not about reality.
+
+   **Directions:**
+   1. **Break it**: Construct the conditions under which your conclusion fails.
+   2. **Cross it**: Reach the same conclusion through an independent path.
+   3. **Ground it**: Go to the source. Run the code, read the data, observe the system.
+
+   ### Transparency
+   - State the trigger on escalation: why did you switch to System 2?
+   - State the rationale on judgment: why keep/discard/refine?
+
+   ### Domain Hints
+   (paste from discipline/hints.md — include what's relevant to your work)
+
+   ### Skills
+   - `skills/guard/` — pre-commit verification
+   - `skills/loop/` — autonomous loop with escalation
+   - `skills/plan/` — milestone/phase management
+   ```
+
+   Claude Code handles this automatically via its plugin system. For other CLIs, you are the plugin.
+
+3. Adapt hooks to your CLI's format if needed.
 
 ## Design philosophy
 
