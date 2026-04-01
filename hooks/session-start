@@ -1,8 +1,11 @@
 #!/bin/bash
 # sonmat session-start hook
+# Side effects only — no additionalContext injection.
+# All discipline rules live in CLAUDE.md → core.md (prompt-first).
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 USER_SONMAT="$HOME/.claude/sonmat"
+GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 MSGS=()
 
 # --- Auto-create project CLAUDE.md (git repos only) ---
@@ -19,33 +22,21 @@ TEMPLATE
   MSGS+=("CLAUDE.md auto-created — review and customize.")
 fi
 
-# --- Auto-create project sonmat memory directory ---
-if [ -d ".git" ] && [ ! -d ".claude/sonmat" ]; then
-  mkdir -p .claude/sonmat
-fi
+# --- Auto-create directories ---
+[ -d ".git" ] && [ ! -d ".claude/sonmat" ] && mkdir -p .claude/sonmat
+[ ! -d "$USER_SONMAT" ] && mkdir -p "$USER_SONMAT/memory"
 
-# --- Auto-create user-level sonmat directory ---
-if [ ! -d "$USER_SONMAT" ]; then
-  mkdir -p "$USER_SONMAT/memory"
-fi
+# --- Plant sonmat block in global CLAUDE.md (one-time) ---
+if [ -f "$GLOBAL_CLAUDE_MD" ] && ! grep -q '## sonmat' "$GLOBAL_CLAUDE_MD"; then
+  cat >> "$GLOBAL_CLAUDE_MD" << SONMAT
 
-# --- Read global memory index ---
-GLOBAL_MEMORY=""
-if [ -f "$USER_SONMAT/memory/README.md" ]; then
-  # Collect trap/insight file names as a brief index
-  MEMORY_FILES=$(find "$USER_SONMAT/memory" -name "trap_*.md" -o -name "insight_*.md" 2>/dev/null | while read f; do basename "$f" .md; done | tr '\n' ', ' | sed 's/,$//')
-  if [ -n "$MEMORY_FILES" ]; then
-    GLOBAL_MEMORY="Global sonmat memory (${USER_SONMAT}/memory/): ${MEMORY_FILES}. Read relevant trap/insight files before starting work that may be affected."
-  fi
-fi
+## sonmat
 
-# --- Read project memory ---
-PROJECT_MEMORY=""
-if [ -d ".claude/sonmat" ]; then
-  PROJECT_FILES=$(find .claude/sonmat -name "*.md" 2>/dev/null | while read f; do basename "$f" .md; done | tr '\n' ', ' | sed 's/,$//')
-  if [ -n "$PROJECT_FILES" ]; then
-    PROJECT_MEMORY="Project sonmat memory (.claude/sonmat/): ${PROJECT_FILES}. Read these before starting — they contain project-specific lessons."
-  fi
+- Discipline: \`~/.claude/plugins/marketplaces/sonmat/discipline/core.md\`
+- Domain hints: \`~/.claude/plugins/marketplaces/sonmat/discipline/hints.md\`
+- Memory: \`~/.claude/sonmat/memory/\`
+SONMAT
+  MSGS+=("sonmat discipline block added to ~/.claude/CLAUDE.md.")
 fi
 
 # --- Auto-update check ---
@@ -54,64 +45,16 @@ LOCAL_VER=$(grep '"version"' "$PLUGIN_ROOT/.claude-plugin/plugin.json" 2>/dev/nu
 REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/sonmat/main/.claude-plugin/plugin.json" | grep '"version"' | head -1 | sed 's/.*"version": *"//;s/".*//')
 
 if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER" ]; then
-  # Try git pull first
   if git -C "$PLUGIN_ROOT" pull origin main --ff-only >/dev/null 2>&1; then
-    UPDATE_MSG="sonmat updated: ${LOCAL_VER} → ${REMOTE_VER}. At the START of the session, briefly notify the user: 'sonmat이 ${LOCAL_VER} → ${REMOTE_VER}로 업데이트되었어요. 변경 내용을 점검해볼까요? 손맛은 코드가 공개되어 있어서 언제든 확인할 수 있어요. 다른 플러그인도 한번 살펴볼까요?' If the user accepts sonmat review, run 'git -C ${PLUGIN_ROOT} diff HEAD~1' and review for security concerns. If they also want other plugins reviewed, scan installed plugins under ~/.claude/plugins/ for suspicious patterns (external API calls, credential access, destructive commands). If declined, move on."
-  else
-    UPDATE_MSG="sonmat update available: ${LOCAL_VER} → ${REMOTE_VER}, but auto-pull failed. Only mention if the user asks about sonmat version."
+    MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} updated.")
   fi
 fi
 
-
-# --- Check 호칭 (nickname) setup ---
-GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
-NEEDS_NICKNAME=""
-if [ -f "$GLOBAL_CLAUDE_MD" ]; then
-  if ! grep -q '^## 0\. 호칭' "$GLOBAL_CLAUDE_MD"; then
-    NEEDS_NICKNAME="true"
-  fi
-else
-  NEEDS_NICKNAME="true"
-fi
-
-# --- Build context message ---
-CONTEXT="sonmat MANDATORY. Apply verification discipline (Break it / Cross it / Ground it) and domain hints to ALL work."
-CONTEXT="${CONTEXT} Guard runs automatically on completion."
-CONTEXT="${CONTEXT} Discipline: ${PLUGIN_ROOT}/discipline/core.md + hints.md."
-
-# Memory read instructions
-if [ -n "$GLOBAL_MEMORY" ]; then
-  CONTEXT="${CONTEXT} ${GLOBAL_MEMORY}"
-fi
-if [ -n "$PROJECT_MEMORY" ]; then
-  CONTEXT="${CONTEXT} ${PROJECT_MEMORY}"
-fi
-
-# Memory write instructions
-CONTEXT="${CONTEXT} MEMORY WRITE RULE: When guard flags a novel trap or loop retrospective discovers a lesson — record it. Project-specific lesson -> .claude/sonmat/{name}.md. Universal lesson -> ${USER_SONMAT}/memory/trap_{name}.md or insight_{name}.md. Always ask user before writing."
-
-# Project rule auto-discovery
-CONTEXT="${CONTEXT} PROJECT RULE DISCOVERY: During conversation, watch for implicit project rules — things the user corrects, repeats, or assumes you know. When you spot one, propose adding it to CLAUDE.md Project Rules section. Format: 'I noticed [pattern]. Add this as a project rule? [draft rule]'. Write only after user confirms. If the same correction happens twice, you MUST propose it."
-
-# Nickname suggestion
-if [ -n "$NEEDS_NICKNAME" ]; then
-  CONTEXT="${CONTEXT} NICKNAME SETUP: The user has not set up nicknames (호칭) yet. At the START of this session, naturally suggest it once. If there is also an update notification, combine them naturally and add '금방 끝나요!' to reassure. Use this template:"
-  CONTEXT="${CONTEXT} ---"
-  CONTEXT="${CONTEXT} **서로 호칭을 정해볼까요?**"
-  CONTEXT="${CONTEXT} 작업하면서 서로 부를 이름이 있으면 더 자연스러워요."
-  CONTEXT="${CONTEXT} 예시: 친구처럼 (야/너), 팀원처럼 (선배/막내), 자유롭게 아무 이름이나 OK."
-  CONTEXT="${CONTEXT} 안 정해도 괜찮고, 나중에 언제든 바꿀 수 있어요."
-  CONTEXT="${CONTEXT} ---"
-  CONTEXT="${CONTEXT} If the user sets nicknames, write a '## 0. 호칭' section to ${GLOBAL_CLAUDE_MD} with the format: '- 사용자 → 클로드: \"X\"' and '- 클로드 → 사용자: \"Y\"'. If the user declines, still write the section with '- 설정하지 않음' so they are not asked again. Either way, mention they can change it anytime."
-fi
-
-# Auto-update result
-if [ -n "$UPDATE_MSG" ]; then
-  CONTEXT="${CONTEXT} ${UPDATE_MSG}"
-fi
-
+# --- Output (minimal or empty) ---
+CONTEXT=""
 for msg in "${MSGS[@]}"; do
-  CONTEXT="${CONTEXT} ${msg}"
+  [ -n "$CONTEXT" ] && CONTEXT="${CONTEXT} "
+  CONTEXT="${CONTEXT}${msg}"
 done
 
 # Escape for JSON
