@@ -58,17 +58,41 @@ When inspect finds nothing noteworthy:
 
 ## When to suggest activation
 
-Don't activate automatically. But suggest `/inspect` when:
+Don't activate automatically. Suggest once per task when trigger conditions are met.
 
-- Modifying shared utilities, base classes, or core infrastructure
-- Touching auth, payments, or data migration
-- Refactoring that spans 5+ files
-- User says "this is risky" or "be careful"
+### Trigger conditions (any one is enough)
 
-Suggestion format: `This touches [X]. Consider /inspect for wider verification.`
+| Category | Condition |
+|----------|-----------|
+| **Blast radius** | Change spans 5+ files, or modifies a file imported by 3+ others |
+| **Shared code** | Editing shared utilities, base classes, config generators, or sync scripts |
+| **Infrastructure** | Touching DB schemas, env vars across services, Milvus/Redis contracts, cron schedules |
+| **Auth/Security** | Modifying authentication, API keys, permissions, or credential paths |
+| **Data migration** | INSERT/UPDATE/DELETE on production data, schema changes, index rebuilds |
+| **Cross-service** | Change requires coordinated deployment to multiple servers/services |
+| **User signal** | User says "risky", "careful", "worried", "double-check" |
+
+### Suggestion format
+
+One line, no preamble:
+
+```
+[sonmat] {what was detected}. /inspect 켤까요?
+```
+
+Examples:
+- `[sonmat] 6개 서비스 filter_env 동시 수정. /inspect 켤까요?`
+- `[sonmat] prod DB 스키마 변경 감지. /inspect 켤까요?`
+- `[sonmat] sync-env.sh + 4개 .env 배포. /inspect 켤까요?`
+
+### Scope management
+
+- User accepts → inspect activates for the current task only
+- Task completes or user says `/inspect off` → inspect deactivates
+- Don't re-suggest for the same task after user declines
 
 ---
 
 ## Design rationale
 
-Mode activation is the user's decision. The user chooses when to pay the cost of wider verification. sonmat provides the lens; the user decides when to put it on.
+Mode activation is the user's decision. The user chooses when to pay the cost of wider verification. sonmat provides the lens; the user decides when to put it on. Automatic suggestion lowers the chance of missing risky changes; manual activation preserves user agency.
