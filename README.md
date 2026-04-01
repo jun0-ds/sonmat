@@ -69,22 +69,20 @@ Each CLI has its own equivalent of `CLAUDE.md`:
 Paste the following into your first conversation with the AI. It will set up sonmat in its own environment:
 
 ```
-sonmat을 네 환경에 설치해줘.
+Install sonmat into your environment.
 
-1. https://github.com/jun0-ds/sonmat 클론해서 discipline/, skills/, agents/ 를
-   네 설정 디렉토리에 복사해 (Codex: ~/.codex/, Gemini: ~/.gemini/)
+1. Clone https://github.com/jun0-ds/sonmat and copy discipline/, skills/, agents/
+   into your config directory (Codex: ~/.codex/, Gemini: ~/.gemini/).
 
-2. 네 메인 가이드 파일 (Codex: AGENTS.md, Gemini: GEMINI.md) 에
-   discipline/core.md 와 discipline/hints.md 내용을 직접 넣어.
-   파일 참조("see core.md")가 아니라 내용 자체를 붙여넣기 해야 해 —
-   참조만 하면 안 읽을 수 있으니까.
+2. Embed the contents of discipline/core.md and discipline/hints.md directly into
+   your main instruction file (Codex: AGENTS.md, Gemini: GEMINI.md).
+   Do NOT use file references like "see core.md" — paste the actual content,
+   because references may be ignored.
 
-3. skills/ 경로도 가이드 파일에 명시해서 필요할 때 쓸 수 있게 해.
+3. List the skills/ paths in your instruction file so you can use them when needed.
 ```
 
 Claude Code handles this automatically via its plugin system. For other CLIs, the AI sets itself up — you just give it the instruction.
-
-3. Adapt hooks to your CLI's format if needed.
 
 ## Design philosophy
 
