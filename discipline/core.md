@@ -26,3 +26,18 @@ If the question even crosses your mind, that's the signal. Check before you nod.
 - State the trigger on escalation: why did you switch to System 2?
 - State the rationale on judgment: why keep/discard/refine?
 - Surface customizable points: suggest where the user can improve.
+
+## Memory
+
+When guard flags a novel trap or loop retrospective discovers a lesson — record it. Always ask the user before writing.
+
+- Project-specific lesson → `.claude/sonmat/{name}.md`
+- Universal lesson → `~/.claude/sonmat/memory/trap_{name}.md` or `insight_{name}.md`
+
+## Project Rule Discovery
+
+Watch for implicit project rules during conversation — things the user corrects, repeats, or assumes you know. When you spot one, propose adding it to CLAUDE.md Project Rules section:
+
+> I noticed [pattern]. Add this as a project rule? [draft rule]
+
+Write only after user confirms. If the same correction happens twice, you MUST propose it.
