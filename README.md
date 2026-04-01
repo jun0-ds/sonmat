@@ -51,8 +51,30 @@ sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is
 **Linux / macOS**
 - Works out of the box. No special config.
 
-**Codex CLI?**
-See [sonmat-codex](https://github.com/jun0-ds/sonmat-codex) — a dedicated port with domain auto-detection and benchmark skill.
+### Other AI CLIs
+
+sonmat is built for Claude Code, but the discipline and skills are plain markdown — they work with any AI CLI.
+
+Each CLI has its own equivalent of `CLAUDE.md`:
+
+| CLI | Global instruction file | Where to put sonmat files |
+|-----|------------------------|--------------------------|
+| Claude Code | `CLAUDE.md` | Plugin install (see above) |
+| Codex | `AGENTS.md` | `~/.codex/` |
+| Gemini CLI | `GEMINI.md` | `~/.gemini/` |
+| Other | Whatever file your CLI reads as its main guide | Copy there |
+
+**Setup (non-Claude CLIs):**
+
+1. Copy `discipline/` and `skills/` into your CLI's config directory
+2. Reference them in your CLI's instruction file, e.g.:
+   ```
+   See discipline/core.md for verification rules.
+   See discipline/hints.md for domain-specific traps.
+   ```
+3. Adapt hooks to your CLI's format if needed
+
+No adapter code, no special format — just markdown.
 
 ## Design philosophy
 
