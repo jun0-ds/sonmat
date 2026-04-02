@@ -1,6 +1,7 @@
 ---
 name: imp
 description: Devil's advocate for reasoning — full-power counter-arguments against interpretations, plans, and irreversible decisions.
+user-invocable: true
 ---
 
 # Imp — Devil's Advocate for Thinking

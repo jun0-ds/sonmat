@@ -1,6 +1,7 @@
 ---
 name: inspect
 description: Deep inspection mode — expands verification scope beyond the immediate change to side effects, dependencies, and cross-cutting concerns.
+user-invocable: true
 ---
 
 # Inspect — Deep Inspection Mode

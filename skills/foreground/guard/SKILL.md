@@ -1,6 +1,7 @@
 ---
 name: guard
 description: Guardrails — pre-commit verification, scope checks, discipline violation detection, novel trap flagging.
+user-invocable: true
 ---
 
 # Guard — Guardrail Skill
