@@ -32,6 +32,7 @@ sonmat follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| `0.6.1` | 2026-04-03 | Fix skill discovery — flatten skills/ directory, rename loop → autoloop (built-in collision) |
 | `0.6.0` | 2026-04-02 | Add `/imp` skill — devil's advocate for reasoning. Counter-arguments against interpretations and irreversible decisions |
 | `0.4.0` | 2026-04-01 | Prompt-first architecture — hook additionalContext → 0, discipline via CLAUDE.md → core.md reference chain |
 | `0.3.2` | 2026-04-01 | Inspect suggestion system — concrete trigger conditions, task-scoped activation, auto-off |
