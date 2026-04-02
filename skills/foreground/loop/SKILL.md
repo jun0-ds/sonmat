@@ -18,6 +18,8 @@ On receiving a task, judge complexity:
 
 **Full loop**: Proceed to section 1.
 
+**Bridge-note check**: Before starting any task, check if `.claude/sonmat/bridge-note.md` exists. If relevant context is found, incorporate it silently. Mention to user only if directly relevant to the new task.
+
 
 ## 1. Planning Questions
 
@@ -54,10 +56,19 @@ For L0 tasks: one-line summary suffices — "Proceeding like this: [summary]. Ob
 ### [Plan]
 - No definition → run section 1 questions.
 - Has definition → proceed to [Define].
-- Milestone-scale planning → escalate to L3.
+- Milestone-scale planning → escalate to L3 (see below).
 
 **Brainstorming** (for non-trivial planning):
 Don't adopt the first approach that comes to mind. Have the worker generate variations (different constraints, different priorities), then cross-compare and present options to user.
+
+**Milestone planning** (absorbed from plan skill):
+When user requests "create roadmap", "restructure milestones", or other structural changes to `progress.md`, escalate to L3. Planning questions:
+1. What is the end goal?
+2. Any deadlines?
+3. How large should milestones be?
+4. Anything that needs to start immediately?
+
+Draft `progress.md` from answers, present for user review. Use 3-tier structure: Milestone > Phase > Task with `[x]`/`[ ]` checkboxes. Scribe handles checkbox updates after this point.
 
 ### [Define]
 - Finalize loop definition YAML for this iteration.
@@ -101,6 +112,11 @@ On keep: loop self-review → guard completion review → commit. If review find
 - Not met → return to [Define].
 - On exit: total iterations, metric trajectory, final state.
 - **Loop Artifact**: If context should carry to a follow-up loop, record: output paths, key results, constraints for next loop.
+
+**Scribe dispatch** (on exit):
+- **keep**: Dispatch scribe with mode `all` (bridge + journal + progress). Include loop report and git diff as artifacts.
+- **discard**: Dispatch scribe with mode `journal` only. Record what was tried and why it failed.
+- Scribe runs in background. Do NOT wait for it. Proceed with user interaction immediately.
 
 ### Retrospective (after 3+ iterations)
 - Was the approach order optimal?
