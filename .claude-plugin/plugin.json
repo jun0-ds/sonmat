@@ -7,5 +7,5 @@
   },
   "repository": "https://github.com/jun0-ds/sonmat",
   "license": "MIT",
-  "keywords": ["verification", "loop", "autonomous", "discipline", "memory"]
+  "keywords": ["verification", "autoloop", "autonomous", "discipline", "memory"]
 }

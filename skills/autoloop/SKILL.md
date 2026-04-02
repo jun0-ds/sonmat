@@ -1,10 +1,10 @@
 ---
-name: loop
+name: autoloop
 description: 범용 자율 루프 — 기획→정의→실행→평가→판단→기록→반복. 에스컬레이션 판단 포함.
 user-invocable: true
 ---
 
-# Loop — Autonomous Loop Protocol
+# Autoloop — Autonomous Loop Protocol
 
 ## 0. Entry Routing
 

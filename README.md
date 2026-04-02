@@ -121,7 +121,7 @@ On first session, the hook plants a sonmat reference block in `~/.claude/CLAUDE.
 
 ```
 sonmat/
-├── skills/          # loop, guard, plan, inspect
+├── skills/          # autoloop, guard, plan, inspect
 ├── discipline/      # core.md (verification) + hints.md (domain traps)
 ├── agents/          # sonmat-worker (System 2, discipline-injected)
 └── hooks/           # session start (side effects only, zero prompt injection)
@@ -143,8 +143,8 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 | Before | After (sonmat) |
 |--------|---------------|
 | superpowers TDD/debug/review | `discipline/core.md` + `hints.md` |
-| superpowers brainstorming | `skills/loop/` planning questions |
-| GSD spec → plan → execute | `skills/plan/` + `skills/loop/` |
+| superpowers brainstorming | `skills/autoloop/` planning questions |
+| GSD spec → plan → execute | `skills/plan/` + `skills/autoloop/` |
 | karpathy-skills principles | `discipline/core.md` |
 
 ## License

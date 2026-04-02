@@ -38,4 +38,4 @@ sonmat follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 | `0.3.1` | 2026-04-01 | Add `/inspect` skill (deep inspection mode), prompt-first architecture principle |
 | `0.3.0` | 2026-04-01 | Multi-CLI support (Codex/Gemini), sonmat as single directory, embed discipline in instruction files |
 | `0.2.1` | 2026-03-31 | Restructured discipline (thinking rules + action rules), polyglot hook, nickname system |
-| `0.1.0` | 2026-03-29 | Initial release — core discipline, guard/loop/plan skills, worker agent |
+| `0.1.0` | 2026-03-29 | Initial release — core discipline, guard/autoloop/plan skills, worker agent |
