@@ -29,7 +29,7 @@ If the question even crosses your mind, that's the signal. Check before you nod.
 
 ## Memory
 
-When guard flags a novel trap or loop retrospective discovers a lesson — record it. Always ask the user before writing.
+When guard flags a novel trap or autoloop retrospective discovers a lesson — record it. Always ask the user before writing.
 
 - Project-specific lesson → `.claude/sonmat/{name}.md`
 - Universal lesson → `~/.claude/sonmat/memory/trap_{name}.md` or `insight_{name}.md`
