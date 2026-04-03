@@ -28,6 +28,26 @@ That's it. Everything else is implementation.
 
 On first session, sonmat plants a reference block in your `~/.claude/CLAUDE.md` automatically. Start talking.
 
+### Reinstall
+
+스킬이 보이지 않을 때 (터미널에서 직접 실행):
+
+```bash
+# 재설치
+claude plugin marketplace add jun0-ds/sonmat
+claude plugin install sonmat@sonmat
+```
+
+위 방법이 안 되면 수동 클론 후 등록:
+
+```bash
+rm -rf ~/.claude/plugins/marketplaces/sonmat
+git clone https://github.com/jun0-ds/sonmat.git ~/.claude/plugins/marketplaces/sonmat
+claude plugin install sonmat@sonmat
+```
+
+자세한 진단 방법은 [Troubleshooting](docs/troubleshooting.md) 참고.
+
 ### Platform notes
 
 sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is a polyglot script — cmd.exe runs the batch portion, Unix shells run the bash portion.
@@ -37,9 +57,17 @@ sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is
 - The script finds Git for Windows bash (`C:\Program Files\Git\bin\bash.exe`) or any bash on PATH
 - No extra setup needed if Git for Windows is installed
 
+> **Git Bash (MSYS2) 주의**: Git Bash에서 `/plugin install` 등 슬래시 명령 실행 시 MSYS2가 경로를 자동 변환하여 `C:/Program Files/Git/plugin`처럼 깨질 수 있다. `MSYS_NO_PATHCONV=1` 환경변수를 설정하거나, WSL2 사용을 권장한다.
+>
+> ```bash
+> # Git Bash에서 경로 변환 비활성화
+> export MSYS_NO_PATHCONV=1
+> ```
+
 **Windows (WSL2) — recommended**
 - Claude Code runs inside WSL2, so hooks execute as plain bash
 - Paths stay Linux-native (`~/.claude/...`) — no cross-filesystem issues
+- Git Bash의 MSYS2 경로 변환 문제가 없음
 - `settings.json` hooks should point to the bash script directly:
   ```json
   {
@@ -146,6 +174,10 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 | superpowers brainstorming | `skills/autoloop/` planning questions |
 | GSD spec → plan → execute | `skills/plan/` + `skills/autoloop/` |
 | karpathy-skills principles | `discipline/core.md` |
+
+## Troubleshooting
+
+설치 문제, Windows 경로 변환, 스킬 미표시 등 → [docs/troubleshooting.md](docs/troubleshooting.md)
 
 ## License
 
