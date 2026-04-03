@@ -62,11 +62,25 @@ echo 'export MSYS_NO_PATHCONV=1' >> ~/.bashrc
 
 ## `/plugin` 명령은 사용자가 직접 실행해야 한다
 
-**증상**: AI 어시스턴트에게 "sonmat 설치해줘"라고 하면 `/plugin install`을 실행하지 못한다.
+**증상**: AI 어시스턴트에게 "sonmat 설치해줘"라고 하면 `claude plugin install`을 실행하지 못한다.
 
-**원인**: `/plugin`, `/help` 등 슬래시 명령은 Claude Code CLI의 내장 명령이다. AI 어시스턴트가 아닌 **사용자가 터미널에서 직접 입력**해야 실행된다.
+**원인**: `claude plugin` 등 CLI 명령과 `/plugin` 등 슬래시 명령은 사용자가 터미널에서 직접 입력해야 한다. VSCode 확장 등 에이전트 환경에서는 어시스턴트가 이를 대신 실행할 수 없다.
 
-**해결**: 어시스턴트가 안내하는 명령을 복사해서 직접 터미널에 붙여넣기.
+**해결 — 사용자가 직접 실행** (아래 단계를 따라하세요):
+
+1. **터미널 열기**
+   - VS Code: `Ctrl + `` ` (백틱) 또는 상단 메뉴 → Terminal → New Terminal
+   - 일반: OS 터미널 앱 실행 (Windows: PowerShell/Git Bash, Mac/Linux: Terminal)
+
+2. **아래 명령어를 한 줄씩 복사 → 터미널에 붙여넣기 → Enter**:
+   ```bash
+   claude plugin marketplace add jun0-ds/sonmat
+   ```
+   ```bash
+   claude plugin install sonmat@sonmat
+   ```
+
+3. **새 세션 시작**: 현재 대화를 닫고 다시 열어야 스킬이 로드된다.
 
 ## 일반 진단 체크리스트
 
