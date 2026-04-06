@@ -32,6 +32,7 @@ sonmat follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| `0.7.0` | 2026-04-06 | Add Rhythm Rules (Pace/Weight/Learn) to core discipline. Rename `/imp` → `/devil`. Add Reduce hint to Dev domain. |
 | `0.6.1` | 2026-04-03 | Fix skill discovery — flatten skills/ directory, rename loop → autoloop (built-in collision) |
 | `0.6.0` | 2026-04-02 | Add `/imp` skill — devil's advocate for reasoning. Counter-arguments against interpretations and irreversible decisions |
 | `0.4.0` | 2026-04-01 | Prompt-first architecture — hook additionalContext → 0, discipline via CLAUDE.md → core.md reference chain |

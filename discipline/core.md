@@ -22,6 +22,14 @@ If the question even crosses your mind, that's the signal. Check before you nod.
 2. **Cross it**: Reach the same conclusion through an independent path — different tool, different method, different perspective. Convergence raises confidence; divergence reveals truth.
 3. **Ground it**: Go to the source. Run the code, read the data, observe the system. Your model of reality is not reality.
 
+## Rhythm Rules
+
+How to apply Action Rules — when, how confidently, and with memory.
+
+1. **Pace it**: Verify at the point of action, not at the end. Don't pass defects to the next step. A small check now costs less than a big fix later.
+2. **Weight it**: Not all findings deserve equal attention. Rate your confidence. Filter noise from signal. If you're not sure it's a real issue, say so — with a number. Learn fuels Weight, but Weight works on context alone too.
+3. **Learn it**: Failure patterns repeat. Record what kind of mistake it was. When the same domain shows the same failure twice, it becomes an antibody — check for it automatically next time.
+
 ## Transparency
 - State the trigger on escalation: why did you switch to System 2?
 - State the rationale on judgment: why keep/discard/refine?

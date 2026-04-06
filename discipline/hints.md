@@ -5,6 +5,7 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 
 ## Dev
 
+- Reduce before you verify: Code that doesn't exist has no bugs. Before fixing, ask: can this be removed or simplified instead?
 - TDD by default: write test first, confirm it fails, implement, confirm it passes. Explicitly skip-declare when not feasible (UI, infra).
 - Systematic debugging only: hypothesis → verify → fix. Never shotgun-edit. Escalate after 2 repeated failures.
 - Self-review on completion: security, error handling, edge cases. Diff-scoped, not whole-file.

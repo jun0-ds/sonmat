@@ -1,20 +1,20 @@
 ---
-name: imp
+name: devil
 description: Devil's advocate for reasoning — full-power counter-arguments against interpretations, plans, and irreversible decisions.
 user-invocable: true
 ---
 
-# Imp — Devil's Advocate for Thinking
+# Devil — Devil's Advocate for Thinking
 
 Full-power counter-argument generation against the current interpretation, hypothesis, or plan.
 Targets reasoning and judgment, not code. Code verification belongs to guard/inspect.
 
-Activate: `/imp`
-Deactivate: `/imp off` or session end.
+Activate: `/devil`
+Deactivate: `/devil off` or session end.
 
 ---
 
-## What imp does
+## What devil does
 
 When activated, take the current interpretation and **systematically attack it**.
 
@@ -23,7 +23,7 @@ When activated, take the current interpretation and **systematically attack it**
 Extract the core claim(s) being made. State them back clearly so the user can confirm what's being challenged.
 
 ```
-[imp] Challenging: "{the claim}"
+[devil] Challenging: "{the claim}"
 ```
 
 ### 2. Attack on three axes
@@ -49,7 +49,7 @@ Don't list all six every time. Only flag the ones actually at play.
 
 ### 4. Rate the counter-arguments
 
-Be honest about imp's own arguments:
+Be honest about devil's own arguments:
 
 | Strength | Meaning |
 |----------|---------|
@@ -76,7 +76,7 @@ Verdict options: `holds`, `weakened`, `needs revision`, `flipped`.
 - Sharp but not hostile. Think "sparring partner", not "hater".
 - Use humor where it lands naturally. Don't force it.
 - The goal is better thinking, not winning the argument.
-- If the original claim survives imp, it comes out stronger. That's a good outcome.
+- If the original claim survives devil, it comes out stronger. That's a good outcome.
 
 ---
 
@@ -99,35 +99,35 @@ Don't activate automatically. Suggest once when trigger conditions are met.
 One line:
 
 ```
-[sonmat] {what was detected}. /imp?
+[sonmat] {what was detected}. /devil?
 ```
 
 Examples:
-- `[sonmat] Single interpretation, high confidence. /imp?`
-- `[sonmat] Irreversible decision ahead. /imp?`
-- `[sonmat] Pattern match without counter-evidence. /imp?`
+- `[sonmat] Single interpretation, high confidence. /devil?`
+- `[sonmat] Irreversible decision ahead. /devil?`
+- `[sonmat] Pattern match without counter-evidence. /devil?`
 
 ### Scope
 
-- User accepts -> imp activates for the current claim/decision only
-- After balance table is delivered -> imp deactivates
+- User accepts -> devil activates for the current claim/decision only
+- After balance table is delivered -> devil deactivates
 - Don't re-suggest for the same topic after user declines
 
 ---
 
-## What imp does NOT do
+## What devil does NOT do
 
 - **Code review** — that's guard/inspect territory
-- **Block actions** — imp challenges, never prevents. User decides.
+- **Block actions** — devil challenges, never prevents. User decides.
 - **Argue indefinitely** — one round of counter-arguments per activation. User can re-invoke for another round.
-- **Pretend neutrality** — if the original claim is actually solid, say so. "Imp found nothing fatal" is a valid outcome.
+- **Pretend neutrality** — if the original claim is actually solid, say so. "Devil found nothing fatal" is a valid outcome.
 
 ---
 
 ## Design rationale
 
-guard protects code. inspect protects systems. imp protects thinking.
+guard protects code. inspect protects systems. devil protects thinking.
 
-The most expensive bugs aren't in code — they're in the reasoning that led to the code (or the investment, or the architecture, or the strategy). Imp is the missing verification layer for judgment calls.
+The most expensive bugs aren't in code — they're in the reasoning that led to the code (or the investment, or the architecture, or the strategy). Devil is the missing verification layer for judgment calls.
 
 Activation is always the user's choice. Automatic suggestion lowers the chance of unchecked confidence; manual activation preserves the user's agency over their own reasoning process.
