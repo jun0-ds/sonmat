@@ -179,6 +179,12 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 
 설치 문제, Windows 경로 변환, 스킬 미표시 등 → [docs/troubleshooting.md](docs/troubleshooting.md)
 
+## Attribution
+
+If you use or reference sonmat in your project, a mention is appreciated:
+
+> Built with [sonmat](https://github.com/jun0-ds/sonmat) by jun0-ds
+
 ## License
 
 MIT — see `LICENSE`.
