@@ -2,9 +2,9 @@
 
 > 엄마 손맛은 맛있는데 왜 내가 하면..?
 
-> Your AI is confident. Your AI is wrong. And neither of you noticed.
+> AI는 확신에 차 있고, 당신은 그걸 믿는다. 둘 다 틀렸는데 아무도 모른다.
 
-sonmat teaches both of you to doubt and fix.
+손맛은 AI와 사용자 양쪽에 **의심하고 검증하는 습관**을 심는 Claude Code 플러그인입니다.
 
 ## What this is
 
