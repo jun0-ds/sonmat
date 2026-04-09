@@ -82,6 +82,29 @@ echo 'export MSYS_NO_PATHCONV=1' >> ~/.bashrc
 
 3. **새 세션 시작**: 현재 대화를 닫고 다시 열어야 스킬이 로드된다.
 
+## 업데이트했는데 옛날 버전이 깔릴 때
+
+**증상**: `claude plugin uninstall` → `install` 했는데 이전 버전이 다시 설치된다.
+
+**원인**: 로컬 마켓플레이스 캐시가 오래된 상태. `claude plugin install`은 로컬에 캐시된 마켓플레이스 소스에서 가져오므로, 리포에 새 버전을 릴리즈해도 각 기기의 마켓플레이스를 먼저 갱신해야 한다.
+
+**해결 — 3단계 순서**:
+
+```bash
+# 1. 마켓플레이스 소스 최신화 (이게 빠지면 옛날 버전이 다시 깔림)
+claude plugin marketplace update sonmat
+
+# 2. 기존 플러그인 제거
+claude plugin uninstall sonmat
+
+# 3. 재설치
+claude plugin install sonmat@sonmat
+```
+
+재설치 후 **새 세션을 시작**해야 변경사항이 반영된다.
+
+> **참고**: `claude plugin update sonmat`도 있지만, marketplace update + clean reinstall이 가장 확실하다.
+
 ## 일반 진단 체크리스트
 
 문제가 위 항목에 해당하지 않을 때:
