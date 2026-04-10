@@ -51,8 +51,8 @@ Don't list all six every time. Only flag the ones actually at play.
 
 Be honest about devil's own arguments:
 
-| Strength | Meaning |
-|----------|---------|
+| Counter strength | Meaning |
+|------------------|---------|
 | **Strong** | This counter-argument has real teeth. The original claim needs revision or hedging. |
 | **Moderate** | Worth considering. Doesn't kill the claim but exposes a blind spot. |
 | **Weak** | Technically possible but unlikely. Noted for completeness. |
@@ -62,12 +62,12 @@ Be honest about devil's own arguments:
 End with a comparison table:
 
 ```
-| Original claim | Counter-argument | Strength | Verdict |
-|----------------|------------------|----------|---------|
+| Original claim | Counter-argument | Counter strength | Claim verdict |
+|----------------|------------------|------------------|---------------|
 | ...            | ...              | ...      | ...     |
 ```
 
-Verdict options: `holds`, `weakened`, `needs revision`, `flipped`.
+Claim verdict options: `holds`, `weakened`, `needs revision`, `flipped`.
 
 ---
 
