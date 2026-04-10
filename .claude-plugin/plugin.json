@@ -1,7 +1,7 @@
 {
   "name": "sonmat",
   "description": "sonmat — External verification system with dual-channel architecture. Foreground work + background meta (scribe). Discipline-driven, memory-accumulating.",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "author": {
     "name": "jun0-ds"
   },
