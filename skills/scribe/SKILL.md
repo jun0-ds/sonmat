@@ -31,7 +31,7 @@ Both modes belong to scribe because the **axis is the same** (persistence of ses
 
 ## Isolation boundaries (witness protection)
 
-Scribe writes into channels that future sessions will read. This creates a potential re-injection path: if witness findings end up in bridge-notes that main reads next session, witness's structural isolation would be defeated on the second run.
+Scribe writes into channels that future sessions will read. This creates a potential re-injection path: if witness findings end up in bridge-notes that main reads next session, witness's protocol isolation would be defeated on the second run.
 
 **The isolation boundary**:
 
@@ -117,7 +117,7 @@ Read it only when:
 
 When a witness verdict is included in the dispatch artifacts, scribe records it as a discrete journal line (not just a summary). `BLOCK` and `WARN` events are particularly valuable as learning signals — they represent moments where main's self-interpretation diverged from the raw user intent, and are worth reviewing in retrospectives. `PASS` events record as a single compact line.
 
-Witness verdicts go to the journal only. They do **not** go to bridge notes. The full rationale for this routing is in §Isolation boundaries at the top of this file — the short version is that bridge notes flow back into main's context on the next session, which would defeat witness's structural isolation on subsequent runs. Journal is read-on-demand and does not auto-inject, so it is safe.
+Witness verdicts go to the journal only. They do **not** go to bridge notes. The full rationale for this routing is in §Isolation boundaries at the top of this file — the short version is that bridge notes flow back into main's context on the next session, which would defeat witness's isolation guarantee on subsequent runs. Journal is read-on-demand and does not auto-inject, so it is safe.
 
 ---
 

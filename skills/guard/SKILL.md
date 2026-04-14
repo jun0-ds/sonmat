@@ -15,7 +15,7 @@ Guard covers **verification** checks that main can reliably do on itself: sensit
 | Check kind | Owner | Why |
 |---|---|---|
 | Test execution, sensitive file blocking, discipline conformance, novel-trap detection | **guard** | Real-time verification during work; synchronous check-and-block at decision points |
-| Scope match (is this within what was asked?), content match (does it do what was asked?), framing-derived scope | **witness** | Intent-artifact comparison — requires structural isolation from main's reasoning |
+| Scope match (is this within what was asked?), content match (does it do what was asked?), framing-derived scope | **witness** | Intent-artifact comparison — requires protocol isolation from main's reasoning (see witness.md §Isolation stack for what "isolation" means on current Claude Code) |
 | Recording novel traps, writing project rules to CLAUDE.md, journaling verdicts, bridge notes, progress tracking | **scribe** | Post-work persistence — what the session learned that should outlive it |
 
 Guard detects and flags. Scribe persists what was flagged. Witness checks intent-artifact match in isolation. Three different axes on the same work.
@@ -74,7 +74,7 @@ Guard does **not** write memory files itself, does not propose formats to the us
 
 Same-category warnings repeated 3+ times in a session → collapse to one-line summary.
 
-Scope creep is *not* listed here — that category moved to witness's intent-scope mismatch check. Guard does not judge scope against user intent; witness does, with structural isolation.
+Scope creep is *not* listed here — that category moved to witness's intent-scope mismatch check. Guard does not judge scope against user intent; witness does, with protocol isolation.
 
 Project rule discovery is *not* listed here — that category moved to scribe. Guard detects and verifies; observing the user's patterns to propose project rules is accumulation work, and accumulation is scribe's axis.
 
@@ -88,4 +88,4 @@ This guardrail operates at **System 1 level**:
 - Always on unless user explicitly disables.
 - When triggered, state what was detected concisely.
 
-For the **structurally-isolated** verification layer (intent-artifact match, commit-gate BLOCK), see [witness](../../agents/sonmat-witness.md). Guard and witness are complementary Swiss-cheese layers, not substitutes — guard catches operational slips, witness catches intent drift that main's self-check structurally cannot.
+For the **protocol-isolated** verification layer (intent-artifact match, commit-gate BLOCK), see [witness](../../agents/sonmat-witness.md). Guard and witness are complementary Swiss-cheese layers, not substitutes — guard catches operational slips, witness catches intent drift that main's self-check structurally cannot.
