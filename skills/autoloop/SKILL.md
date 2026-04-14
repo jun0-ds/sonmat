@@ -101,7 +101,7 @@ Draft `progress.md` from answers, present for user review. Use 3-tier structure:
 
 1. **Self-review** (main, System 1) — quick re-read of the diff by the same agent that wrote it. This is **not structural isolation** — it is the remnant discipline layer that the sonmat architecture admits cannot be eliminated (cf. `memory/domain/discipline_forced_protocols.md` §Core Tension). Its role is to catch obvious slips cheaply before spending on subagent spawns. Treat it as a noise filter, not as verification. If the loop ever relies on self-review as the *only* gate, the architecture is broken.
 2. **Guard** (main, verification checks) — pre-commit test execution, sensitive-file blocking, discipline conformance, novel-trap detection. Runs in-context. Still main-side but oriented around structural rules (file patterns, test results) rather than self-interpretation of intent. See `skills/guard/SKILL.md`.
-3. **Witness** (spawned subagent, isolated) — intent-artifact match. Spawned with user-turn cascade as the only input, main's chain-of-thought structurally excluded. See `agents/sonmat-witness.md`. Whether to spawn witness for a given commit is a structural decision set in `loop.yaml` (`witness.commit: required | optional | skip`) — never a main runtime judgment call. If the loop definition is silent, default to `required`.
+3. **Witness** (spawned subagent, protocol-isolated) — intent-artifact match. Spawned with user-turn cascade as the only input. Main's chain-of-thought is excluded at the spawn-prompt layer (discipline) and at the execution-context layer (harness-enforced); see `agents/sonmat-witness.md` §Isolation stack for the honest breakdown of what that means on current Claude Code. Whether to spawn witness for a given commit is a structural decision set in `loop.yaml` (`witness.commit: required | optional | skip`) — never a main runtime judgment call. If the loop definition is silent, default to `required`.
 
 Any gate returning a blocking verdict (guard block / witness `BLOCK`) → judgment becomes **refine**, not keep. Non-blocking findings (guard warning / witness `WARN`) → surface to user but proceed if user confirms.
 
@@ -319,7 +319,9 @@ If worker needs to modify files outside `loop.modify`, it must report the need �
 
 ### 6b. Witness dispatch
 
-Witness is **not** a worker. It does not receive discipline, does not execute tasks, and does not modify state. Its only job is comparator verification in structural isolation from main's reasoning (`agents/sonmat-witness.md`).
+Witness is **not** a worker. It does not receive discipline, does not execute tasks, and does not modify state. Its only job is comparator verification in protocol isolation from main's reasoning (`agents/sonmat-witness.md` §Isolation stack).
+
+**Implementation caveat**: the pattern of "PreToolUse hook invokes witness as an `agent`-type hook, waits for the verdict, then denies the tool call on `BLOCK`" is **not documented in current Claude Code docs** as an officially supported pattern. It is inferred from the existence of `"type": "agent"` hooks and the `permissionDecision: "deny"` mechanism. This pipeline needs runtime verification before it can be relied on in production. Until verified, treat witness at the commit gate as a best-effort layer, not a guaranteed block. See `agents/sonmat-witness.md` §Architectural notes → "What the platform does NOT provide" for the caveat in full.
 
 Spawn points:
 - **[Judge] keep pipeline** — commit-gate scope, per iteration. Gated by `loop.witness.commit`.

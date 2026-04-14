@@ -115,7 +115,7 @@ Concrete patterns to scan for during residue check:
 1. **Removed section / renamed section**: grep for the old section title, heading anchor, or internal link target across the whole project. Any match outside the removal point is residue.
 2. **Removed function / method / class**: grep for the old name. Any caller, import, or docstring reference is residue.
 3. **Removed file**: grep for the old path. Any cross-reference, include, or doc link is residue.
-4. **Retired terminology**: when a term is deprecated (e.g., "mode" → "reaction", "2-layer" → "witness-pair"), grep for the old term. Any surviving use is residue, *unless* it appears in historical / changelog / archival context that is supposed to preserve the old term.
+4. **Retired terminology**: when a term is deprecated (e.g., "mode" → "reaction", "cascade principle" → "discovery-led principle"), grep for the old term. Any surviving use is residue, *unless* it appears in historical / changelog / archival context that is supposed to preserve the old term.
 5. **Orphaned examples**: examples that reference the removed/renamed item. Update or remove.
 6. **Severity / category / type tables**: enum-like lists that mentioned the removed item as a valid value. Remove the entry.
 7. **Template strings**: report templates, commit message formats, or prompt fragments that embed the old name. Update.
