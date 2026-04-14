@@ -13,7 +13,7 @@ Building a verification architecture where a second agent checks the first agent
 | **Reasoning-level context isolation** — preventing the subagent from seeing parent's system prompt, prior tool outputs, or in-flight chain-of-thought | ❌ No documented mechanism | Required for structural isolation |
 | **Nested subagent delegation** — a subagent spawning its own sub-subagents | ❌ Explicitly forbidden ([multi-agent docs](https://platform.claude.com/docs/en/managed-agents/multi-agent.md)) | Needed for orchestrator-worker layering above verifier |
 | **Session-level intent extraction layer** — a component that reads user turns before main processes them and can route them to isolated verifiers | ❌ No such concept in docs | Needed to remove main's role in preparing witness's input |
-| **PreToolUse hook → synchronous subagent verdict → deny** pipeline | ❓ Inferable from `"type": "agent"` hooks + `permissionDecision: "deny"`, but not documented | Needed for commit-gate blocking |
+| **PreToolUse hook → synchronous subagent verdict → deny** pipeline | ❌ Not documented; agent hooks only shown for `Stop` event | ~~Needed for commit-gate blocking~~ — not needed on reflection; autoloop [Judge] phase spawns witness via Task tool, enforcement is discipline-level like all other autoloop phases |
 
 ## Why reasoning-level isolation matters
 
@@ -55,15 +55,11 @@ Currently, the boundary between "what the user said" and "what main decided the 
 
 This could be built on top of `UserPromptSubmit` hooks if hooks were allowed to fork the user turn into multiple downstream channels, one of which is a subagent with its own long-lived context.
 
-## Why PreToolUse hook → subagent verdict → block documentation matters
+## ~~Why PreToolUse hook → subagent verdict → block documentation matters~~
 
-The hook types `"command"`, `"http"`, `"prompt"`, and `"agent"` are documented. The `permissionDecision: "deny"` field is documented. What is not documented is whether:
+*Retracted 2026-04-15.* On reflection, witness does not need hook-level enforcement. Autoloop's [Judge] keep pipeline is the right integration point: it already drives commit decisions in a phase-ordered protocol, and adding a witness Task call is just one more step in that protocol, enforced by the same autoloop discipline as every other phase. A hook-level PreToolUse enforcement would be stronger in that main could not bypass it even by ignoring autoloop, but that stronger guarantee is (a) not available on the current platform, (b) not actually necessary for the use cases we care about, and (c) would add latency to every gated tool call in a way that probably costs more than it saves.
 
-1. An `agent`-type PreToolUse hook can synchronously wait for the subagent to complete before the tool call proceeds
-2. The subagent's verdict can be used to populate `permissionDecision`
-3. This pattern scales (i.e., doesn't add unbounded latency to every gated tool call)
-
-Even a short documentation page saying "yes, this works, here's a minimal example, here are the latency expectations" would let us rely on this pattern instead of inferring it from part counts.
+If a user runs outside autoloop and wants witness on ad-hoc tool calls, that is a different use case, and the current recommendation is to use a dedicated skill wrapper (e.g., `/commit-verified`) that invokes witness before the risky operation. That is not a platform feature request — it is a user-side skill pattern.
 
 ## Non-goals
 
@@ -76,6 +72,6 @@ Even a short documentation page saying "yes, this works, here's a minimal exampl
 - Building witness as a 2-layer (witness-pair) architecture on the primitives available today
 - Documenting the isolation stack honestly: execution-level (harness-enforced) + spawn-prompt discipline (design-enforced) + citation rule (behavioral)
 - Treating the above as "protocol isolation" rather than "structural isolation" in the documentation
-- Runtime-verifying the PreToolUse → agent hook → deny pattern before relying on it in production autoloop integrations
+- Spawning witness via the Task tool from autoloop's [Judge] phase (documented, supported path) rather than via a PreToolUse agent hook (undocumented for that event type)
 
 We can ship a functional witness-pair architecture without these features. The features would let us ship a stronger one.
