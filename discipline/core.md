@@ -36,17 +36,13 @@ How to apply Action Rules — when, how confidently, and with memory.
 - State the rationale on judgment: why keep/discard/refine?
 - Surface customizable points: suggest where the user can improve.
 
-## Memory
+## Persistence Hand-off
 
-When guard flags a novel trap or autoloop retrospective discovers a lesson — record it. Always ask the user before writing.
+Discipline for main and workers stops at **detect and flag**. Writing anything durable — memory entries, project rules, journal — is not discipline work; it is scribe's axis. When you detect something worth keeping, dispatch the raw signal to scribe and move on. Do not write memory files yourself.
 
-- Project-specific lesson → `.claude/sonmat/{name}.md`
-- Universal lesson → `~/.claude/sonmat/memory/trap_{name}.md` or `insight_{name}.md`
+Two detection patterns that must be handed off:
 
-## Project Rule Discovery
+- **Novel trap**: a verification failure not covered by existing hints or memory. When guard or an autoloop retrospective spots one, dispatch to scribe. See `skills/scribe/SKILL.md` §Novel Trap Recording for what scribe does with it.
+- **Project rule**: an implicit project convention surfacing through user corrections, repetitions, or explicit statements. When you spot the pattern, dispatch to scribe. See `skills/scribe/SKILL.md` §Project Rule Recording. **If the same correction happens twice, dispatching is not optional.**
 
-Watch for implicit project rules during conversation — things the user corrects, repeats, or assumes you know. When you spot one, propose adding it to CLAUDE.md Project Rules section:
-
-> I noticed [pattern]. Add this as a project rule? [draft rule]
-
-Write only after user confirms. If the same correction happens twice, you MUST propose it.
+In both cases: the *detection* is discipline; the *recording* is scribe. Main and workers never write directly to memory or `CLAUDE.md`.

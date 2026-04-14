@@ -56,7 +56,7 @@ On completion, submit a result summary including:
 - Files changed (absolute paths)
 - Key judgment rationale
 - Concerns (if any)
-- Novel traps discovered (if any — flagged for main session to record)
+- Novel traps discovered (if any — flagged for main session to dispatch to scribe; worker never writes memory itself)
 
 ---
 

@@ -1,12 +1,24 @@
 ---
 name: guard
-description: Guardrails — pre-commit verification, scope checks, discipline violation detection, novel trap flagging.
+description: Main-side verification checks — pre-commit test / sensitive-file blocking, discipline conformance, novel-trap detection. Pure verify-and-flag; persistence of findings is scribe's job, intent-artifact match is witness's.
 user-invocable: true
 ---
 
-# Guard — Guardrail Skill
+# Guard — Main-Side Verification Checks
 
 Automatic verification layer running in the main session (System 1). No agent spawn.
+
+Guard covers **verification** checks that main can reliably do on itself: sensitive files, test execution, discipline conformance, and detection of novel traps during work. Guard is pure verify-and-flag — it detects, it warns, it blocks. It does **not** record, accumulate, or persist findings; those belong to scribe (post-work persistence). It also does **not** verify whether the artifact matches the user's intent; that check is structurally unreliable when done inside the agent that produced the artifact, and is delegated to [witness](../../agents/sonmat-witness.md).
+
+**Scope boundaries**:
+
+| Check kind | Owner | Why |
+|---|---|---|
+| Test execution, sensitive file blocking, discipline conformance, novel-trap detection | **guard** | Real-time verification during work; synchronous check-and-block at decision points |
+| Scope match (is this within what was asked?), content match (does it do what was asked?), framing-derived scope | **witness** | Intent-artifact comparison — requires structural isolation from main's reasoning |
+| Recording novel traps, writing project rules to CLAUDE.md, journaling verdicts, bridge notes, progress tracking | **scribe** | Post-work persistence — what the session learned that should outlive it |
+
+Guard detects and flags. Scribe persists what was flagged. Witness checks intent-artifact match in isolation. Three different axes on the same work.
 
 ---
 
@@ -27,131 +39,53 @@ Before any commit, check in order:
 
 ---
 
-## 2. Scope Check
-
-### Scope creep detection
-- Flag file changes beyond the requested scope.
-- "This button color change" → refactoring the component tree = scope creep.
-
-### Impulse suppression
-- Unrelated improvements noticed during work → note them, don't include in current commit.
-
-### Scope expansion requires confirmation
-- If broader changes are needed, ask the user first. Never expand silently.
-
----
-
-## 3. Project Rule Discovery
-
-During work, watch for implicit rules the user assumes you know:
-
-- **Direct statement**: "이 프로젝트에서는 항상 X" → propose immediately.
-- **Repeated correction**: Same fix requested 2+ times → MUST propose as rule.
-- **Structural inference**: Config files, test patterns, naming conventions that imply rules.
-
-When spotted:
-```
-💡 Project rule detected: {draft rule}
-   Add to CLAUDE.md? [Yes / No / Rephrase]
-```
-
-Write to `## Project Rules` section in CLAUDE.md only after user confirms.
-This is how the "빈 공간" shrinks over time — rules accumulate from practice, not declaration.
-
----
-
-## 4. Discipline Violation
+## 2. Discipline Violation
 
 ### Check against core.md + hints.md
 - Compare current actions against the active discipline (core verification principles + domain hints).
 - On violation: stop, warn, suggest the correct action.
 - User can explicitly override.
 
----
-
-## 4. Completion Review (Verification Discipline Applied)
-
-Before declaring "done", apply the verification discipline:
-
-### Break it
-- Re-read the full diff as if trying to find what's wrong.
-- What input would make this code fail? What edge case was missed?
-
-### Cross it
-- Check downstream: files that depend on what changed. References, config, paths still valid?
-- Does the change work from a different entry point?
-
-### Ground it
-- Was the fix verified by actual execution, or just by reading the code?
-- If only read → run it.
+**Note**: Discipline conformance is a main-side check because discipline is a shared rule set, not a user-specific intent. Witness is deliberately excluded from discipline injection (see witness.md §Operating principles) — it is a comparator, not a rule-follower.
 
 ---
 
-## 5. Novel Trap Flagging + Memory Write
+## 3. Novel Trap Detection
 
-When a verification failure is discovered that is NOT covered by existing hints or memory:
+When a verification failure is discovered that is NOT covered by existing hints or memory, guard flags it as a **novel trap** — a class of failure that existing discipline and memory did not anticipate. Guard's job stops at detection and flagging; recording, abstracting, and persisting the trap belong to scribe.
 
-1. **Flag** it as `Novel trap` in the output.
-2. **Describe**: what happened, why existing discipline didn't catch it, what would have caught it.
-3. **Propose** a memory record to the user:
-   - Project-specific lesson → `{project}/.claude/sonmat/{name}.md`
-   - Universal lesson → `~/.claude/sonmat/memory/trap_{name}.md`
-4. **Write** only after user confirms. Use this format:
+### What guard does
 
-```markdown
-# Trap: {title}
+1. **Detect**: a verification failure occurs, and the failure pattern does not match any existing hint or memory entry.
+2. **Flag** it in the output as `Novel trap` with a 1-2 line description: what happened, why existing discipline didn't catch it.
+3. **Dispatch to scribe** at the end of the current task with the trap payload (pattern, context, what-would-have-caught-it). See `skills/scribe/SKILL.md` §Novel Trap Recording.
+4. **Not optional**: guard must dispatch. If a novel trap is detected and not dispatched, the verification layer is not complete.
 
-## Pattern
-{What went wrong and why it wasn't caught}
-
-## Lesson
-{What to do differently — tied to Break/Cross/Ground}
-
-## Applies to
-{When this trap is likely to recur}
-```
-
-**This is not optional.** If guard detects a novel trap and does NOT propose a memory record, the verification discipline was not fully applied. The memory system grows through practice, not pre-definition.
-
-### GitHub feedback (optional)
-
-After writing a memory record, offer to submit it as a GitHub issue to the sonmat repo:
-
-```
-💬 This trap could help other sonmat users. Submit to GitHub?
-   Your privacy is respected — only the abstracted pattern is sent,
-   no conversation content or personal data.
-
-   Below is EXACTLY what will be sent:
-
-   Title: Trap: {title}
-   Pattern: {abstracted pattern}
-   Discovered via: {method}
-
-   [Yes / No / Edit first]
-```
-
-If user approves: `gh issue create --repo jun0-ds/sonmat --template trap-report.md`
-If user wants to edit: show the full issue body, let them modify, then submit.
-**Never send without showing the content first.**
+Guard does **not** write memory files itself, does not propose formats to the user, and does not manage the sonmat memory directory. All of that is scribe's territory — guard's role is to notice that something new happened and hand the raw signal off.
 
 ---
 
-## 6. Severity
+## 4. Severity
 
 | Severity | Symbol | Target | Action |
 |----------|--------|--------|--------|
-| **Warning** | ⚠️ | Scope creep, discipline violation | Warn + suggest alternative. Proceed if user allows. |
-| **Block** | 🚨 | Sensitive files, security risk | Immediate stop. Re-confirm even after user allows. |
+| **Warning** | ⚠️ | Discipline violation, novel trap detected | Warn + dispatch to scribe for persistence (traps). Proceed if user allows. |
+| **Block** | 🚨 | Sensitive files, security risk, failing tests | Immediate stop. Re-confirm even after user allows. |
 
 Same-category warnings repeated 3+ times in a session → collapse to one-line summary.
 
+Scope creep is *not* listed here — that category moved to witness's intent-scope mismatch check. Guard does not judge scope against user intent; witness does, with structural isolation.
+
+Project rule discovery is *not* listed here — that category moved to scribe. Guard detects and verifies; observing the user's patterns to propose project rules is accumulation work, and accumulation is scribe's axis.
+
 ---
 
-## 7. Operation Mode
+## 5. Operation Mode
 
 This guardrail operates at **System 1 level**:
 - No agent spawn.
 - Runs in main session, immediately.
 - Always on unless user explicitly disables.
 - When triggered, state what was detected concisely.
+
+For the **structurally-isolated** verification layer (intent-artifact match, commit-gate BLOCK), see [witness](../../agents/sonmat-witness.md). Guard and witness are complementary Swiss-cheese layers, not substitutes — guard catches operational slips, witness catches intent drift that main's self-check structurally cannot.
