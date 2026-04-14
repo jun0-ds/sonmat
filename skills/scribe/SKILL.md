@@ -39,7 +39,7 @@ Scribe writes into channels that future sessions will read. This creates a poten
 - **Journal** (not auto-loaded, user-readable only) is the durable place where witness findings live. Journal is scribe's append-only record; witness findings go there in full.
 - **CLAUDE.md Project Rules** and **memory trap records** are user-facing reference files, not main's automatic context. They are safe targets for synchronous writes.
 
-Witness spawn prompts must **never** include bridge-notes, journal excerpts, or any scribe-managed file as input. Witness receives only raw user turns and the artifact; scribe-managed files are outside the witness input contract. This boundary is enforced at the hook layer (witness spawn configuration), but scribe carries the policy responsibility: if scribe ever writes witness content into a channel that flows back to main or witness, the isolation is broken.
+Witness spawn prompts must **never** include bridge-notes, journal excerpts, or any scribe-managed file as input. Witness receives only raw user turns and the artifact; scribe-managed files are outside the witness input contract. This boundary is enforced by autoloop's Task-tool spawn composition (§6b Witness dispatch in `skills/autoloop/SKILL.md`): the spawn prompt template explicitly lists what goes in, and bridge-notes / journal are not in that list. Scribe carries the policy responsibility for not authoring the content that would then need to be excluded — if scribe ever writes witness content into a channel that flows back to main, the isolation is broken at the composition layer, even if the spawn template excludes it.
 
 ---
 

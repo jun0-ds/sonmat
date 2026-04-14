@@ -321,7 +321,8 @@ If worker needs to modify files outside `loop.modify`, it must report the need �
 
 Witness is **not** a worker. It does not receive discipline, does not execute tasks, and does not modify state. Its only job is comparator verification in protocol isolation from main's reasoning (`agents/sonmat-witness.md` §Isolation stack).
 
-**Implementation caveat**: the pattern of "PreToolUse hook invokes witness as an `agent`-type hook, waits for the verdict, then denies the tool call on `BLOCK`" is **not documented in current Claude Code docs** as an officially supported pattern. It is inferred from the existence of `"type": "agent"` hooks and the `permissionDecision: "deny"` mechanism. This pipeline needs runtime verification before it can be relied on in production. Until verified, treat witness at the commit gate as a best-effort layer, not a guaranteed block. See `agents/sonmat-witness.md` §Architectural notes → "What the platform does NOT provide" for the caveat in full.
+**How witness is actually spawned**: via the Task tool with `subagent_type: sonmat-witness`, invoked from within autoloop's [Judge] keep pipeline and [Repeat/Exit] forest check. This is a documented, supported path — Task tool subagent delegation is the native Claude Code primitive for spawning isolated subagents. Earlier drafts of this document referred to a "PreToolUse hook → agent hook → deny" pipeline; that path turned out to be undocumented for PreToolUse specifically, and is not the path we use. The enforcement model is autoloop discipline: main must follow the [Judge] pipeline sequence, and the witness Task call is one step in that sequence. This is the same discipline-enforcement model as all other autoloop phases.
+
 
 Spawn points:
 - **[Judge] keep pipeline** — commit-gate scope, per iteration. Gated by `loop.witness.commit`.
