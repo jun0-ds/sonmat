@@ -32,6 +32,7 @@ sonmat follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| `0.9.1` | 2026-04-15 | Honest framing pass on witness isolation stack. Separate layer 1 (platform-enforced execution isolation) from layers 2-3 (aspirational prompt-level contracts). Add honest caveats to witness.md §Role and §Isolation stack clarifying that the agent file is a prompt, not a compiled program, and that comparator discipline needs human-sampled validation in early use. Autoloop adds a reliability note to the [Judge] pipeline pointing at scribe's witness event log as the drift-detection channel. |
 | `0.9.0` | 2026-04-15 | Add `sonmat-witness` agent — protocol-isolated intent-artifact comparator with three scope scales (commit / session forest / principle coverage). Split guard/scribe — scribe becomes post-work persistence layer, absorbs project rule discovery and novel trap recording. Reframe inspect and devil around discovery-led depth (cascade principle retracted as ambiguous). Add refactor-residue check to punch. Retract "3-layer architecture" aspiration as unsupported by current Claude Code platform; document honest 2-layer witness-pair architecture with isolation stack. Replace PreToolUse hook integration path with Task-tool spawn from autoloop [Judge] phase. |
 | `0.8.0` | 2026-04-11 | Add `/punch` skill (completeness check), context doubt principle in core discipline |
 | `0.7.1` | 2026-04-10 | Fix devil balance table column labels — Strength→Counter strength, Verdict→Claim verdict |
