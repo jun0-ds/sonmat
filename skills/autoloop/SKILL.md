@@ -105,6 +105,8 @@ Draft `progress.md` from answers, present for user review. Use 3-tier structure:
 
 Any gate returning a blocking verdict (guard block / witness `BLOCK`) → judgment becomes **refine**, not keep. Non-blocking findings (guard warning / witness `WARN`) → surface to user but proceed if user confirms.
 
+Note on witness verdict reliability: witness's comparator discipline (citing from valid sources only, source-based verdict determination, refusing strength judgment) is **prompt-level**, not runtime-enforced — see `agents/sonmat-witness.md` §Isolation stack for the honest breakdown. Early uses of witness should be sampled by a human reviewer to validate that its verdicts actually follow the specified rules. If drift is observed (e.g., verdicts without citations, strength-based WARN assignments), the agent file needs adjustment — the journal is the right place to log these events (scribe captures witness verdicts for exactly this purpose).
+
 The three-gate order is deliberate: cheap checks first, structurally-isolated check last (because it costs a spawn). Witness is the final gate because its isolation is most valuable on content that a cheaper gate would not have caught anyway. **The three gates are complementary layers of a Swiss cheese model — not redundant, not interchangeable, and definitely not substitutable. Self-review alone is the thinnest possible layer; guard + witness together is the minimum honest stack.**
 
 **Preservation zones** (subjective domains like writing): If refine/discard reveals "the previous version was better" for certain parts, add those to `loop.constraints`. Update zones each iteration with user confirmation.
