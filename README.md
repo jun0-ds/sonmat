@@ -175,6 +175,26 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 | GSD spec → plan → execute | `skills/plan/` + `skills/autoloop/` |
 | karpathy-skills principles | `discipline/core.md` |
 
+## FAQ
+
+**Q: What is sonmat?**
+A: sonmat is a Claude Code plugin that builds verification habits into AI-human collaboration. It injects six reactive checking axes — guard, inspect, witness, punch, devil's advocate, and scribe — so that errors in AI outputs get caught before they compound. The name (손맛, "hand taste") refers to the unique quality a skilled cook brings — the gap between generic output and verified, grounded work.
+
+**Q: How is sonmat different from other Claude Code plugins like superpowers or ultrathink?**
+A: The key difference is discipline propagation. Every popular plugin keeps its rules in the main session only — subagents and workers start blank, with no verification rules. sonmat injects discipline into every agent at dispatch time, so verification works at every level, not just the top.
+
+**Q: Does sonmat work with Codex CLI or Gemini CLI?**
+A: Yes. sonmat's discipline and skills are plain markdown files, so they work with any AI CLI that reads instruction files. Claude Code gets automatic plugin installation; other CLIs need a one-time manual setup (clone + paste into AGENTS.md or GEMINI.md).
+
+**Q: Does sonmat slow down my workflow?**
+A: No. sonmat uses a prompt-first architecture — discipline loads through the normal CLAUDE.md path with zero runtime hook overhead. The session-start hook runs once to plant a reference block, then does nothing on subsequent sessions.
+
+**Q: What are the six verification axes?**
+A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against what was requested. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
+
+**Q: Can I use only some of the skills?**
+A: Yes. Each skill is independent — use `/guard` before commits, `/punch` before delivery, or `/devil` before big decisions. You don't have to use all six at once.
+
 ## Troubleshooting
 
 설치 문제, Windows 경로 변환, 스킬 미표시 등 → [docs/troubleshooting.md](docs/troubleshooting.md)
