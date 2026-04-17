@@ -84,9 +84,9 @@ Don't list all six every time. Only flag the ones actually at play.
 
 Be honest about devil's own arguments. The rating below applies to the **dominant counter-argument** — the one devil drove depth into in §3 after CCT located the load-bearing part. Secondary notes on the other two axes get a brief pass only; they are not independently rated and then averaged.
 
-| Counter strength | Meaning |
-|------------------|---------|
-| **Strong** | The dominant counter-argument has real teeth. The original claim needs revision or hedging. |
+| How strong is the counter-argument? | Meaning |
+|--------------------------------------|---------|
+| **Strong** | The counter-argument has real teeth. The original claim needs revision or hedging. |
 | **Moderate** | Worth considering. Doesn't kill the claim but exposes a blind spot. |
 | **Weak** | Technically possible but unlikely. Noted for completeness. |
 
@@ -97,12 +97,12 @@ This is discovery-led strength rating, not parallel strength rating. Rating the 
 End with a comparison table:
 
 ```
-| Original claim | Counter-argument | Counter strength | Claim verdict |
-|----------------|------------------|------------------|---------------|
-| ...            | ...              | ...      | ...     |
+| Original claim | Counter-argument | Counter (strong/moderate/weak) | Claim after challenge |
+|----------------|------------------|-------------------------------|----------------------|
+| ...            | ...              | ...                           | ...                  |
 ```
 
-Claim verdict options: `holds`, `weakened`, `needs revision`, `flipped`.
+Claim after challenge options: `holds`, `weakened`, `needs revision`, `flipped`.
 
 **Well-formed balance table**: one dominant row representing the §3 depth drive (the load-bearing counter on the found axis), plus at most one or two secondary rows noting what the quick passes on the other axes surfaced. A balance table with five parallel rows of equally-weighted counter-arguments is a symptom of parallel attack — if that happens, go back to §2 CCT and locate the actual load-bearing part before writing the table.
 

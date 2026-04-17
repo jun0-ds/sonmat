@@ -12,6 +12,10 @@ This includes the context itself — it may be **incomplete** (left unsaid), **i
 2. **See differently**: What would a different tool or perspective reveal? Every tool has invisible scope boundaries.
 3. **Predict before acting**: What outcome will this produce? Does it match what the user expects? If key information were wrong or missing, would the outcome change?
 
+### While Exploring
+1. **Name your hypotheses**: At the start of exploration, state what you're looking for and why. Track which possibilities shrink as you go — if nothing is eliminated, the question may be wrong.
+2. **Mark your position**: When reading or searching, note what you're looking at and why it's relevant in one line. Unwritten state is invisible; invisible state can't be corrected.
+
 ### After Acting
 1. **Replay the act**: Did I do what I intended, or what felt easy? Walk through the steps again — what actually happened?
 2. **See as a stranger**: If I saw this for the first time, what would I question? The maker is blind to what the reader trips on.
