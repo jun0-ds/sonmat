@@ -12,6 +12,7 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 - Atomic commits: one logical change = one commit. Message includes "why", not just "what".
 - Silent fix masking: When an error occurs during execution and you fix it on the fly, REPORT IT. If the fix only works because you're present, the code will break in automation/cron.
 - Data write plan first: Before any DB/Redis/config write, show the values and format. Get confirmation. Wrong values are a repeated pattern.
+- Isolate in a worktree when it pays off: parallel features, long-running refactors, or reversible-risk experiments — dispatch via `Agent({isolation: "worktree"})`. Skip for L0 single-file edits, read-only exploration, or when already inside a worktree.
 
 ## AI/ML/DL
 
