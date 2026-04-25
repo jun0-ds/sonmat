@@ -207,4 +207,4 @@ If you use or reference sonmat in your project, a mention is appreciated:
 
 ## License
 
-MIT — see `LICENSE`.
+BSD 3-Clause — see `LICENSE`.
