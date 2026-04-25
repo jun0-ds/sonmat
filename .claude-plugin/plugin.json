@@ -6,6 +6,6 @@
     "name": "jun0-ds"
   },
   "repository": "https://github.com/jun0-ds/sonmat",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "keywords": ["verification", "autoloop", "autonomous", "discipline", "memory", "witness", "discovery-led"]
 }
