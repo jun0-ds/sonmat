@@ -101,6 +101,20 @@ At the start of any non-trivial task:
    참고: 이전 작업에서 {relevant item}이 나왔는데, 이번에 연관될 수 있어요.
    ```
 4. If nothing is relevant, ignore it.
+5. **Treat the bridge note as hypothesis, not fact**. The previous session may have written it under partial understanding. Before acting on a claim from the bridge note, verify it against the actual code/state. If the claim disagrees with what you observe, trust observation and flag the bridge-note divergence in your next dispatch.
+
+---
+
+## Bridge Note Authoring Principles
+
+When scribe writes a bridge note, four principles are load-bearing. Sections beyond these are optional — write what the work demands, omit what would pad. (A3 lesson: what doesn't fit the page wasn't essential.)
+
+1. **Open work in status form, never imperative.** Write "X is not yet implemented; depends on Y being finalized first" — not "Implement X next." Imperative phrasing makes the next session execute blindly without verifying the premise (Auftragstaktik intent-not-method principle, also Toby T2 handoff lesson). The next session decides what to do; scribe records what stands.
+2. **Traps to Avoid is mandatory when present.** Failed approaches, dead ends, hypotheses that turned out wrong — these vanish from code but matter for the next session. If the work hit any failed branch, that record is part of the bridge note. (Phase 2 induction §15: minority/failed positions preserved are future optionality.)
+3. **The bridge note is hypothesis, not fact.** Scribe writes from limited synthesis; the next session must verify. Phrase claims in a form that signals tentativeness ("appears to / observed / decided based on") rather than asserting. Include enough file/line references that the next session can confirm independently.
+4. **Brevity over completeness.** Aim for a note the next session reads in under a minute. If detail is needed, link to a separate artifact (journal, ADR, report) rather than inlining. A bridge note that has to be skimmed is a bridge note that loses the point it was making.
+
+Sections like Summary, Key Decisions, Relevant Files, Working Agreements, or a Prompt for New Chat may be useful — include them when the work justifies, skip them when they would be padding. The structure is free; the four principles above are not.
 
 ---
 
@@ -152,14 +166,22 @@ This is how the "빈 공간" shrinks over time — rules accumulate from practic
 
 ## Novel Trap Recording (absorbed from guard §4)
 
-A novel trap is a verification failure pattern that existing discipline and memory did not anticipate. Guard detects the failure and dispatches the raw trap payload to scribe. Scribe abstracts it into a memory record.
+A novel trap is **either** a verification failure pattern that existing discipline and memory did not anticipate, **or** a "spec didn't cover this" moment — a case where discipline ran fine but the existing rules/spec/contract had a gap that the situation exposed. Both are inputs to memory because both signal that the system's prior model of "what to watch for" is incomplete.
 
-### What scribe receives from guard
+The two flavors:
 
-Guard's dispatch includes:
-- **Pattern**: what failed and how it slipped past existing discipline
-- **Context**: what was being done when the trap fired
-- **Catch-signal**: the specific check or signal that would have caught it earlier (this is what gets added to the memory system)
+- **Verification failure** (classic novel trap): discipline ran but missed a real problem. The catch-signal is what would have caught it earlier.
+- **Spec gap** (improvisation surfacing): discipline didn't fail; the spec/rule was simply silent on the case, and the actor had to improvise. The catch-signal is what kind of case the spec should have covered.
+
+Both reach scribe via the same channel — guard for the first, main observation or autoloop retrospective for the second. The Wehrmacht *Gefechtsbericht* lesson: a successful improvisation that revealed a doctrinal gap is just as valuable as a verification failure, and both belong in the next edition of the rule book.
+
+### What scribe receives from guard (or main observation)
+
+The dispatch includes:
+- **Flavor**: `verification_failure` or `spec_gap`
+- **Pattern**: what was missed and how
+- **Context**: what was being done when it surfaced
+- **Catch-signal**: the specific check or signal that would have caught it earlier (verification failure) or the kind of case the spec should have covered (spec gap)
 
 ### What scribe does
 

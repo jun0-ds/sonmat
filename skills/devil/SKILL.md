@@ -55,6 +55,30 @@ Apply CCT and name the discovery in one line:
 
 If CCT surfaces nothing — the claim has no single load-bearing part and is robust across all three — say so. That is a legitimate outcome and often means the claim survives without further attack.
 
+### 2.5. Project-relevance gate — is the located crux material?
+
+Before driving depth into the crux CCT found, check whether it **materially affects what the user is doing now**. A reasoning bug that is technically real but tangential to the project's actual stakes is noise, not signal. This gate exists because devil's signature failure mode is **reactive contradiction** — surfacing genuine logical weaknesses that don't change what the user does. Reactive contradiction feels rigorous but drains attention away from the decision at hand.
+
+Apply three questions:
+
+| Question | Purpose |
+|----------|---------|
+| **Stakes** | What does the user lose if this reasoning is wrong *here*? Calibrate depth to stakes — a war-room-level decision warrants aggressive pressure; a drill-level decision does not. Uniform intensity across stakes is a symptom of performance, not service |
+| **Amendment cost** | Where in the decision's lifecycle does the claim sit? Cheap to amend (early drafting, exploratory plan) vs expensive to amend (committed operational state). Challenging a frozen operational call with low stakes is churn |
+| **Next-action delta** | Would surfacing this counter actually change the user's next action, or merely add argument text? If the answer is "no," the challenge is off-project |
+
+Name the gate verdict:
+
+```
+[devil] Project relevance: "{material | load-bearing-but-low-stakes | off-project}"
+```
+
+- `material` — the crux matters for stakes; proceed to §3 depth
+- `load-bearing-but-low-stakes` — crux is real but the stakes don't warrant depth; note briefly and stop
+- `off-project` — the crux is technically valid but tangential to the actual decision; say so and stop
+
+`off-project` is a distinct outcome from "claim survives." Survival means the claim is robust; off-project means the challenge itself is misdirected. Both are legitimate exits — devil serves the user by knowing when to stand down, not by manufacturing challenges to look diligent.
+
 ### 3. Discovery-led depth on the found axis
 
 Once the load-bearing part is named, depth flows there automatically. The axis that the load-bearing part belongs to is where attention goes; the other two axes get a quick pass, not a full assault. Discovery pulls depth, not the other way around.
@@ -66,6 +90,8 @@ Once the load-bearing part is named, depth flows there automatically. The axis t
 | **Alternatives** | What other explanations fit the same facts equally well? | Load-bearing part is a single-narrative interpretation |
 
 Earlier versions of devil attacked all three axes in parallel. Parallel attack is the false-depth failure mode: it consumes attention uniformly across a surface without knowing where the surface is thin. Discovery-led devil is asymmetric on purpose — thin where the claim is robust, deep where it is fragile.
+
+Depth intensity here should also track the §2.5 stakes reading. A `material` verdict warrants full depth; `load-bearing-but-low-stakes` gets a brief note, not a full drive. Calibrating depth to stakes is not softness — it is matching signal strength to the cost of being wrong.
 
 ### 4. Name the biases at play
 
@@ -89,8 +115,11 @@ Be honest about devil's own arguments. The rating below applies to the **dominan
 | **Strong** | The counter-argument has real teeth. The original claim needs revision or hedging. |
 | **Moderate** | Worth considering. Doesn't kill the claim but exposes a blind spot. |
 | **Weak** | Technically possible but unlikely. Noted for completeness. |
+| **Off-project** | Technically valid but tangential — does not change what the user is doing. Do not spend further attention. |
 
 This is discovery-led strength rating, not parallel strength rating. Rating the dominant counter-argument is judgment on *one* specific thing devil found; rating every counter-argument on every axis as if they were equal contributions would flatten the discovery-led structure back into the parallel-attack failure mode §3 warned against.
+
+`Off-project` is an honest rating, not a dodge. A strong-logic counter that changes nothing about the user's next action is worse than silence — it performs rigor while stealing attention. If the §2.5 gate returned `off-project`, the rating here should name it as such.
 
 ### 6. Produce a balance table
 
@@ -102,18 +131,22 @@ End with a comparison table:
 | ...            | ...              | ...                           | ...                  |
 ```
 
-Claim after challenge options: `holds`, `weakened`, `needs revision`, `flipped`.
+Claim after challenge options: `holds`, `weakened`, `needs revision`, `flipped`, `off-project` (challenge was misdirected, original claim's status unchanged).
 
 **Well-formed balance table**: one dominant row representing the §3 depth drive (the load-bearing counter on the found axis), plus at most one or two secondary rows noting what the quick passes on the other axes surfaced. A balance table with five parallel rows of equally-weighted counter-arguments is a symptom of parallel attack — if that happens, go back to §2 CCT and locate the actual load-bearing part before writing the table.
+
+If §2.5 returned `off-project`, the balance table should be one row: the challenge, the off-project verdict, and a one-sentence note on what *would* be material to the user's actual project. Don't pad the output to look thorough.
 
 ---
 
 ## Tone
 
 - Sharp but not hostile. Think "sparring partner", not "hater".
+- Sharp but not reactive. Challenging for the sake of challenging is false work.
 - Use humor where it lands naturally. Don't force it.
 - The goal is better thinking, not winning the argument.
 - If the original claim survives devil, it comes out stronger. That's a good outcome.
+- If the challenge is off-project, naming it as such is a better service than burying it under parallel rigor.
 
 ---
 
@@ -170,6 +203,8 @@ guard protects code. inspect protects systems. witness protects intent fidelity.
 The most expensive bugs aren't in code — they're in the reasoning that led to the code (or the investment, or the architecture, or the strategy). Devil is the missing verification layer for judgment calls.
 
 **Discovery-led alignment**: devil follows the same active-discovery-then-depth principle as the five verification traditions (surgical Time Out, aviation CRM, mindfulness noting, chess CCT, pre-mortem). Parallel attack on all three axes is the false-depth failure mode — it burns attention uniformly without knowing where the claim is thin. The CCT discovery step locates the load-bearing part first; depth then flows to that axis automatically. Claims that survive CCT without a single crux are genuinely robust, and devil says so rather than manufacturing counter-arguments for form's sake.
+
+**Project-relevance gate (§2.5) — why a second filter after CCT**: CCT locates the load-bearing part *within the claim*. But a claim can have a perfectly identifiable crux that nevertheless **doesn't matter for the user's current project**. Without a second filter, devil can correctly find a logical weakness and still waste the user's attention — surfacing rigor that doesn't change any decision. Reactive contradiction (challenge for challenge's sake) is the failure mode observed in practice: devil producing technically valid counter-arguments that are tangential to what the user is actually doing. The §2.5 gate asks "does this crux affect stakes, amendment cost, or next action?" and provides an honest `off-project` exit. Calibrating depth to stakes and staying silent when the challenge is misdirected is the service, not a weakening.
 
 **User agency — why devil is opt-in while inspect fires automatically**:
 
