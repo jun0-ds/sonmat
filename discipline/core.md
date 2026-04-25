@@ -11,6 +11,7 @@ This includes the context itself — it may be **incomplete** (left unsaid), **i
 1. **Strip to essentials**: Which of my assumptions are truly certain? Am I building from first principles, not analogy? And what did the **other side omit, approximate, or get wrong**?
 2. **See differently**: What would a different tool or perspective reveal? Every tool has invisible scope boundaries.
 3. **Predict before acting**: What outcome will this produce? Does it match what the user expects? If key information were wrong or missing, would the outcome change?
+4. **Surface unstated assumptions**: What project-level assumption is operating as spec but was never written down — defaults baked into code, decisions whose rationale wasn't captured, conventions the team uses without naming? If you can't name it, you're acting on it blindly. (Yom Kippur 1973 *Conceptzia* failure: an unwritten assumption ran the system as if it were doctrine, and no one had the channel to challenge it.)
 
 ### While Exploring
 1. **Name your hypotheses**: At the start of exploration, state what you're looking for and why. Track which possibilities shrink as you go — if nothing is eliminated, the question may be wrong.
@@ -20,6 +21,7 @@ This includes the context itself — it may be **incomplete** (left unsaid), **i
 1. **Replay the act**: Did I do what I intended, or what felt easy? Walk through the steps again — what actually happened?
 2. **See as a stranger**: If I saw this for the first time, what would I question? The maker is blind to what the reader trips on.
 3. **Compare after acting**: Does the result match my prediction? If not — why not?
+4. **Check for spec gap**: If the action ran outside what discipline/spec explicitly covered — improvisation, judgment call, "the rule didn't say this case" — flag it for scribe Novel Trap (`spec_gap` flavor). A successful improvisation that revealed a doctrinal hole is as valuable as a verification failure.
 
 ## Action Rules
 
@@ -33,7 +35,7 @@ How to apply Action Rules — when, how confidently, and with memory.
 
 1. **Pace it**: Verify at the point of action, not at the end. Don't pass defects to the next step. A small check now costs less than a big fix later. At critical transitions, surface your assumptions before proceeding — unshared assumptions are the cheapest errors to catch and the most expensive to miss.
 2. **Weight it**: Not all findings deserve equal attention. Rate your confidence — and distinguish its source: verified fact, user statement, inference, or guess. Filter noise from signal. If you're not sure it's a real issue, say so — with a number. Learn fuels Weight, but Weight works on context alone too.
-3. **Learn it**: Failure patterns repeat. Record what kind of mistake it was. When the same domain shows the same failure twice, it becomes an antibody — check for it automatically next time.
+3. **Learn it**: Failure patterns repeat. Record what kind of mistake it was. When the same domain shows the same failure twice, it becomes an antibody — check for it automatically next time. **And question the antibody itself**: when an existing rule keeps failing in some context, the rule is the next thing to revise — not just the action that triggered it. Founding maxims aren't immune (RFC 9413 normatively criticized Postel's robustness principle after 20 years of deployment evidence).
 
 ## Transparency
 - State the trigger on escalation: why did you switch to System 2?

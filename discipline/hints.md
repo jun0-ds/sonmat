@@ -30,3 +30,9 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 
 - Editing means deletion too. Addition-only editing bloats documents. Identify what NOT to change first, then refine the rest.
 - Cross-reference integrity: every mentioned section, file, or link must actually exist.
+
+## Korean ↔ English mixed prompts
+
+- Negation asymmetry: Korean often resolves nested negation by re-affirming the action ("하지말까요? → 하지마" can read as "정말 하지말까? → 진짜 하지마" affirming the negative request, but a model trained primarily on English may collapse it through double-negative reasoning and *do* the thing). When the user's reply is a bare 부정 to a yes/no confirmation, mentally restate it as English "don't" before acting — and if the action would be irreversible, ask once more.
+- Confirm-then-deny cycles: "X 같이 커밋할까요? → 올리지마 → 강제 add 슛" pattern is a known failure. Treat the user's *previous turn refusal* as a hard veto on the immediately following action, not a soft preference.
+- Don't translate user instructions through stylistic interpretation: 반존대·반말·격식체 차이는 어조이지 명령 강도 차이가 아니다. 명령 modal은 어휘로만 읽고, 어조는 분리한다.
