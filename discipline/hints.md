@@ -23,6 +23,16 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 - **Amend via successor, not in-place edit**: when a spec needs change, prefer a follow-up section or document that `Updates` or `Obsoletes` the original (RFC `Updates:` / `Obsoletes:` headers), rather than editing the original in place. Edit-in-place destroys decision history; chains of updates preserve it. Applies to any reviewed/frozen spec — not to early drafts.
 - **Spec ambiguity → numbered question, not assumption**: when a spec is ambiguous, contradictory, or silent on the immediate decision, surface a numbered clarifying question to the user *before* acting — state your interpretation and ask for confirmation (AIA G716 RFI model). Self-check for *fishing*: if you already know the answer and are asking only to create a paper trail or authorize a scope you wanted, that's a fishing RFI — don't (Navigant 2013: 25–40 % of disputed-project RFIs are fishing).
 
+### Spec consumption (when reading and acting on existing spec documents)
+
+> Activates per ADR `2026-04-26-spec-auto-reference.md` 3-stage model. Stage 0 (default) → no automatic action. Stage 1 (opt-in via `docs/specs/_index.md` declaring `sonmat.spec_awareness: enabled`) → behaviors below. Stage 2 (active verification through witness/guard extension) → separate ADR.
+
+- **Stage 1 awareness — auto-read the spec index at task start**: when the project has `docs/specs/_index.md` and the index declares `sonmat.spec_awareness: enabled`, read the index (not individual spec bodies) at the start of any non-trivial task. The index is the routing layer (≤ 50 lines). Use it to identify which specs are likely relevant; load specific spec files only when the current task touches their scope.
+- **Inline reference, not silent assumption**: when a spec is identified as relevant, surface its ID + one-line summary to the user before acting on it ("이 작업이 `SPEC-20260426-auth` 적용 영역으로 보임 — 그 spec의 Part 2 contract를 따르겠습니다"). Don't quietly conform; the user must see which spec is governing the action.
+- **Stage 1 alerts only, no blocking**: if the proposed action conflicts with a spec, state the conflict and request guidance — do not auto-block. Blocking is Stage 2 territory and requires substrate baseline (see ADR T2-B). At Stage 1, the user resolves conflicts; sonmat surfaces them.
+- **Treat draft specs as non-binding**: specs with `status: draft` are not authoritative. They may inform but do not constrain. Only `status: shared` or `status: published` specs justify the conformance language above.
+- **Verify against spec body, not just index**: the index is hypothesis (per scribe Bridge Note Authoring Principle 3). When a spec is relevant, read the actual spec file before quoting its contract — index titles can drift from body content.
+
 ## AI/ML/DL
 
 - Baseline first. No improvement claims without one.

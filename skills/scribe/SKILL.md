@@ -211,7 +211,44 @@ The dispatch includes:
 {When this trap is likely to recur}
 ```
 
-5. **Dispatch GitHub feedback (optional)**: after writing, offer to submit as a GitHub issue to the sonmat repo. This is purely optional — if the user declines, the memory record stays local.
+5. **Spec amendment proposal (only when flavor = `spec_gap` AND project has `docs/specs/` with `sonmat.spec_awareness: enabled`)**: if both conditions hold, after writing the trap memory, offer to generate a successor spec rather than only logging. This implements ADR `2026-04-26-spec-evolution-loop.md` (T2-C). Conditions:
+
+   - Project must have `docs/specs/` directory with an `_index.md` declaring `sonmat.spec_awareness: enabled`. If absent, skip this step entirely — Stage 0 projects log to trap memory only.
+   - The novel trap dispatch must carry `flavor: spec_gap` (i.e., the action ran outside spec coverage, not a verification failure of existing discipline).
+   - There must be a clearly identifiable existing spec the gap relates to. If the gap doesn't map to any existing spec, skip — this is "new spec needed" territory, which is user-initiated, not scribe-initiated.
+
+   When all three hold, propose synchronously:
+
+   ```
+   💡 Spec gap detected: {pattern}
+      Maps to: {existing spec id or section}
+      Catch-signal: {what spec clause would have caught this}
+
+      Propose amendment via successor spec? [Yes / No log only / Edit first]
+   ```
+
+   On `Yes`: generate a draft successor spec at `docs/specs/SPEC-{YYYYMMDD}-{slug}.md` using the project's spec template (or the sonmat default at `templates/spec-template.md` if no project template exists). Set `supersedes: {original-spec-id}`. Update the original spec's frontmatter to add `superseded-by: {new-spec-id}` and propose `status: archived` only after user confirms full supersession (vs partial amendment that leaves original active).
+
+   On `Edit first`: show the draft, let user modify, then write.
+
+   On `No log only`: do not generate successor. Trap memory record is sufficient.
+
+   **Closure ceremony auto-trigger**: if user accepts full supersession (original `status: archived`), prompt for sunset date and fork-prevention declaration per `discipline/hints.md` "Closure ceremony" hint (PEP 404 model). Do not write `archived` without this metadata.
+
+   **LEARN journal entry (always, regardless of Yes/No/Edit)**: append to `journal.md`:
+
+   ```markdown
+   ## YYYY-MM-DD [hostname] — Spec gap AAR
+   - Trigger: {what was outside spec}
+   - Maps to: {existing spec id or "no clear mapping"}
+   - Catch-signal: {what spec clause would have caught it}
+   - Decision: {amendment generated SPEC-XXX | log only | edited then generated}
+   - Reasoning: {1-line justification}
+   ```
+
+   This is the LPS-5-conversation LEARN step (`docs/research/architecture-methodology-and-spec-discipline.md` A4). Captured even when no amendment generated, because the deferred decisions are themselves data for later retrospective.
+
+6. **Dispatch GitHub feedback (optional)**: after writing, offer to submit as a GitHub issue to the sonmat repo. This is purely optional — if the user declines, the memory record stays local.
 
    ```
    💬 This trap could help other sonmat users. Submit to GitHub?
@@ -230,6 +267,7 @@ The dispatch includes:
    If user approves: `gh issue create --repo jun0-ds/sonmat --template trap-report.md`.
    If user wants to edit: show the full issue body, let them modify, then submit.
    **Never send without showing the content first.**
+
 
 **This is not optional on guard's side.** If guard detects a novel trap and does not dispatch to scribe, the verification + persistence loop is broken. The memory system grows through practice, not pre-definition, and scribe is the step that converts practice into persistence.
 
