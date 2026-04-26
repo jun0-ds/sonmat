@@ -14,6 +14,15 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 - Data write plan first: Before any DB/Redis/config write, show the values and format. Get confirmation. Wrong values are a repeated pattern.
 - Isolate in a worktree when it pays off: parallel features, long-running refactors, or reversible-risk experiments — dispatch via `Agent({isolation: "worktree"})`. Skip for L0 single-file edits, read-only exploration, or when already inside a worktree.
 
+### Spec authoring (when writing or updating contract / requirements / API / design documents)
+
+- **Modal calibration**: mark each clause with explicit strength — MUST / SHOULD / MAY (RFC 2119). Limit MUST to interoperability or harm-prevention; do not impose method where method is not required for interop (RFC 2119 §6 self-limiting). Mixing aspirational and binding language in the same paragraph defeats the spec's authority.
+- **Intent vs mechanism**: a spec captures the contract (target state, externally observable behavior) — not the algorithm. When porting / re-implementing, replicate the contract, not the original mechanism. Original algorithm is one valid expression; substrate change (language/runtime/library) usually requires a different mechanism for the same contract (Auftragstaktik *Was/Warum*, not *Wie*).
+- **Record rejected alternatives**: when a spec choice is non-obvious, write what was considered and rejected — and why. "Why not X" is load-bearing alongside "why X." A future re-implementation that lacks this context will rediscover the same failed branches (Brooks's "ledger of refusal" / Talmud preserved minority opinion).
+- **Closure ceremony on retirement**: when retiring or replacing a spec section, declare an explicit sunset date and mark fork-prevention status (PEP 404 model: "Python 2.8 will never exist"). Silent deprecation produces zombies — the deprecated spec keeps consuming attention because nothing told the system to stop.
+- **Amend via successor, not in-place edit**: when a spec needs change, prefer a follow-up section or document that `Updates` or `Obsoletes` the original (RFC `Updates:` / `Obsoletes:` headers), rather than editing the original in place. Edit-in-place destroys decision history; chains of updates preserve it. Applies to any reviewed/frozen spec — not to early drafts.
+- **Spec ambiguity → numbered question, not assumption**: when a spec is ambiguous, contradictory, or silent on the immediate decision, surface a numbered clarifying question to the user *before* acting — state your interpretation and ask for confirmation (AIA G716 RFI model). Self-check for *fishing*: if you already know the answer and are asking only to create a paper trail or authorize a scope you wanted, that's a fishing RFI — don't (Navigant 2013: 25–40 % of disputed-project RFIs are fishing).
+
 ## AI/ML/DL
 
 - Baseline first. No improvement claims without one.
