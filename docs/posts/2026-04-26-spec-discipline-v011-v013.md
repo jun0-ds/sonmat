@@ -145,6 +145,8 @@ devil이 설계 진행 자체를 정직하게 줄인 사건. 이 작동은 v0.11
 
 T2 ADR 3건 + Stage 2 ADR 3건 작성 완료. 구현 진입은 사용자 첫 파일럿 결과 본 뒤. CLAUDE.md §7 글로벌 업데이트 (`docs/specs/` 권고 추가)는 별도 검토.
 
+> **2026-04-27 update**: §7 글로벌 업데이트 적용 완료. `~/.claude/CLAUDE.md` §7 트리에 `docs/specs/` 줄 추가(decisions/ 다음), 리스트에 opt-in 권고·CSI Three-Part·강제 0·템플릿 경로 명시, `*.md` 줄에서 "스펙" 제거, 검토 순서 4번에 `_index.md`의 `sonmat.spec_awareness` 플래그 확인 추가. claude-config commit `1f21b9e`. 첫 사용자 프로젝트 파일럿(Stage 1 활성화)은 각 프로젝트 진입 시점에 검증으로 결정.
+
 진짜 검증은 첫 사용자 프로젝트가 `docs/specs/_index.md`에 `sonmat.spec_awareness: enabled`를 박을 때 시작된다. 그때 Stage 1이 어떻게 작동하는지가 이 모든 결정의 진짜 데이터.
 
 ---
