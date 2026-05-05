@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "sonmat — External verification system. Six verification axes (guard/inspect/witness/punch/devil/scribe) + autoloop orchestration. Discovery-led depth, protocol-isolated intent-artifact comparator (witness), post-work persistence layer (scribe).",
-    "version": "0.13.0"
+    "version": "0.13.1"
   },
   "plugins": [
     {
       "name": "sonmat",
       "source": "./",
       "description": "sonmat — External verification system. Six verification axes (guard/inspect/witness/punch/devil/scribe) + autoloop orchestration. Discovery-led depth, protocol-isolated intent-artifact comparator (witness), post-work persistence layer (scribe).",
-      "version": "0.13.0",
+      "version": "0.13.1",
       "author": {
         "name": "jun0-ds"
       },
