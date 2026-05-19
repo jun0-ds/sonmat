@@ -126,12 +126,17 @@ This is discovery-led strength rating, not parallel strength rating. Rating the 
 End with a comparison table:
 
 ```
-| Original claim | Counter-argument | Counter (strong/moderate/weak) | Claim after challenge |
-|----------------|------------------|-------------------------------|----------------------|
-| ...            | ...              | ...                           | ...                  |
+| Original claim | Counter-argument | Claim fragility | Status after verification |
+|----------------|------------------|-----------------|---------------------------|
+| ...            | ...              | ...             | ...                       |
 ```
 
-Claim after challenge options: `holds`, `weakened`, `needs revision`, `flipped`, `off-project` (challenge was misdirected, original claim's status unchanged).
+Column semantics — phrased from the claim's side, not the counter's side, so the user reads "how shaky is my claim?" rather than translating from "how strong is the counter?":
+
+- **Claim fragility** (`strong`/`moderate`/`weak`/`off-project`) — how much give the original claim has under the dominant counter. Inverse of counter strength: a `strong` fragility means the claim is shaky; a `weak` fragility means the claim held up. `off-project` means the counter was technically valid but tangential — the claim's actual status was not put at risk.
+- **Status after verification** — outcome of the logical check: `holds` / `weakened` / `needs revision` / `flipped` / `off-project` (challenge was misdirected, original claim's status unchanged).
+
+Note: earlier versions of devil labeled these columns "Counter (strong/moderate/weak)" and "Claim after challenge" — both phrased the reader's mental work as a translation step (counter strength → claim status; challenge → verification outcome). The current labels move that translation up-front, into the column header, so the table reads in a single direction: claim → counter → fragility of claim → verified status.
 
 **Well-formed balance table**: one dominant row representing the §3 depth drive (the load-bearing counter on the found axis), plus at most one or two secondary rows noting what the quick passes on the other axes surfaced. A balance table with five parallel rows of equally-weighted counter-arguments is a symptom of parallel attack — if that happens, go back to §2 CCT and locate the actual load-bearing part before writing the table.
 
