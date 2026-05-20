@@ -13,6 +13,7 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 - Silent fix masking: When an error occurs during execution and you fix it on the fly, REPORT IT. If the fix only works because you're present, the code will break in automation/cron.
 - Data write plan first: Before any DB/Redis/config write, show the values and format. Get confirmation. Wrong values are a repeated pattern.
 - Isolate in a worktree when it pays off: parallel features, long-running refactors, or reversible-risk experiments — dispatch via `Agent({isolation: "worktree"})`. Skip for L0 single-file edits, read-only exploration, or when already inside a worktree.
+- Deep module over shallow: a good module is deep — large functionality behind a narrow interface. Splitting files (blocking) alone breeds shallow modules; the interface surface must narrow with the implementation, not just the file count. Adding functionality ≠ widening the surface. Shallow warning signs: cross-module private imports (`from x import _helper`), one file's LOC ballooning, many private helpers leaking out. When new code is substantial, give it its own module rather than wedging it into the existing monolith (Ousterhout, *A Philosophy of Software Design*).
 
 ### Spec authoring (when writing or updating contract / requirements / API / design documents)
 
