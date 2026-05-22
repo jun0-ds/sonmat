@@ -25,7 +25,7 @@ Your job is to keep the meta layer clean so the foreground can focus on actual w
 The most important function. When a task ends, extract what the next task should know.
 
 **Input**: git diff, changed file list, loop report (if available)
-**Output**: `.claude/sonmat/bridge-note.md`
+**Output**: `bridge-note.md` in the per-project scribe dir — `$SONMAT_PROJECTS_BASE/<slug>` (default `~/.sonmat/projects/<slug>`, where `<slug>` is the cwd path with `/`→`-`). This lives outside `.claude/` (which Claude Code edit-protects); the session-start hook auto-migrates any legacy `.claude/sonmat/`.
 
 Bridge note format:
 ```markdown
@@ -55,7 +55,7 @@ Rules:
 Append-only log of completed work. Not a detailed record — a scannable timeline.
 
 **Input**: git log (recent commits), changed files, loop report
-**Output**: append to `.claude/sonmat/journal.md`
+**Output**: append to `journal.md` in the scribe dir (same dir as the bridge note above).
 
 Entry format:
 ```markdown
@@ -67,7 +67,7 @@ Entry format:
 
 Rules:
 - One entry per task/loop, not per commit.
-- If the journal exceeds 50 entries, archive older entries to `.claude/sonmat/journal-archive.md`.
+- If the journal exceeds 50 entries, archive older entries to `journal-archive.md` in the scribe dir.
 
 ### 3. Progress — Lightweight Tracking (absorbed from plan skill)
 

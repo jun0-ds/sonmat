@@ -4,9 +4,19 @@
 # All discipline rules live in CLAUDE.md → core.md (prompt-first).
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-USER_SONMAT="$HOME/.claude/sonmat"
+# sonmat state lives OUTSIDE any .claude/ dir — Claude Code edit-protects every
+# .claude/ (prompting on each Edit/Write, unsuppressable except bypassPermissions).
+# An integrating framework (e.g. munteok) can redirect state via the override vars.
+SONMAT_HOME="${SONMAT_HOME:-$HOME/.sonmat}"
+SONMAT_PROJECTS_BASE="${SONMAT_PROJECTS_BASE:-$SONMAT_HOME/projects}"
+SONMAT_MEMORY_DIR="${SONMAT_MEMORY_DIR:-$SONMAT_HOME/memory}"
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 MSGS=()
+
+# Project slug from cwd, mirroring Claude Code's ~/.claude/projects/{slug}
+# (full path → dashes, NOT basename — avoids collisions across same-named/nested projects).
+SLUG=$(printf '%s' "$PWD" | sed 's#/#-#g')
+PROJ_DIR="$SONMAT_PROJECTS_BASE/$SLUG"
 
 # --- Auto-create project CLAUDE.md (git repos only) ---
 if [ -d ".git" ] && [ ! -f "CLAUDE.md" ]; then
@@ -22,9 +32,20 @@ TEMPLATE
   MSGS+=("CLAUDE.md auto-created — review and customize.")
 fi
 
-# --- Auto-create directories ---
-[ -d ".git" ] && [ ! -d ".claude/sonmat" ] && mkdir -p .claude/sonmat
-[ ! -d "$USER_SONMAT" ] && mkdir -p "$USER_SONMAT/memory"
+# --- sonmat state dirs (outside .claude) + one-time migration from legacy .claude paths ---
+mkdir -p "$SONMAT_HOME" "$SONMAT_MEMORY_DIR"
+# memory: legacy ~/.claude/sonmat/memory → SONMAT_MEMORY_DIR (real dir only; skip a symlink an integrator manages)
+OLD_MEM="$HOME/.claude/sonmat/memory"
+if [ -d "$OLD_MEM" ] && [ ! -L "$OLD_MEM" ] && [ -z "$(ls -A "$SONMAT_MEMORY_DIR" 2>/dev/null)" ] && [ -n "$(ls -A "$OLD_MEM" 2>/dev/null)" ]; then
+  mv "$OLD_MEM"/* "$SONMAT_MEMORY_DIR"/ 2>/dev/null && rmdir "$OLD_MEM" 2>/dev/null && MSGS+=("sonmat memory migrated → $SONMAT_MEMORY_DIR")
+fi
+# project scribe (git repos only): legacy .claude/sonmat → PROJ_DIR
+if [ -d ".git" ]; then
+  mkdir -p "$PROJ_DIR"
+  if [ -d ".claude/sonmat" ] && [ -z "$(ls -A "$PROJ_DIR" 2>/dev/null)" ] && [ -n "$(ls -A ".claude/sonmat" 2>/dev/null)" ]; then
+    mv .claude/sonmat/* "$PROJ_DIR"/ 2>/dev/null && rmdir .claude/sonmat 2>/dev/null && MSGS+=("sonmat scribe migrated: .claude/sonmat → $PROJ_DIR")
+  fi
+fi
 
 # --- Plant sonmat block in global CLAUDE.md (one-time) ---
 if [ -f "$GLOBAL_CLAUDE_MD" ] && ! grep -q '## sonmat' "$GLOBAL_CLAUDE_MD"; then
@@ -34,7 +55,8 @@ if [ -f "$GLOBAL_CLAUDE_MD" ] && ! grep -q '## sonmat' "$GLOBAL_CLAUDE_MD"; then
 
 - Discipline: \`~/.claude/plugins/marketplaces/sonmat/discipline/core.md\`
 - Domain hints: \`~/.claude/plugins/marketplaces/sonmat/discipline/hints.md\`
-- Memory: \`~/.claude/sonmat/memory/\`
+- Memory: \`~/.sonmat/memory/\`
+- Scribe logs (per project): \`~/.sonmat/projects/{slug}/\`
 SONMAT
   MSGS+=("sonmat discipline block added to ~/.claude/CLAUDE.md.")
 fi
@@ -45,7 +67,7 @@ fi
 # We detect a version mismatch against main and ask the user to run the proper CC
 # update command. The message is appended to MSGS so it is actually delivered via
 # additionalContext — the prior UPDATE_MSG variable was computed but never output.
-UPDATE_CHECK_FILE="$USER_SONMAT/.last_update_check"
+UPDATE_CHECK_FILE="$SONMAT_HOME/.last_update_check"
 UPDATE_INTERVAL=10800  # 3 hours in seconds
 
 SHOULD_CHECK=false

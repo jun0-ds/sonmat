@@ -85,7 +85,7 @@ This is the ONLY conversation context scribe receives. Be precise.}
 ### After dispatch
 
 - Do NOT wait for scribe to finish. Continue with user interaction.
-- Scribe writes to `.claude/sonmat/bridge-note.md`, `.claude/sonmat/journal.md`, and `progress.md`.
+- Scribe writes `bridge-note.md` and `journal.md` to the per-project scribe dir (see File Locations), and `progress.md` to the project root.
 - On next task start, read `bridge-note.md` if it exists. Use it as context, then proceed.
 
 ---
@@ -94,7 +94,7 @@ This is the ONLY conversation context scribe receives. Be precise.}
 
 At the start of any non-trivial task:
 
-1. Check if `.claude/sonmat/bridge-note.md` exists in the project.
+1. Check if `bridge-note.md` exists in the scribe dir (see File Locations; legacy `.claude/sonmat/` as fallback).
 2. If yes, read it silently. Use the context but don't quote it to the user.
 3. If a carry-forward item is directly relevant to the new task, mention it naturally:
    ```
@@ -120,7 +120,7 @@ Sections like Summary, Key Decisions, Relevant Files, Working Agreements, or a P
 
 ## Journal Access
 
-The journal at `.claude/sonmat/journal.md` is a passive record. It is NOT loaded into context automatically.
+The journal (`journal.md` in the scribe dir — see File Locations) is a passive record. It is NOT loaded into context automatically.
 
 Read it only when:
 - User asks "what did we do last time?"
@@ -187,8 +187,8 @@ The dispatch includes:
 
 1. **Abstract the pattern**: convert the concrete incident into a general-form description. Strip project-specific identifiers that would prevent reuse.
 2. **Choose the scope**:
-   - Project-specific lesson → `{project}/.claude/sonmat/{name}.md`
-   - Universal lesson (applies across projects) → `~/.claude/sonmat/memory/trap_{name}.md`
+   - Project-specific lesson → `{name}.md` in the per-project scribe dir (see File Locations)
+   - Universal lesson (applies across projects) → `trap_{name}.md` in `$SONMAT_MEMORY_DIR` (default `~/.sonmat/memory/`)
 3. **Propose** the memory record synchronously:
 
    ```
@@ -292,9 +292,15 @@ Milestone-level planning ("create roadmap", "restructure milestones") is now han
 
 ## File Locations
 
+sonmat state lives **outside `.claude/`** — Claude Code edit-protects every `.claude/` directory (prompting on each Edit/Write, unsuppressable except in `bypassPermissions`). Resolution:
+
+- **Per-project scribe dir** (`<scribe-dir>` below) = `$SONMAT_PROJECTS_BASE/<slug>` (default `~/.sonmat/projects/<slug>`), where `<slug>` is the cwd path with `/`→`-` (e.g. `/home/u/proj` → `-home-u-proj`), mirroring Claude Code's own `~/.claude/projects/`.
+- **Universal memory** = `$SONMAT_MEMORY_DIR` (default `~/.sonmat/memory/`).
+- The session-start hook creates these and migrates legacy `.claude/sonmat/` + `~/.claude/sonmat/memory/` automatically. **Fallback**: if `<scribe-dir>` is empty but a legacy `.claude/sonmat/` has content, read the legacy path.
+
 | File | Location | Lifecycle |
 |------|----------|-----------|
-| `bridge-note.md` | `.claude/sonmat/bridge-note.md` (project) | Overwritten each dispatch |
-| `journal.md` | `.claude/sonmat/journal.md` (project) | Append-only, archived at 50 entries |
-| `journal-archive.md` | `.claude/sonmat/journal-archive.md` (project) | Long-term storage |
+| `bridge-note.md` | `<scribe-dir>/bridge-note.md` | Overwritten each dispatch |
+| `journal.md` | `<scribe-dir>/journal.md` | Append-only, archived at 50 entries |
+| `journal-archive.md` | `<scribe-dir>/journal-archive.md` | Long-term storage |
 | `progress.md` | Project root | Managed jointly (foreground creates, scribe updates) |

@@ -19,7 +19,7 @@ On receiving a task, judge complexity:
 
 **Full loop**: Proceed to section 1.
 
-**Bridge-note check**: Before starting any task, check if `.claude/sonmat/bridge-note.md` exists. If relevant context is found, incorporate it silently. Mention to user only if directly relevant to the new task.
+**Bridge-note check**: Before starting any task, check if the sonmat bridge note exists (`bridge-note.md` in `$SONMAT_PROJECTS_BASE/<slug>`, default `~/.sonmat/projects/<slug>/` where `<slug>` is the cwd path with `/`→`-`; legacy `.claude/sonmat/` as fallback). If relevant context is found, incorporate it silently. Mention to user only if directly relevant to the new task.
 
 
 ## 1. Planning Questions

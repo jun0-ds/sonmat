@@ -90,7 +90,7 @@ Domain checklists grow over time. When punch finds a gap that wasn't on any chec
   Add to {domain} checklist? [Yes / No]
 ```
 
-Stored in: `~/.claude/sonmat/memory/punch_{domain}.md`
+Stored in: `$SONMAT_MEMORY_DIR/punch_{domain}.md` (default `~/.sonmat/memory/`)
 
 ### Phase 3 — Systematic gap search
 
