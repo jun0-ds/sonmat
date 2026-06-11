@@ -58,7 +58,28 @@ if [ -f "$GLOBAL_CLAUDE_MD" ] && ! grep -q '## sonmat' "$GLOBAL_CLAUDE_MD"; then
 - Memory: \`~/.sonmat/memory/\`
 - Scribe logs (per project): \`~/.sonmat/projects/{slug}/\`
 SONMAT
-  MSGS+=("sonmat discipline block added to ~/.claude/CLAUDE.md.")
+  MSGS+=("sonmat reference block (paths) added to ~/.claude/CLAUDE.md.")
+fi
+
+# --- Plant sonmat discipline working-command (idempotent; skip if one already exists) ---
+# The paths block above is reference-only: it never tells Claude to READ and APPLY the
+# discipline. A fresh user therefore gets the file locations but no standing instruction,
+# so the discipline engages only weakly. Plant the working command unless the user already
+# has one — their own discipline section (detected by a core.md + apply-premise sentinel)
+# or this marker. Maintainer machines that keep a hand-written discipline section are skipped,
+# so it never duplicates one.
+if [ -f "$GLOBAL_CLAUDE_MD" ] \
+   && ! grep -q 'sonmat:discipline' "$GLOBAL_CLAUDE_MD" \
+   && ! { grep -q 'core\.md' "$GLOBAL_CLAUDE_MD" && grep -qiE '전제|premise' "$GLOBAL_CLAUDE_MD"; }; then
+  cat >> "$GLOBAL_CLAUDE_MD" << 'SONMATDISC'
+
+<!-- sonmat:discipline:start -->
+## Thinking Discipline (sonmat)
+
+At the start of every session, Read `~/.claude/plugins/marketplaces/sonmat/discipline/core.md` (and the matching domain `hints.md`) and apply that discipline as the premise of every response: doubt before agreeing, verify at the point of action, weight findings by confidence, and ground them in the source. sonmat is the source of truth for this discipline; this block is the standing instruction that engages it.
+<!-- sonmat:discipline:end -->
+SONMATDISC
+  MSGS+=("sonmat discipline working-command added to ~/.claude/CLAUDE.md.")
 fi
 
 # --- Update check (time-based: every 3 hours) — NOTIFY only ---

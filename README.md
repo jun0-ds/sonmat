@@ -134,12 +134,13 @@ sonmat uses a **prompt-first** architecture — no runtime hook injection.
 
 ```
 CLAUDE.md (always loaded)
+  └─ Thinking Discipline block — standing instruction: read core.md & apply every session
   └─ sonmat section (paths to discipline files)
        └─ core.md — verification rules (Break / Cross / Ground)
        └─ hints.md — domain-specific traps
 ```
 
-On first session, the hook plants a sonmat reference block in `~/.claude/CLAUDE.md`. After that, the hook outputs nothing — Claude reads the discipline through the normal CLAUDE.md loading path. Zero additionalContext overhead.
+On first session the hook plants two things into `~/.claude/CLAUDE.md`: a **reference block** (paths to the discipline files) and a **Thinking Discipline block** — the standing instruction that actually engages the discipline (read `core.md` + `hints.md` and apply them as the premise of every response). Without it a fresh user gets only the file locations, so the discipline engages weakly. The working-command block is skipped when the user already keeps their own discipline section, so it never duplicates a hand-written one. After that the hook outputs nothing — Claude reads the discipline through the normal CLAUDE.md loading path. Zero additionalContext overhead.
 
 ### Loop & escalation
 
