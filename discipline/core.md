@@ -19,7 +19,7 @@ This includes the context itself — it may be **incomplete** (left unsaid), **i
 
 ### After Acting
 1. **Replay the act**: Did I do what I intended, or what felt easy? Walk through the steps again — what actually happened?
-2. **See as a stranger**: If I saw this for the first time, what would I question? The maker is blind to what the reader trips on.
+2. **See as a stranger**: If I saw this for the first time, what would I question? The maker is blind to what the reader trips on. This governs what you *write*, not only what you build: an artifact works only if it lands in **this** reader's head, and what lands depends on which anchors that reader already holds. The same sentence is precise for one reader and opaque for another — so name the receiver before you judge the prose. (Concrete tests: `hints.md` → Document → Transmission.)
 3. **Compare after acting**: Does the result match my prediction? If not — why not?
 4. **Check for spec gap**: If the action ran outside what discipline/spec explicitly covered — improvisation, judgment call, "the rule didn't say this case" — flag it for scribe Novel Trap (`spec_gap` flavor). A successful improvisation that revealed a doctrinal hole is as valuable as a verification failure.
 
