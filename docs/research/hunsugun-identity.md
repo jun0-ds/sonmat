@@ -1,6 +1,6 @@
 # 훈수꾼 (Kibitzer) — 정체성·아키텍처 정의 v0.2
 
-> 시작: 2026-04-24, **개정 2026-04-25 (OpenRabbit 4층 위계 + ICM 외부 정합 반영)**
+> 시작: 2026-04-24, **개정 2026-04-25 (OpenHuman 4층 위계 + ICM 외부 정합 반영)**
 > 상태: **DRAFT — 검토 단계**. 적용 안 됨.
 > 컴패니언: [spec-induction-and-sisyphus-review.md](spec-induction-and-sisyphus-review.md), [glossary.md](glossary.md), [../decisions/2026-04-25-l2-cognitive-architecture-positioning.md](../decisions/2026-04-25-l2-cognitive-architecture-positioning.md)
 >
@@ -22,12 +22,12 @@ task/session    │ 훈수꾼 advisory    │ 훈수꾼          │ 훈수꾼  
 표현 (★ 본체)   │ (project-relevance│ capability      │ multi-tag memory │
                 │ + CCT)            │ boundary + audit│ + handoff spec   │
                 ├───────────────────┼─────────────────┼──────────────────┤
-project 표현    │ scribe project   │ OpenRabbit L2   │ scribe registry  │
+project 표현    │ scribe project   │ OpenHuman L2   │ scribe registry  │
                 │ rule recording    │ asset reuse     │ + ADR feed       │
                 └───────────────────┴─────────────────┴──────────────────┘
 ```
 
-각 cell이 sonmat·훈수꾼·OpenRabbit 자산화의 어느 부분과 매핑되는지 명시. **이게 통합 structure**.
+각 cell이 sonmat·훈수꾼·OpenHuman 자산화의 어느 부분과 매핑되는지 명시. **이게 통합 structure**.
 
 ---
 
@@ -49,7 +49,7 @@ project 표현    │ scribe project   │ OpenRabbit L2   │ scribe registry  
 
 ### JTBD 포지션 [+]
 
-OpenRabbit framework가 강조: "AI awareness 말고 **AI literacy**" (Jake Van Clief). 훈수꾼의 진짜 job:
+OpenHuman framework가 강조: "AI awareness 말고 **AI literacy**" (Jake Van Clief). 훈수꾼의 진짜 job:
 
 | 후보 | 분류 | 채택 |
 |------|------|------|
@@ -148,14 +148,14 @@ ICM(Van Clief & McDermott, arXiv 2603.16021)이 정의한 5층 컨텍스트 모�
 - **3.19 stake-matched depth** — 작은 task에 깊은 advisory 금지, 큰 task에 얕은 advisory 금지
 - **3.20 archaeology / 시간 부패** — timestamp + context hash, expiry 명시, stale 경고
 
-### v0.2 신규 [+] 조건 (3.21~3.28) — OpenRabbit framework 반영
+### v0.2 신규 [+] 조건 (3.21~3.28) — OpenHuman framework 반영
 
 - **3.21 인지 아키텍처 세 축 강제** — 훈수꾼은 sonmat 세 축(Cognition/Action/Memory)을 모두 가짐. 일부 축만이면 "advisor 흉내" 수준에 머묾
 - **3.22 L3 어댑터 plug-in only** — 본체 L2는 immutable. 3rd party 확장은 SKILL.md / ICM·MWP / 미래 포맷 표면에서만
 - **3.23 JTBD literacy 우선** — awareness 도구 아니라 literacy 도구로 자기 포지션. 출력에 "왜 이렇게 작동하는가" 항상 동반. educational tone
-- **3.24 sonmat → OpenRabbit 회수 경로** — 훈수꾼에서 검증된 패턴을 추상화 N단계로 OpenRabbit L2 자산화. 회수 단위·기준·간격 명시. 두 채널이 같은 L2 IP 공유
+- **3.24 sonmat → OpenHuman 회수 경로** — 훈수꾼에서 검증된 패턴을 추상화 N단계로 OpenHuman L2 자산화. 회수 단위·기준·간격 명시. 두 채널이 같은 L2 IP 공유
 - **3.25 외부 정합 자료 매핑 의무** — 새 plugin·기능 추가 시 ICM·MWP·RinDig·Anthropic Skills 등 외부 자료와의 매핑 명시 (영업·문서화 권위 + 5년 호환성 검증 도구)
-- **3.26 두 채널 충돌 방지** — sonmat 오픈 + OpenRabbit 상용 동선. brand·라이센싱·feature 포지셔닝 충돌 방지 정책 (후속 ADR로 구체화)
+- **3.26 두 채널 충돌 방지** — sonmat 오픈 + OpenHuman 상용 동선. brand·라이센싱·feature 포지셔닝 충돌 방지 정책 (후속 ADR로 구체화)
 - **3.27 폴더+마크다운 우선** — Jake Van Clief 핵심 — "폴더 = 메소드, 영어 = 지시문, 에이전트 = 런타임". 훈수꾼 자체도 폴더+마크다운 구조 우선, 코드 최소화. ICM Inputs/Process/Outputs 템플릿 차용
 - **3.28 ICM 5층 흡수** — Memory 축 구현은 ICM 5층 모델 형식으로 정합화. token budget per layer + L3/L4 strategic distinction 차용
 
@@ -171,7 +171,7 @@ ICM(Van Clief & McDermott, arXiv 2603.16021)이 정의한 5층 컨텍스트 모�
 6. **무료 vs 과금** — 사용자 비용 모델
 7. **공개 vs 사적** — sonmat marketplace 모델 vs 사적 배포
 8. **identity persona** — 일관 어조 유지 여부
-9. **두 채널 IP 분리 정책** — sonmat 오픈 vs OpenRabbit 상용에서 어느 부분 공유, 어느 부분 분기 — **별도 ADR 필요**
+9. **두 채널 IP 분리 정책** — sonmat 오픈 vs OpenHuman 상용에서 어느 부분 공유, 어느 부분 분기 — **별도 ADR 필요**
 
 ---
 
@@ -184,7 +184,7 @@ ICM(Van Clief & McDermott, arXiv 2603.16021)이 정의한 5층 컨텍스트 모�
 | 사고 상태 기록 | scribe write phase | — | — |
 | task-level advisory | — | 훈수꾼 main | witness 일부 |
 | session-level handoff | scribe bridge-note | 훈수꾼 spec | scribe seam 단일화 |
-| project-level pattern | scribe project rule | OpenRabbit 회수 + 훈수꾼 telemetry | 회수 파이프라인 명세화 |
+| project-level pattern | scribe project rule | OpenHuman 회수 + 훈수꾼 telemetry | 회수 파이프라인 명세화 |
 | capability boundary | guard | 훈수꾼 audit log | 분리 또는 합병 결정 |
 
 **겹침 영역 4개**(witness, scribe, capability, project rule)는 단일화 결정 후속 ADR 후보.
@@ -197,12 +197,12 @@ ICM(Van Clief & McDermott, arXiv 2603.16021)이 정의한 5층 컨텍스트 모�
 2. **v0.2 신규 [+] 조건 8개** 일괄 채택?
 3. **Open Question 9** (두 채널 IP 분리 정책) — ADR 작성할지, 잠정 보류할지
 4. **단일 본체 vs federation** Open Question 1 — 결정 필요. 미결이면 design freeze 못 함
-5. **brand "훈수꾼" 확정** (오픈소스 채널) + **OpenRabbit 측 상용명 별도** — OK [확정됨]
+5. **brand "훈수꾼" 확정** (오픈소스 채널) + **OpenHuman 측 상용명 별도** — OK [확정됨]
 
 ---
 
 ## 메모
 
 - 본 문서는 sonmat docs/decisions/2026-04-25-l2-cognitive-architecture-positioning.md ADR을 따라 재구조화
-- 이전 버전 v0.1 (2026-04-24)은 "별도 layer" 프레임이 OpenRabbit 위계와 정렬 안 됐음. v0.2에서 정정
+- 이전 버전 v0.1 (2026-04-24)은 "별도 layer" 프레임이 OpenHuman 위계와 정렬 안 됐음. v0.2에서 정정
 - 작성 원칙: **분석·기획만, 구현 보류**. 이 문서는 즉시 실행되지 않음

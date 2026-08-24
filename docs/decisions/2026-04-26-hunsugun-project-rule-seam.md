@@ -12,7 +12,7 @@ scribe project rule:
 
 훈수꾼 project-level (정체성 §0 매트릭스 project 행):
 - scribe project rule recording (sonmat 측)
-- OpenRabbit L2 asset reuse pipeline (사업 측)
+- OpenHuman L2 asset reuse pipeline (사업 측)
 - scribe registry + ADR feed (도구 측)
 
 훈수꾼 정체성 §3.17 telemetry feedback도 project-level outcome tracking 영역.
@@ -49,12 +49,12 @@ scribe → 훈수꾼은 ADR `2026-04-26-hunsugun-scribe-seam.md` 와 동일 보�
 
 ### Cross-project pattern의 회수 가능성
 
-훈수꾼이 발견한 cross-project pattern 중 **OpenRabbit L2 자산화 가치 있는 것**은 회수 파이프라인(`recovery-pipeline` ADR S1 detect 단계) 후보:
-- 훈수꾼 telemetry → OpenRabbit 사내 회수 후보 backlog
+훈수꾼이 발견한 cross-project pattern 중 **OpenHuman L2 자산화 가치 있는 것**은 회수 파이프라인(`recovery-pipeline` ADR S1 detect 단계) 후보:
+- 훈수꾼 telemetry → OpenHuman 사내 회수 후보 backlog
 - ADR `recovery-pipeline` S1~S5 절차 통과
 - 회수 거절 시 거절 ADR (Brooks ledger of refusal)
 
-이 흐름은 훈수꾼 → OpenRabbit (사용자 매개), sonmat scribe와 별도.
+이 흐름은 훈수꾼 → OpenHuman (사용자 매개), sonmat scribe와 별도.
 
 ### 합병 거절
 
@@ -69,7 +69,7 @@ scribe project rule과 훈수꾼 telemetry 합병 거절. 이유:
 
 - **범위 분리로 각자 강해짐**: scribe는 단일 프로젝트 깊이, 훈수꾼은 cross-project 폭
 - **권한 분리**: CLAUDE.md 작성은 scribe·사용자 confirmation, telemetry는 훈수꾼 자유 — 권한 폭주 없음
-- **회수 파이프라인 입력**: cross-project pattern이 OpenRabbit 회수 후보로 자연스럽게 흘러감
+- **회수 파이프라인 입력**: cross-project pattern이 OpenHuman 회수 후보로 자연스럽게 흘러감
 - **scribe gatekeeper 유지**: 훈수꾼 → scribe 흐름이 sync 의례 거침
 
 ### 부정적·리스크
@@ -103,5 +103,5 @@ scribe project rule과 훈수꾼 telemetry 합병 거절. 이유:
 - `2026-04-25-hunsugun-positioning.md` D5 — seam 4 영역 중 마지막
 - `skills/scribe/SKILL.md` §Project Rule Recording — scribe 측 protocol
 - `2026-04-26-hunsugun-{witness,scribe,capability-boundary}-seam.md` — 자매 ADR (D5 결정 묶음)
-- `2026-04-26-recovery-pipeline.md` — cross-project pattern → OpenRabbit 회수 흐름
+- `2026-04-26-recovery-pipeline.md` — cross-project pattern → OpenHuman 회수 흐름
 - `docs/research/hunsugun-identity.md` v0.2 §3.5 (privacy·격리), §3.17 (telemetry)

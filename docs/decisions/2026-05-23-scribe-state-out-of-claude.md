@@ -18,7 +18,7 @@ sonmat은 두 곳에 영속 상태를 쓴다:
 
 ### 1. 기본 홈 = `~/.sonmat/` (`.claude` 밖)
 
-- `~/.sonmat/projects/{slug}/` — 프로젝트별 scribe (`bridge-note`·`journal`·`journal-archive`·`progress`·lesson). `{slug}`는 **cwd 전체 경로**를 slug화 (`/home/jun0/Documents/x` → `-home-jun0-Documents-x`), CC의 `~/.claude/projects/{slug}/`와 동일 방식. **basename 사용 금지** — 동명·중첩 프로젝트(예: `001_OpenRabbit/wellness-platform`) scribe 로그 충돌 방지 (cross-project 위험).
+- `~/.sonmat/projects/{slug}/` — 프로젝트별 scribe (`bridge-note`·`journal`·`journal-archive`·`progress`·lesson). `{slug}`는 **cwd 전체 경로**를 slug화 (`/home/jun0/Documents/x` → `-home-jun0-Documents-x`), CC의 `~/.claude/projects/{slug}/`와 동일 방식. **basename 사용 금지** — 동명·중첩 프로젝트(예: `001_OpenHuman/wellness-platform`) scribe 로그 충돌 방지 (cross-project 위험).
 - `~/.sonmat/memory/` — 범용 lesson (`trap_*`·`insight_*`·`punch_*`).
 - `~/.sonmat/`는 `~/.claude/` 밑이 아니고 protected 목록(`.git`/`.vscode`/`.idea`/`.husky`/`.claude`)에도 없다 → **프롬프트 없음**, harness-neutral (own-harness 이행에도 정합).
 

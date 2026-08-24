@@ -73,7 +73,7 @@ sonmat은 ICM 5층 모델과 **L0, L1, L3, L4 강 정합**, **L2 중 정합**. I
 
 ### 긍정적
 
-- **외부 학술 권위 확보**: ICM(arXiv 2603.16021) 인용 가능. OpenRabbit 영업 자료에서 sonmat L2 contract의 외부 정합 근거로 활용
+- **외부 학술 권위 확보**: ICM(arXiv 2603.16021) 인용 가능. OpenHuman 영업 자료에서 sonmat L2 contract의 외부 정합 근거로 활용
 - **5년 호환성**: SKILL.md 포맷 → ICM·MWP·다음 표준으로 이행 시 sonmat memory contract는 보존. ADR `2026-04-25-l2-cognitive-architecture-positioning.md`의 "L3 어댑터 갈아끼움" 원칙과 정합
 - **Anthropic Skills progressive disclosure와 호환**: ICM과 Anthropic Skills 둘 다 같은 패턴(L2 stage contract, lazy load) 사용 → sonmat이 두 표면 모두에 자연 적응
 - **갭 정밀화**: 막연히 "sonmat memory 개선"이 아니라 "L2 Stage Contract 정형 부재"처럼 구체 갭으로 환원. 후속 ADR이 명확
@@ -89,7 +89,7 @@ sonmat은 ICM 5층 모델과 **L0, L1, L3, L4 강 정합**, **L2 중 정합**. I
 
 - 4건 후속 ADR 중 첫 번째 적용 후 sonmat 운용 안정성 평가
 - ICM이 5년 후 다른 표준에 자리 내주는 시점에 본 ADR의 매핑이 어떻게 이행되는지 측정
-- OpenRabbit 첫 고객사 deploy 시 ICM 권위 인용이 영업 단가에 미치는 영향 평가
+- OpenHuman 첫 고객사 deploy 시 ICM 권위 인용이 영업 단가에 미치는 영향 평가
 
 ## 참조
 
