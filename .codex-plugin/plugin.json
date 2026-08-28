@@ -1,6 +1,6 @@
 {
   "name": "sonmat",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "description": "External verification system with six verification axes and autonomous-loop orchestration.",
   "author": {
     "name": "jun0-ds",
@@ -20,7 +20,7 @@
     "websiteURL": "https://github.com/jun0-ds/sonmat",
     "defaultPrompt": [
       "Run a sonmat punch check before delivery.",
-      "Use sonmat guard before committing.",
+      "Verify tests and sensitive files before committing.",
       "Challenge this plan with sonmat devil."
     ]
   }

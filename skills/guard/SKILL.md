@@ -1,7 +1,7 @@
 ---
 name: guard
 description: Main-side verification checks — pre-commit test / sensitive-file blocking, discipline conformance, novel-trap detection. Pure verify-and-flag; persistence of findings is scribe's job, intent-artifact match is witness's.
-user-invocable: true
+user-invocable: false
 ---
 
 # Guard — Main-Side Verification Checks
