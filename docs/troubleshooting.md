@@ -2,6 +2,34 @@
 
 sonmat 설치/실행 중 발생하는 문제와 해결법.
 
+## Codex 훅이 `Review 1`로 남을 때
+
+Codex는 플러그인의 비관리 훅을 처음부터 실행하지 않는다. 새 세션에서 `/hooks`를 열고 sonmat의 SessionStart 정의와 실제 명령을 검토한 뒤 신뢰해야 한다. 훅 파일이 바뀌면 해시도 바뀌므로 다시 검토하는 것이 정상이다.
+
+신뢰하기 전에도 스킬은 설치될 수 있지만 SessionStart가 맡는 discipline 연결과 네이티브 에이전트 설치 안내는 나오지 않는다.
+
+## Codex에서 `sonmat_witness`가 보이지 않을 때
+
+Codex 플러그인은 스킬과 훅을 발견하지만 플러그인 안의 Claude Code용 `agents/*.md`를 `~/.codex/agents/`로 복사하지 않는다. 새 세션에서 sonmat 훅이 출력한 설치 명령을 검토한 뒤 실행한다.
+
+개발 체크아웃에서는 다음처럼 직접 실행할 수 있다.
+
+```bash
+bash scripts/install-codex-agents.sh
+```
+
+기존 TOML이 패키지 원본과 다르면 설치기는 쓰기 전에 멈춘다. 차이를 검토한 뒤 패키지 버전으로 교체할 의도가 분명할 때만 `--force`를 붙인다. 설치 뒤에는 새 세션을 시작해야 에이전트 구성이 로드된다.
+
+## Codex가 `CLAUDE.md`를 만들거나 고칠 때
+
+v0.17.0부터 Codex 분기는 `PLUGIN_DATA`로 하네스를 구분하며 Claude 파일을 건드리지 않는다. 이런 변경이 보이면 먼저 설치 버전을 확인한다.
+
+```bash
+codex plugin list
+```
+
+v0.16.1 이하면 마켓플레이스를 갱신하고 플러그인을 다시 설치한다. v0.17.0 이상인데도 재현되면 `/hooks`에 표시된 source path와 hook definition을 함께 확인한다.
+
 ## Skills이 안 보일 때
 
 **증상**: `/sonmat:autoloop` 등 스킬이 자동완성에 나타나지 않거나 실행 시 "unknown skill" 에러.

@@ -1,0 +1,27 @@
+{
+  "name": "sonmat",
+  "version": "0.17.0",
+  "description": "External verification system with six verification axes and autonomous-loop orchestration.",
+  "author": {
+    "name": "jun0-ds",
+    "url": "https://github.com/jun0-ds"
+  },
+  "repository": "https://github.com/jun0-ds/sonmat",
+  "license": "BSD-3-Clause",
+  "keywords": ["verification", "autoloop", "discipline", "witness", "scribe"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "sonmat",
+    "shortDescription": "Verification discipline for agentic work",
+    "longDescription": "Six verification axes, a disciplined autonomous loop, and Codex-native worker, witness, and scribe agent definitions.",
+    "developerName": "jun0-ds",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/jun0-ds/sonmat",
+    "defaultPrompt": [
+      "Run a sonmat punch check before delivery.",
+      "Use sonmat guard before committing.",
+      "Challenge this plan with sonmat devil."
+    ]
+  }
+}

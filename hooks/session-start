@@ -1,7 +1,8 @@
 #!/bin/bash
 # sonmat session-start hook
-# Side effects only — no additionalContext injection.
-# All discipline rules live in CLAUDE.md → core.md (prompt-first).
+# Claude Code uses prompt-first loading through CLAUDE.md. Codex receives a
+# small read-and-apply command through SessionStart because a plugin cannot
+# safely edit a user's AGENTS.md on installation.
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # sonmat state lives OUTSIDE any .claude/ dir — Claude Code edit-protects every
@@ -13,13 +14,21 @@ SONMAT_MEMORY_DIR="${SONMAT_MEMORY_DIR:-$SONMAT_HOME/memory}"
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 MSGS=()
 
+# Codex exposes PLUGIN_DATA to plugin hooks and also keeps
+# CLAUDE_PLUGIN_ROOT as a compatibility variable. Keying on the latter would
+# therefore misclassify Codex as Claude Code.
+IS_CODEX=false
+if [ -n "${PLUGIN_DATA:-}" ]; then
+  IS_CODEX=true
+fi
+
 # Project slug from cwd, mirroring Claude Code's ~/.claude/projects/{slug}
 # (full path → dashes, NOT basename — avoids collisions across same-named/nested projects).
 SLUG=$(printf '%s' "$PWD" | sed 's#/#-#g')
 PROJ_DIR="$SONMAT_PROJECTS_BASE/$SLUG"
 
-# --- Auto-create project CLAUDE.md (git repos only) ---
-if [ -d ".git" ] && [ ! -f "CLAUDE.md" ]; then
+# --- Auto-create project CLAUDE.md (Claude Code, git repos only) ---
+if [ "$IS_CODEX" = false ] && [ -d ".git" ] && [ ! -f "CLAUDE.md" ]; then
   cat > CLAUDE.md << 'TEMPLATE'
 # CLAUDE.md
 
@@ -34,13 +43,14 @@ fi
 
 # --- sonmat state dirs (outside .claude) + one-time migration from legacy .claude paths ---
 mkdir -p "$SONMAT_HOME" "$SONMAT_MEMORY_DIR"
-# memory: legacy ~/.claude/sonmat/memory → SONMAT_MEMORY_DIR (real dir only; skip a symlink an integrator manages)
+# memory: legacy ~/.claude/sonmat/memory → SONMAT_MEMORY_DIR (Claude Code only;
+# real dir only; skip a symlink an integrator manages)
 OLD_MEM="$HOME/.claude/sonmat/memory"
-if [ -d "$OLD_MEM" ] && [ ! -L "$OLD_MEM" ] && [ -z "$(ls -A "$SONMAT_MEMORY_DIR" 2>/dev/null)" ] && [ -n "$(ls -A "$OLD_MEM" 2>/dev/null)" ]; then
+if [ "$IS_CODEX" = false ] && [ -d "$OLD_MEM" ] && [ ! -L "$OLD_MEM" ] && [ -z "$(ls -A "$SONMAT_MEMORY_DIR" 2>/dev/null)" ] && [ -n "$(ls -A "$OLD_MEM" 2>/dev/null)" ]; then
   mv "$OLD_MEM"/* "$SONMAT_MEMORY_DIR"/ 2>/dev/null && rmdir "$OLD_MEM" 2>/dev/null && MSGS+=("sonmat memory migrated → $SONMAT_MEMORY_DIR")
 fi
 # project scribe (git repos only): legacy .claude/sonmat → PROJ_DIR
-if [ -d ".git" ]; then
+if [ "$IS_CODEX" = false ] && [ -d ".git" ]; then
   mkdir -p "$PROJ_DIR"
   if [ -d ".claude/sonmat" ] && [ -z "$(ls -A "$PROJ_DIR" 2>/dev/null)" ] && [ -n "$(ls -A ".claude/sonmat" 2>/dev/null)" ]; then
     mv .claude/sonmat/* "$PROJ_DIR"/ 2>/dev/null && rmdir .claude/sonmat 2>/dev/null && MSGS+=("sonmat scribe migrated: .claude/sonmat → $PROJ_DIR")
@@ -48,7 +58,7 @@ if [ -d ".git" ]; then
 fi
 
 # --- Plant sonmat block in global CLAUDE.md (one-time) ---
-if [ -f "$GLOBAL_CLAUDE_MD" ] && ! grep -q '## sonmat' "$GLOBAL_CLAUDE_MD"; then
+if [ "$IS_CODEX" = false ] && [ -f "$GLOBAL_CLAUDE_MD" ] && ! grep -q '## sonmat' "$GLOBAL_CLAUDE_MD"; then
   cat >> "$GLOBAL_CLAUDE_MD" << SONMAT
 
 ## sonmat
@@ -68,7 +78,7 @@ fi
 # has one — their own discipline section (detected by a core.md + apply-premise sentinel)
 # or this marker. Maintainer machines that keep a hand-written discipline section are skipped,
 # so it never duplicates one.
-if [ -f "$GLOBAL_CLAUDE_MD" ] \
+if [ "$IS_CODEX" = false ] && [ -f "$GLOBAL_CLAUDE_MD" ] \
    && ! grep -q 'sonmat:discipline' "$GLOBAL_CLAUDE_MD" \
    && ! { grep -q 'core\.md' "$GLOBAL_CLAUDE_MD" && grep -qiE '전제|premise' "$GLOBAL_CLAUDE_MD"; }; then
   cat >> "$GLOBAL_CLAUDE_MD" << 'SONMATDISC'
@@ -82,12 +92,26 @@ SONMATDISC
   MSGS+=("sonmat discipline working-command added to ~/.claude/CLAUDE.md.")
 fi
 
+# --- Codex adapter: engage discipline without mutating AGENTS.md ---
+if [ "$IS_CODEX" = true ]; then
+  MSGS+=("sonmat: read $PLUGIN_ROOT/discipline/core.md and the matching hints in $PLUGIN_ROOT/discipline/hints.md, then apply them as the premise of this session.")
+
+  CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
+  MISSING_AGENTS=()
+  for agent in sonmat_worker sonmat_witness sonmat_scribe; do
+    if [ ! -f "$CODEX_HOME_DIR/agents/${agent}.toml" ]; then
+      MISSING_AGENTS+=("$agent")
+    fi
+  done
+  if [ "${#MISSING_AGENTS[@]}" -gt 0 ]; then
+    MSGS+=("sonmat Codex agents are not installed (${MISSING_AGENTS[*]}). Review and run: bash \"$PLUGIN_ROOT/scripts/install-codex-agents.sh\"")
+  fi
+fi
+
 # --- Update check (time-based: every 3 hours) — NOTIFY only ---
-# Claude Code runs the *cached* copy (~/.claude/plugins/cache/.../{version}/),
-# which is not a git repo, so the plugin cannot self-update in place via git pull.
-# We detect a version mismatch against main and ask the user to run the proper CC
-# update command. The message is appended to MSGS so it is actually delivered via
-# additionalContext — the prior UPDATE_MSG variable was computed but never output.
+# Installed plugin copies are managed by their harness. The hook detects a
+# version mismatch against main and asks the user to use that harness's update
+# path instead of trying to mutate a cache or marketplace checkout in place.
 UPDATE_CHECK_FILE="$SONMAT_HOME/.last_update_check"
 UPDATE_INTERVAL=10800  # 3 hours in seconds
 
@@ -105,11 +129,19 @@ fi
 if [ "$SHOULD_CHECK" = true ]; then
   date +%s > "$UPDATE_CHECK_FILE"
 
-  LOCAL_VER=$(grep '"version"' "$PLUGIN_ROOT/.claude-plugin/plugin.json" 2>/dev/null | head -1 | sed 's/.*"version": *"//;s/".*//')
-  REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/sonmat/main/.claude-plugin/plugin.json" | grep '"version"' | head -1 | sed 's/.*"version": *"//;s/".*//')
+  MANIFEST_DIR=".claude-plugin"
+  if [ "$IS_CODEX" = true ]; then
+    MANIFEST_DIR=".codex-plugin"
+  fi
+  LOCAL_VER=$(grep '"version"' "$PLUGIN_ROOT/$MANIFEST_DIR/plugin.json" 2>/dev/null | head -1 | sed 's/.*"version": *"//;s/".*//')
+  REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/sonmat/main/$MANIFEST_DIR/plugin.json" | grep '"version"' | head -1 | sed 's/.*"version": *"//;s/".*//')
 
   if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER" ]; then
-    MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. At the START of the session, briefly tell the user in Korean: sonmat ${LOCAL_VER} → ${REMOTE_VER} 업데이트가 있어요 — '/plugin update sonmat@sonmat' 후 '/reload-plugins'로 적용하세요. 손맛은 코드가 공개돼 있어 적용 전후로 변경 내용을 함께 점검할 수 있어요. If the user wants to review before updating, the marketplace clone at ~/.claude/plugins/marketplaces/sonmat is a git repo tracking main — show its recent commits/diff and check for security concerns (unexpected network calls, credential or file access, destructive commands). If declined, move on and do not nag.")
+    if [ "$IS_CODEX" = true ]; then
+      MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. Tell the user once and offer to review the diff before running 'codex plugin marketplace upgrade <source>' and 'codex plugin add sonmat@<source>'.")
+    else
+      MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. At the START of the session, briefly tell the user in Korean: sonmat ${LOCAL_VER} → ${REMOTE_VER} 업데이트가 있어요 — '/plugin update sonmat@sonmat' 후 '/reload-plugins'로 적용하세요. 손맛은 코드가 공개돼 있어 적용 전후로 변경 내용을 함께 점검할 수 있어요. If the user wants to review before updating, the marketplace clone at ~/.claude/plugins/marketplaces/sonmat is a git repo tracking main — show its recent commits/diff and check for security concerns (unexpected network calls, credential or file access, destructive commands). If declined, move on and do not nag.")
+    fi
   fi
 fi
 

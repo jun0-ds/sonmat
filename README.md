@@ -4,11 +4,11 @@
 
 > Your AI is confident. Your AI is wrong. And neither of you noticed.
 
-손맛은 AI와 사용자 양쪽에 **의심하고 검증하는 습관**을 심는 Claude Code 플러그인입니다.
+손맛은 AI와 사용자 양쪽에 **의심하고 검증하는 습관**을 심는 Claude Code·Codex 플러그인입니다.
 
 ## What this is
 
-A Claude Code plugin that builds the habit of **doubting and correcting** — on both sides.
+A Claude Code and Codex plugin that builds the habit of **doubting and correcting** on both sides.
 
 Your AI delivers answers with confidence but no verification. You accept them because they sound right. Nobody checks. Errors compound silently.
 
@@ -21,12 +21,25 @@ That's it. Everything else is implementation.
 
 ## Install
 
+### Claude Code
+
 ```bash
 /plugin marketplace add jun0-ds/sonmat
 /plugin install sonmat@sonmat
 ```
 
 On first session, sonmat plants a reference block in your `~/.claude/CLAUDE.md` automatically. Start talking.
+
+### Codex
+
+```bash
+codex plugin marketplace add jun0-ds/sonmat
+codex plugin add sonmat@sonmat
+```
+
+Start a new thread and open `/hooks`. Review the SessionStart hook before trusting it. Codex binds trust to the hook hash, so a changed hook waits for review instead of running silently.
+
+The hook engages the discipline through session context without editing `AGENTS.md`. It also reports the exact path of the optional native-agent installer. Review that script, then run the command it prints to install `sonmat_worker`, `sonmat_witness`, and `sonmat_scribe` under `~/.codex/agents/`. The installer is idempotent and refuses to overwrite a locally modified agent unless you pass `--force`.
 
 ### Reinstall
 
@@ -81,18 +94,18 @@ sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is
 
 ### Other AI CLIs
 
-sonmat is built for Claude Code, but the discipline and skills are plain markdown — they work with any AI CLI.
+Claude Code and Codex have native plugin adapters. The discipline and skills remain plain markdown, so other AI CLIs can use them with a manual setup.
 
 Each CLI has its own equivalent of `CLAUDE.md`:
 
 | CLI | Global instruction file | Where to put sonmat files |
 |-----|------------------------|--------------------------|
 | Claude Code | `CLAUDE.md` | Plugin install (see above) |
-| Codex | `AGENTS.md` | `~/.codex/sonmat/` |
+| Codex | `AGENTS.md` | Native plugin install above |
 | Gemini CLI | `GEMINI.md` | `~/.gemini/sonmat/` |
 | Other | Whatever file your CLI reads as its main guide | Copy there |
 
-**Setup (non-Claude CLIs):**
+**Setup (CLIs without a native adapter):**
 
 Paste the following into your first conversation with the AI. It will set up sonmat in its own environment:
 
@@ -100,13 +113,13 @@ Paste the following into your first conversation with the AI. It will set up son
 Install sonmat into your environment.
 
 1. Clone https://github.com/jun0-ds/sonmat into your config directory
-   as a single directory (Codex: ~/.codex/sonmat/, Gemini: ~/.gemini/sonmat/).
+   as a single directory (Gemini: ~/.gemini/sonmat/).
    Keep it as one unit — sonmat is a unified verification system,
    not a collection of separate files.
 
 2. Read sonmat/discipline/core.md and sonmat/discipline/hints.md,
    then embed their contents directly into your main instruction file
-   (Codex: AGENTS.md, Gemini: GEMINI.md).
+   (Gemini: GEMINI.md).
    Do NOT use file references like "see core.md" — paste the actual content,
    because references may be ignored.
 
@@ -114,7 +127,7 @@ Install sonmat into your environment.
    so you can use them when needed.
 ```
 
-Claude Code handles this automatically via its plugin system. For other CLIs, the AI sets itself up — you just give it the instruction.
+Claude Code and Codex handle discipline loading through their plugin adapters. For other CLIs, the AI sets itself up from the instruction above.
 
 ## Design philosophy
 
@@ -142,6 +155,8 @@ CLAUDE.md (always loaded)
 
 On first session the hook plants two things into `~/.claude/CLAUDE.md`: a **reference block** (paths to the discipline files) and a **Thinking Discipline block** — the standing instruction that actually engages the discipline (read `core.md` + `hints.md` and apply them as the premise of every response). Without it a fresh user gets only the file locations, so the discipline engages weakly. The working-command block is skipped when the user already keeps their own discipline section, so it never duplicates a hand-written one. After that the hook outputs nothing — Claude reads the discipline through the normal CLAUDE.md loading path. Zero additionalContext overhead.
 
+Codex uses the same SessionStart hook but follows a different branch. It never creates or edits `CLAUDE.md` or `AGENTS.md`; instead it supplies a small read-and-apply command as session context. Native subagent definitions live under `codex/agents/` and are copied into `~/.codex/agents/` only after the user runs the explicit installer.
+
 ### Loop & escalation
 
 `Plan → Execute → Evaluate → Judge → Repeat/Exit` — with automatic escalation when things go wrong (L0 skill → L1 pause → L2 worker spawn → L3 parallel workers).
@@ -152,8 +167,10 @@ On first session the hook plants two things into `~/.claude/CLAUDE.md`: a **refe
 sonmat/
 ├── skills/          # autoloop, guard, plan, inspect
 ├── discipline/      # core.md (verification) + hints.md (domain traps)
-├── agents/          # sonmat-worker (System 2, discipline-injected)
-└── hooks/           # session start (side effects only, zero prompt injection)
+├── agents/          # Claude Code worker, witness, and scribe definitions
+├── codex/agents/    # Codex-native custom-agent definitions
+├── scripts/         # explicit Codex agent installer
+└── hooks/           # harness-aware session start adapter
 ```
 
 ## Coming from other plugins?
@@ -179,16 +196,16 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 ## FAQ
 
 **Q: What is sonmat?**
-A: sonmat is a Claude Code plugin that builds verification habits into AI-human collaboration. It injects six reactive checking axes — guard, inspect, witness, punch, devil's advocate, and scribe — so that errors in AI outputs get caught before they compound. The name (손맛, "hand taste") refers to the unique quality a skilled cook brings — the gap between generic output and verified, grounded work.
+A: sonmat is a Claude Code and Codex plugin that builds verification habits into AI-human collaboration. It provides six reactive checking axes — guard, inspect, witness, punch, devil's advocate, and scribe — so that errors in AI outputs get caught before they compound. The name (손맛, "hand taste") refers to the unique quality a skilled cook brings — the gap between generic output and verified, grounded work.
 
 **Q: How is sonmat different from other Claude Code plugins like superpowers or ultrathink?**
 A: The key difference is discipline propagation. Every popular plugin keeps its rules in the main session only — subagents and workers start blank, with no verification rules. sonmat injects discipline into every agent at dispatch time, so verification works at every level, not just the top.
 
 **Q: Does sonmat work with Codex CLI or Gemini CLI?**
-A: Yes. sonmat's discipline and skills are plain markdown files, so they work with any AI CLI that reads instruction files. Claude Code gets automatic plugin installation; other CLIs need a one-time manual setup (clone + paste into AGENTS.md or GEMINI.md).
+A: Yes. Codex has a native plugin manifest, a harness-aware SessionStart branch, and optional native custom agents. Gemini CLI still uses the one-time manual setup because sonmat does not ship a Gemini-specific adapter.
 
 **Q: Does sonmat slow down my workflow?**
-A: No. sonmat uses a prompt-first architecture — discipline loads through the normal CLAUDE.md path with zero runtime hook overhead. The session-start hook runs once to plant a reference block, then does nothing on subsequent sessions.
+A: Claude Code uses a prompt-first architecture: after the one-time `CLAUDE.md` bootstrap, the hook has no discipline-context overhead. Codex adds one small SessionStart instruction that tells the agent to read and apply the discipline files. The verification skills and agents run only when their workflow calls for them.
 
 **Q: What are the six verification axes?**
 A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against what was requested. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
