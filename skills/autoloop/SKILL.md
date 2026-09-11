@@ -47,6 +47,8 @@ When no loop definition exists, build one through conversation. Ask 2-3 at a tim
 Show the loop definition YAML and get user approval before starting.
 For L0 tasks: one-line summary suffices — "Proceeding like this: [summary]. Object if not."
 
+Approval freezes the displayed definition as the execution baseline; it does not amend a standing contract omitted from the definition. New evidence may change implementation details within that baseline. If it would instead change the approved objective, `loop.modify`, `loop.constraints`, or `loop.judge` — or restore behavior the baseline explicitly removed — show the current baseline and proposed revision and get reapproval before executing the revision. A safety or privacy conflict pauses execution but does not select a fallback on the user's behalf.
+
 
 ## 2. Loop Protocol
 
