@@ -208,7 +208,7 @@ A: Yes. Codex has a native plugin manifest, a harness-aware SessionStart branch,
 A: Claude Code uses a prompt-first architecture: after the one-time `CLAUDE.md` bootstrap, the hook has no discipline-context overhead. Codex adds one small SessionStart instruction that tells the agent to read and apply the discipline files. The verification skills and agents run only when their workflow calls for them.
 
 **Q: What are the six verification axes?**
-A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against what was requested. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
+A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against raw user intent and the approved execution baseline. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
 
 **Q: Can I use only some of the skills?**
 A: Yes. Each skill is independent — use `/guard` before commits, `/punch` before delivery, or `/devil` before big decisions. You don't have to use all six at once.

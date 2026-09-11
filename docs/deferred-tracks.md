@@ -37,8 +37,10 @@ Audit approach when picked up: for each of the five traditions, check whether th
 Witness's comparator discipline is prompt-level, not runtime-enforced (see `agents/sonmat-witness.md` §Isolation stack, layers 2-3 are aspirational). Early uses need human sampling to validate:
 
 - Does witness actually produce citations from valid sources only?
-- Does it follow source-based verdict rules (§1/§2/§4 → BLOCK, §3 → WARN)?
+- Does it keep approved-baseline clauses separate from raw user intent rather than treating approval as authorship?
+- Does it follow source-based verdict rules (§0 → AUTHORITY_CONFLICT, §1/§2/§4/§5 → BLOCK, §3 → WARN)?
 - Does it drift into strength judgment, producing WARN because something "feels" weak?
+- Does it pause on AUTHORITY_CONFLICT instead of choosing a refinement target?
 - Does it respect the "suspect first" default posture?
 
 Data source: `journal.md` witness event log. Scribe captures witness verdicts exactly for this purpose.

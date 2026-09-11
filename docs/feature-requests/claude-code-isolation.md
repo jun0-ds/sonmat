@@ -19,14 +19,14 @@ Building a verification architecture where a second agent checks the first agent
 
 The core failure mode that verifier subagents exist to prevent is the same one documented in Huang et al. 2023 ("LLMs Cannot Self-Correct Reasoning Yet"): when a verifier shares context with the executor, it inherits the executor's rationalizations and becomes a confirmation rubber-stamp instead of an independent check.
 
-Execution-level isolation (separate context window, separate tool permissions) prevents the executor from *driving* the verifier, but it does not prevent the *spawn prompt* from laundering the executor's reasoning into the verifier's input. Today, the sonmat-witness design enforces this by protocol: the spawn prompt must contain only raw user turns and the artifact. This is discipline-enforced at the orchestration layer, not harness-enforced.
+Execution-level isolation (separate context window, separate tool permissions) prevents the executor from *driving* the verifier, but it does not prevent the *spawn prompt* from laundering the executor's reasoning into the verifier's input. Today, the sonmat-witness design enforces this by protocol: the spawn prompt may contain raw user turns, the artifact, and one narrowly formed approved-baseline envelope (the exact displayed plan plus its raw approval turn), but no other main-authored interpretation. This is discipline-enforced at the orchestration layer, not harness-enforced.
 
 A harness-level option to declare "this subagent must receive input from channel X only, and other channels are platform-rejected" would move this from discipline to structure. Example shape:
 
 ```yaml
 subagent:
   name: witness
-  input_channels: [raw_user_turns, artifact_files]
+  input_channels: [raw_user_turns, approved_execution_baseline, artifact_files]
   forbidden_channels: [parent_system_prompt, parent_tool_outputs, parent_messages]
 ```
 

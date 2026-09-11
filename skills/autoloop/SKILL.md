@@ -46,8 +46,9 @@ When no loop definition exists, build one through conversation. Ask 2-3 at a tim
 ### Confirmation
 Show the loop definition YAML and get user approval before starting.
 For L0 tasks: one-line summary suffices — "Proceeding like this: [summary]. Object if not."
+Silence after the L0 notice permits ordinary execution under the raw request but does not create an approved-baseline envelope; that envelope requires an explicit user approval turn.
 
-Approval freezes the displayed definition as the execution baseline; it does not amend a standing contract omitted from the definition. New evidence may change implementation details within that baseline. If it would instead change the approved objective, `loop.modify`, `loop.constraints`, or `loop.judge` — or restore behavior the baseline explicitly removed — show the current baseline and proposed revision and get reapproval before executing the revision. A safety or privacy conflict pauses execution but does not select a fallback on the user's behalf.
+Approval freezes the displayed definition as the execution baseline; preserve the exact display together with the raw approval turn. It does not amend a standing contract omitted from the definition. New evidence may change implementation details within that baseline. If it would instead change the approved objective, `loop.modify`, `loop.constraints`, or `loop.judge` — or restore behavior the baseline explicitly removed — show the current baseline and proposed revision and get reapproval before executing the revision. A safety or privacy conflict pauses execution but does not select a fallback on the user's behalf.
 
 
 ## 2. Loop Protocol
@@ -95,7 +96,7 @@ Draft `progress.md` from answers, present for user review. Use 3-tier structure:
 
 | Judgment | Condition | Git action |
 |----------|-----------|------------|
-| **keep** | `loop.judge.keep` met | Self-review → guard (operational) → witness (intent-match) → commit |
+| **keep** | `loop.judge.keep` met | Self-review → guard (operational) → witness (intent/baseline match) → commit |
 | **discard** | `loop.judge.discard` met | `git restore` (revert) |
 | **refine** | Partial improvement | Keep good parts, fix bad parts, re-execute |
 
@@ -103,9 +104,10 @@ Draft `progress.md` from answers, present for user review. Use 3-tier structure:
 
 1. **Self-review** (main, System 1) — quick re-read of the diff by the same agent that wrote it. This is **not structural isolation** — it is the remnant discipline layer that the sonmat architecture admits cannot be eliminated (cf. `memory/domain/discipline_forced_protocols.md` §Core Tension). Its role is to catch obvious slips cheaply before spending on subagent spawns. Treat it as a noise filter, not as verification. If the loop ever relies on self-review as the *only* gate, the architecture is broken.
 2. **Guard** (main, verification checks) — pre-commit test execution, sensitive-file blocking, discipline conformance, novel-trap detection. Runs in-context. Still main-side but oriented around structural rules (file patterns, test results) rather than self-interpretation of intent. See `skills/guard/SKILL.md`.
-3. **Witness** (spawned subagent, protocol-isolated) — intent-artifact match. Spawned with user-turn cascade as the only input. Main's chain-of-thought is excluded at the spawn-prompt layer (discipline) and at the execution-context layer (harness-enforced); see `agents/sonmat-witness.md` §Isolation stack for the honest breakdown of what that means on current Claude Code. Whether to spawn witness for a given commit is a structural decision set in `loop.yaml` (`witness.commit: required | optional | skip`) — never a main runtime judgment call. If the loop definition is silent, default to `required`.
+3. **Witness** (spawned subagent, protocol-isolated) — intent/baseline-artifact match. Spawned with the raw user-turn cascade and, when one exists, the approved-baseline envelope as separate inputs. Main's chain-of-thought is excluded at the spawn-prompt layer (discipline) and at the execution-context layer (harness-enforced); see `agents/sonmat-witness.md` §Isolation stack for the honest breakdown of what that means on current Claude Code. Whether to spawn witness for a given commit is a structural decision set in `loop.yaml` (`witness.commit: required | optional | skip`) — never a main runtime judgment call. If the loop definition is silent, default to `required`.
 
 Any gate returning a blocking verdict (guard block / witness `BLOCK`) → judgment becomes **refine**, not keep. Non-blocking findings (guard warning / witness `WARN`) → surface to user but proceed if user confirms.
+Witness `AUTHORITY_CONFLICT` is neither path: pause the judgment without selecting a refinement target and ask the user which authority to revise.
 
 Note on witness verdict reliability: witness's comparator discipline (citing from valid sources only, source-based verdict determination, refusing strength judgment) is **prompt-level**, not runtime-enforced — see `agents/sonmat-witness.md` §Isolation stack for the honest breakdown. Early uses of witness should be sampled by a human reviewer to validate that its verdicts actually follow the specified rules. If drift is observed (e.g., verdicts without citations, strength-based WARN assignments), the agent file needs adjustment — the journal is the right place to log these events (scribe captures witness verdicts for exactly this purpose).
 
@@ -128,7 +130,7 @@ The three-gate order is deliberate: cheap checks first, structurally-isolated ch
 
 **Forest-scale witness check** (on exit, before scribe):
 
-Before dispatching scribe, spawn witness at **session forest scope** if any of these conditions hold:
+Before dispatching scribe, spawn witness at **session forest scope** if any of these conditions hold. Pass the session's approved-baseline envelope when one exists; do not reconstruct it from memory:
 
 | Condition | Witness scope |
 |---|---|
@@ -136,10 +138,11 @@ Before dispatching scribe, spawn witness at **session forest scope** if any of t
 | Any user turn in the session contains a scope-broadening phrase ("전체", "모든", "시스템 전반", "일관되게", "across all", etc.) | `principle-coverage` |
 | `loop.yaml` declares `witness.forest: required` | As declared |
 
-Forest-scale witness receives (a) the full session's user-turn cascade and (b) the session's accumulated `git diff`. Its findings route as follows:
+Forest-scale witness receives (a) the full session's user-turn cascade, (b) the approved-baseline envelope when one exists, and (c) the session's accumulated `git diff`. Its findings route as follows:
 
 - `PASS` or `WARN` → continue to scribe dispatch. WARN surfaces to user verbatim; user can override.
 - `BLOCK` → do not dispatch scribe yet. Report BLOCK findings to user. Loop exit is paused; user decides to fix (return to [Execute]) or override (proceed with acknowledged mismatch).
+- `AUTHORITY_CONFLICT` → do not dispatch scribe or return to `[Execute]`. Report the conflicting sources and wait for the user to choose which authority to revise.
 - `INSUFFICIENT_GROUND_TRUTH` → report to user, proceed to scribe dispatch.
 
 This is the structural equivalent of the "forest review" that main alone cannot reliably perform at session end — a comparator running with user-turn isolation catches the multi-file partial application / dead-reference class of misses that main's chain-of-thought would rubber-stamp. See `agents/sonmat-witness.md` §Scope scales for the full definition.
@@ -222,7 +225,7 @@ Every loop definition should specify witness scopes. If omitted, `commit: requir
 3. Apply project CLAUDE.md overrides (if any `## sonmat` section exists)
 4. Inject into System 1 processing or System 2 worker prompt
 
-**Exclusion**: witness is **never** injected with discipline. Witness is a comparator, not a rule-follower; its own operating principles are embedded in the agent definition itself and are distinct from core.md discipline (cf. `agents/sonmat-witness.md` §Operating principles). The only inputs witness receives are raw user turns and the artifact — nothing else.
+**Exclusion**: witness is **never** injected with discipline. Witness is a comparator, not a rule-follower; its own operating principles are embedded in the agent definition itself and are distinct from core.md discipline (cf. `agents/sonmat-witness.md` §Operating principles). Its inputs are raw user turns, the artifact, and optionally the exact approved-baseline envelope defined in §6b — nothing else.
 
 ### Project override format
 ```markdown
@@ -298,7 +301,7 @@ autoloop spawns two distinct subagent types, with different purposes, inputs, an
 | Subagent | Purpose | Input | When spawned |
 |---|---|---|---|
 | **sonmat-worker** | Execute deep analysis or implementation steps that exceed System 1 capacity | discipline-injected prompt + loop context + task instructions | L2/L3 escalation during [Execute], or [Plan] brainstorming |
-| **sonmat-witness** | Intent-artifact match verification in isolated context | raw user-turn cascade + artifact (git diff / files) — **no discipline injection, no main CoT** | [Judge] keep pipeline (commit gate) + [Repeat/Exit] (session forest) |
+| **sonmat-witness** | Intent/baseline-artifact match verification in isolated context | raw user-turn cascade + optional approved-baseline envelope + artifact (git diff / files) — **no discipline injection, no main CoT** | [Judge] keep pipeline (commit gate) + [Repeat/Exit] (session forest) |
 
 ### 6a. Worker dispatch
 
@@ -337,11 +340,12 @@ Spawn prompt composition is different from worker's:
 ```
 [1. Scope]    — commit | session-forest | principle-coverage
 [2. User turns] — raw, unmodified. Session cascade for forest scope; task cascade for commit.
-[3. Artifact]  — git diff + file paths. No summary.
-[4. Principle candidate] — (optional, principle-coverage only) literal phrase anchored to user turns
+[3. Approved baseline] — optional envelope: exact displayed plan/loop definition + raw approval turn
+[4. Artifact]  — git diff + file paths. No summary.
+[5. Principle candidate] — (optional, principle-coverage only) literal phrase anchored to user turns
 ```
 
-**Never include**: discipline/core.md, hints.md, main's chain-of-thought, main's application notes, worker reports, or commit messages as separate inputs. Comments and commit messages embedded in the artifact are visible but citation-invalid (see witness.md §Seen-but-unusable).
+The approved-baseline envelope is the only assistant-authored plan content allowed. Include it only when the approval turn unambiguously refers to that exact displayed snapshot. **Never include**: other assistant plans or summaries, discipline/core.md, hints.md, main's chain-of-thought, main's application notes, worker reports, or commit messages as separate inputs. Comments and commit messages embedded in the artifact are visible but citation-invalid (see witness.md §Seen-but-unusable).
 
 #### Witness verdict → loop routing
 
@@ -350,6 +354,7 @@ Spawn prompt composition is different from worker's:
 | `PASS` | Commit / session-exit proceeds. Record verdict in journal (via scribe dispatch). |
 | `BLOCK` | Commit-scope: judgment downgraded to **refine**, cited mismatch becomes the next [Execute] target. Forest-scope: session-exit paused, findings reported to user, user decides fix or override. Do not retry witness on the same artifact without a real change in between. |
 | `WARN` | Surface to user verbatim (citation included). User confirms → proceed. User rejects → refine. |
+| `AUTHORITY_CONFLICT` | Pause commit / session exit. Show the conflicting raw intent and approved baseline; the user decides which one to revise. Main must not refine toward either side before that decision. |
 | `INSUFFICIENT_GROUND_TRUTH` | Witness could not run its checks. Report to user that the operation is proceeding *without* intent-match verification. Do not silently suppress. |
 
 Witness verdicts are never overridden by main's self-judgment. If main believes witness is wrong, escalate to user — never auto-bypass. This is the structural-isolation principle; bypassing it defeats the mechanism.

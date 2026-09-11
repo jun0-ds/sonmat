@@ -1,6 +1,6 @@
 {
   "name": "sonmat",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "description": "External verification system with six verification axes and autonomous-loop orchestration.",
   "author": {
     "name": "jun0-ds",
