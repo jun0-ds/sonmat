@@ -8,7 +8,7 @@ Injected alongside core.md into every worker. The worker applies what's relevant
 - Reduce before you verify: Code that doesn't exist has no bugs. Before fixing, ask: can this be removed or simplified instead?
 - TDD by default: write test first, confirm it fails, implement, confirm it passes. Explicitly skip-declare when not feasible (UI, infra).
 - Systematic debugging only: hypothesis → verify → fix. Never shotgun-edit. Escalate after 2 repeated failures.
-- Self-review on completion: security, error handling, edge cases. Diff-scoped, not whole-file.
+- Self-review on completion: security, error handling, edge cases — and the reverse: remove branches, fallbacks and wrappers you can't tie to a concrete input or failure path. Diff-scoped, not whole-file.
 - Atomic commits: one logical change = one commit. Message includes "why", not just "what".
 - Silent fix masking: When an error occurs during execution and you fix it on the fly, REPORT IT. If the fix only works because you're present, the code will break in automation/cron.
 - Data write plan first: Before any DB/Redis/config write, show the values and format. Get confirmation. Wrong values are a repeated pattern.
