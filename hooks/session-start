@@ -27,18 +27,35 @@ fi
 SLUG=$(printf '%s' "$PWD" | sed 's#/#-#g')
 PROJ_DIR="$SONMAT_PROJECTS_BASE/$SLUG"
 
-# --- Auto-create project CLAUDE.md (Claude Code, git repos only) ---
-if [ "$IS_CODEX" = false ] && [ -d ".git" ] && [ ! -f "CLAUDE.md" ]; then
-  cat > CLAUDE.md << 'TEMPLATE'
-# CLAUDE.md
-
-> 글로벌 지침(`~/.claude/CLAUDE.md`) 상속: 사고규율(Before/After Acting), 행동규율(Break/Cross/Ground), 환경식별, 호칭, Python/uv 규칙 등.
+# --- Project instruction bootstrap (Claude Code, git repos only) ---
+# AGENTS.md is the project-rule source of truth. CLAUDE.md is only Claude
+# Code's adapter and imports that source. Never rewrite a pre-existing
+# CLAUDE.md: migrating its rules needs a user-reviewed diff.
+if [ "$IS_CODEX" = false ] && [ -d ".git" ]; then
+  if [ ! -f "AGENTS.md" ] && [ ! -f "CLAUDE.md" ]; then
+    cat > AGENTS.md << 'TEMPLATE'
+# AGENTS.md
 
 ## Project Rules
 
 <!-- 대화 중 발견된 프로젝트 규칙이 여기에 추가됩니다. -->
 TEMPLATE
-  MSGS+=("CLAUDE.md auto-created — review and customize.")
+    cat > CLAUDE.md << 'TEMPLATE'
+# CLAUDE.md — Claude Code adapter
+
+@AGENTS.md
+TEMPLATE
+    MSGS+=("AGENTS.md auto-created as the project-rule source; CLAUDE.md now imports it.")
+  elif [ -f "AGENTS.md" ] && [ ! -f "CLAUDE.md" ]; then
+    cat > CLAUDE.md << 'TEMPLATE'
+# CLAUDE.md — Claude Code adapter
+
+@AGENTS.md
+TEMPLATE
+    MSGS+=("CLAUDE.md adapter created — it imports the existing AGENTS.md.")
+  elif [ ! -f "AGENTS.md" ] && [ -f "CLAUDE.md" ]; then
+    MSGS+=("Existing CLAUDE.md found without AGENTS.md; project-rule migration needs a reviewed, user-approved diff.")
+  fi
 fi
 
 # --- sonmat state dirs (outside .claude) + one-time migration from legacy .claude paths ---

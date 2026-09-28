@@ -96,14 +96,14 @@ sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is
 
 Claude Code and Codex have native plugin adapters. The discipline and skills remain plain markdown, so other AI CLIs can use them with a manual setup.
 
-Each CLI has its own equivalent of `CLAUDE.md`:
+Each CLI has its own global instruction mechanism. For project rules, sonmat uses `AGENTS.md` wherever the harness supports it; Claude Code reads it through a minimal `CLAUDE.md` adapter.
 
-| CLI | Global instruction file | Where to put sonmat files |
-|-----|------------------------|--------------------------|
-| Claude Code | `CLAUDE.md` | Plugin install (see above) |
-| Codex | `AGENTS.md` | Native plugin install above |
-| Gemini CLI | `GEMINI.md` | `~/.gemini/sonmat/` |
-| Other | Whatever file your CLI reads as its main guide | Copy there |
+| CLI | Global instruction file | Project rule file | Where to put sonmat files |
+|-----|-------------------------|-------------------|--------------------------|
+| Claude Code | `CLAUDE.md` | `AGENTS.md` (`CLAUDE.md` imports it) | Plugin install (see above) |
+| Codex | `AGENTS.md` | `AGENTS.md` | Native plugin install above |
+| Gemini CLI | `GEMINI.md` | Its native project instruction file | `~/.gemini/sonmat/` |
+| Other | Whatever file your CLI reads as its main guide | Its native project instruction file | Copy there |
 
 **Setup (CLIs without a native adapter):**
 

@@ -16,7 +16,7 @@ Guard covers **verification** checks that main can reliably do on itself: sensit
 |---|---|---|
 | Test execution, sensitive file blocking, discipline conformance, novel-trap detection | **guard** | Real-time verification during work; synchronous check-and-block at decision points |
 | Scope match (is this within what was asked?), content match (does it do what was asked?), framing-derived scope | **witness** | Intent-artifact comparison — requires protocol isolation from main's reasoning (see witness.md §Isolation stack for what "isolation" means on current Claude Code) |
-| Recording novel traps, writing project rules to CLAUDE.md, journaling verdicts, bridge notes, progress tracking | **scribe** | Post-work persistence — what the session learned that should outlive it |
+| Recording novel traps, writing project rules to AGENTS.md, journaling verdicts, bridge notes, progress tracking | **scribe** | Post-work persistence — what the session learned that should outlive it |
 
 Guard detects and flags. Scribe persists what was flagged. Witness checks intent-artifact match in isolation. Three different axes on the same work.
 

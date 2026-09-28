@@ -21,7 +21,7 @@ run_hook() {
   )
 }
 
-# Codex: engage discipline, report missing agents, and never mutate Claude files.
+# Codex: engage discipline, report missing agents, and never mutate instruction files.
 CODEX_HOME_TEST="$TEST_ROOT/codex-home"
 CODEX_PROJECT="$TEST_ROOT/codex-project"
 mkdir -p "$CODEX_HOME_TEST/.claude" "$CODEX_HOME_TEST/.sonmat" "$CODEX_PROJECT/.git"
@@ -32,6 +32,7 @@ grep -q 'sonmat: read ' <<< "$CODEX_OUTPUT"
 grep -q 'sonmat Codex agents are not installed' <<< "$CODEX_OUTPUT"
 grep -qx 'keep-me' "$CODEX_HOME_TEST/.claude/CLAUDE.md"
 test ! -e "$CODEX_PROJECT/CLAUDE.md"
+test ! -e "$CODEX_PROJECT/AGENTS.md"
 
 # Agent installer: install all files, remain idempotent, and refuse local drift.
 INSTALL_HOME="$TEST_ROOT/install-home"
@@ -46,15 +47,27 @@ if CODEX_HOME="$INSTALL_HOME/.codex" bash "$REPO_ROOT/scripts/install-codex-agen
   exit 1
 fi
 
-# Claude Code: preserve the existing project/global bootstrap behavior.
+# Claude Code: create AGENTS.md as the project-rule source and an importing adapter.
 CLAUDE_HOME_TEST="$TEST_ROOT/claude-home"
 CLAUDE_PROJECT="$TEST_ROOT/claude-project"
 mkdir -p "$CLAUDE_HOME_TEST/.claude" "$CLAUDE_HOME_TEST/.sonmat" "$CLAUDE_PROJECT/.git"
 touch "$CLAUDE_HOME_TEST/.claude/CLAUDE.md"
 date +%s > "$CLAUDE_HOME_TEST/.sonmat/.last_update_check"
 run_hook "$CLAUDE_HOME_TEST" "$CLAUDE_PROJECT" "" >/dev/null
+test -f "$CLAUDE_PROJECT/AGENTS.md"
+grep -q '## Project Rules' "$CLAUDE_PROJECT/AGENTS.md"
 test -f "$CLAUDE_PROJECT/CLAUDE.md"
+grep -qx '@AGENTS.md' "$CLAUDE_PROJECT/CLAUDE.md"
 grep -q '## sonmat' "$CLAUDE_HOME_TEST/.claude/CLAUDE.md"
 grep -q 'sonmat:discipline:start' "$CLAUDE_HOME_TEST/.claude/CLAUDE.md"
+
+# Existing CLAUDE.md is not silently rewritten or migrated.
+LEGACY_PROJECT="$TEST_ROOT/legacy-project"
+mkdir -p "$LEGACY_PROJECT/.git"
+printf 'legacy project rules\n' > "$LEGACY_PROJECT/CLAUDE.md"
+LEGACY_OUTPUT="$(run_hook "$CLAUDE_HOME_TEST" "$LEGACY_PROJECT" "")"
+grep -q 'migration needs a reviewed' <<< "$LEGACY_OUTPUT"
+test ! -e "$LEGACY_PROJECT/AGENTS.md"
+grep -qx 'legacy project rules' "$LEGACY_PROJECT/CLAUDE.md"
 
 printf 'Codex support tests passed.\n'

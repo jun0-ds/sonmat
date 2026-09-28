@@ -222,7 +222,7 @@ Every loop definition should specify witness scopes. If omitted, `commit: requir
 ### Injection order
 1. Load core.md (always)
 2. Load hints.md (always — worker applies what's relevant)
-3. Apply project CLAUDE.md overrides (if any `## sonmat` section exists)
+3. Apply project AGENTS.md overrides (if any `## sonmat` section exists; use legacy CLAUDE.md only when AGENTS.md is absent)
 4. Inject into System 1 processing or System 2 worker prompt
 
 **Exclusion**: witness is **never** injected with discipline. Witness is a comparator, not a rule-follower; its own operating principles are embedded in the agent definition itself and are distinct from core.md discipline (cf. `agents/sonmat-witness.md` §Operating principles). Its inputs are raw user turns, the artifact, and optionally the exact approved-baseline envelope defined in §6b — nothing else.

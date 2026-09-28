@@ -51,4 +51,4 @@ Two detection patterns that must be handed off:
 - **Novel trap**: a verification failure not covered by existing hints or memory. When guard or an autoloop retrospective spots one, dispatch to scribe. See `skills/scribe/SKILL.md` §Novel Trap Recording for what scribe does with it.
 - **Project rule**: an implicit project convention surfacing through user corrections, repetitions, or explicit statements. When you spot the pattern, dispatch to scribe. See `skills/scribe/SKILL.md` §Project Rule Recording. **If the same correction happens twice, dispatching is not optional.**
 
-In both cases: the *detection* is discipline; the *recording* is scribe. Main and workers never write directly to memory or `CLAUDE.md`.
+In both cases: the *detection* is discipline; the *recording* is scribe. Main and workers never write directly to memory or `AGENTS.md`.

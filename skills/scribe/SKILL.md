@@ -21,9 +21,9 @@ Scribe runs in two distinct modes depending on what is being persisted. The dist
 | Mode | When | Blocks main? | Operations |
 |---|---|---|---|
 | **Background** | After work completes (loop exit, task completion, session end) | No — main continues interacting with user | Bridge notes, journal appends, progress checkbox updates, witness verdict logging |
-| **Synchronous** | During work, when a finding needs user confirmation before writing | Yes — main pauses to get user yes/no | Project rule proposals (writes to `CLAUDE.md`), novel trap proposals (writes to memory) |
+| **Synchronous** | During work, when a finding needs user confirmation before writing | Yes — main pauses to get user yes/no | Project rule proposals (writes to `AGENTS.md`), novel trap proposals (writes to memory) |
 
-Background writes are fire-and-forget: dispatch sonmat-scribe agent with artifacts, do not wait. Synchronous writes are confirmation-gated: main itself runs the proposal dialogue inline, because writing declarative files like `CLAUDE.md` or memory records must never happen without explicit user approval.
+Background writes are fire-and-forget: dispatch sonmat-scribe agent with artifacts, do not wait. Synchronous writes are confirmation-gated: main itself runs the proposal dialogue inline, because writing declarative files like `AGENTS.md` or memory records must never happen without explicit user approval.
 
 Both modes belong to scribe because the **axis is the same** (persistence of session findings) — only the interaction contract differs. Do not split them into separate skills; that would fragment the persistence axis and leave other skills unsure who to hand off to.
 
@@ -37,7 +37,7 @@ Scribe writes into channels that future sessions will read. This creates a poten
 
 - **Bridge notes** (read by main on next task start) must **not** contain witness findings, raw witness verdicts beyond a compact PASS/WARN/BLOCK/AUTHORITY_CONFLICT marker, or anything main-synthesized from witness output. Main is allowed to see that witness ran and what the overall verdict was — it is not allowed to re-enter witness's citation content through the bridge-note channel.
 - **Journal** (not auto-loaded, user-readable only) is the durable place where witness findings live. Journal is scribe's append-only record; witness findings go there in full.
-- **CLAUDE.md Project Rules** and **memory trap records** are user-facing reference files, not main's automatic context. They are safe targets for synchronous writes.
+- **AGENTS.md Project Rules** and **memory trap records** are user-facing reference files, not main's automatic context. They are safe targets for synchronous writes.
 
 Witness spawn prompts must **never** include bridge-notes, journal excerpts, or any scribe-managed file as input. Witness receives raw user turns, the artifact, and optionally one approved-baseline envelope containing the exact displayed plan plus its raw approval turn; scribe-managed files are outside the witness input contract. This boundary is enforced by autoloop's Task-tool spawn composition (§6b Witness dispatch in `skills/autoloop/SKILL.md`): the spawn prompt template explicitly lists what goes in, and bridge-notes / journal are not in that list. Scribe carries the policy responsibility for not authoring the content that would then need to be excluded — if scribe ever writes witness content into a channel that flows back to main, the isolation is broken at the composition layer, even if the spawn template excludes it.
 
@@ -56,7 +56,7 @@ Witness spawn prompts must **never** include bridge-notes, journal excerpts, or 
 | Session ending with unfinished context | Background | bridge only |
 | L0 / trivial task | — (no dispatch) | — |
 | **Novel trap detected by guard** (any task size) | **Synchronous** | `novel_trap` — user confirmation, then write to memory |
-| **Project rule pattern detected** (any task size) | **Synchronous** | `project_rule` — user confirmation, then write to `CLAUDE.md` |
+| **Project rule pattern detected** (any task size) | **Synchronous** | `project_rule` — user confirmation, then write to `AGENTS.md` |
 
 Synchronous dispatches (bottom two rows) are handled inline by main using the protocols in §Project Rule Recording and §Novel Trap Recording below. Background dispatches spawn the sonmat-scribe agent with the prompt structure below.
 
@@ -137,7 +137,14 @@ Witness verdicts go to the journal only. They do **not** go to bridge notes. The
 
 ## Project Rule Recording (absorbed from guard §2)
 
-Project rules are implicit conventions the user assumes the assistant knows. Guard detects the signals during work; scribe persists them to `CLAUDE.md`.
+Project rules are implicit conventions the user assumes the assistant knows. Guard detects the signals during work; scribe persists them to `AGENTS.md`.
+
+### Project instruction file contract
+
+- `AGENTS.md` is the canonical project instruction file and the only target for `## Project Rules`. Codex loads it natively. Do not create or use `CODEX.md` for this purpose.
+- `CLAUDE.md`, when a project needs one, is a Claude Code adapter: it imports `@AGENTS.md` and may contain only Claude-specific additions beyond that import.
+- Never overwrite or silently migrate an existing `CLAUDE.md`. If it has project rules but no `AGENTS.md`, show the proposed split and obtain a separate user approval before editing either file.
+- A Codex SessionStart hook does not create either file. A user-approved project-rule recording may create `AGENTS.md`; creating or changing a Claude adapter remains an explicit, reviewable change.
 
 ### Signals that reach scribe
 
@@ -154,10 +161,10 @@ Guard (or main observation) dispatches a project-rule proposal to scribe when an
 
    ```
    💡 Project rule detected: {draft rule}
-      Add to CLAUDE.md? [Yes / No / Rephrase]
+      Add to AGENTS.md? [Yes / No / Rephrase]
    ```
 
-3. **Write** to the `## Project Rules` section of the project's `CLAUDE.md` only after user confirms. Create the section if it does not exist.
+3. **Write** to the `## Project Rules` section of the project's `AGENTS.md` only after user confirms. Create the file and section if they do not exist.
 4. **Never write without confirmation**. Project rules are declarative and persistent; a wrong one is expensive to debug later.
 
 This is how the "빈 공간" shrinks over time — rules accumulate from practice, not declaration. But the accumulation itself is scribe's axis: observing patterns, abstracting them, persisting the abstraction.
