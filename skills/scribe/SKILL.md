@@ -193,17 +193,23 @@ The dispatch includes:
 ### What scribe does
 
 1. **Abstract the pattern**: convert the concrete incident into a general-form description. Strip project-specific identifiers that would prevent reuse.
-2. **Choose the scope**:
+2. **Family check (induction)**: compare the abstracted pattern with `discipline/hints.md` and the existing `trap_*` / `insight_*` files in `$SONMAT_MEMORY_DIR`. A family is a shared failure shape — the same wrong inference — not the same tool or project. Settle on exactly one outcome:
+   - **A hint already covers it** → antibody failure: the hint existed and did not fire. Propose revising that hint (wording, activation condition, or how it is loaded) and adding the incident to its instance list. Write a new trap file only if the incident adds a distinct catch-signal.
+   - **Second independent instance, no hint yet** → propose promotion: one hint in the matching `hints.md` section stating the pattern, the catch-signal, and the instance list (trap names). The trap files stay as evidence; the hint is the read path. Independent means a different session and a different surface (project, tool, or system).
+   - **No family** → record a new trap (steps 3–5).
+
+   Why this step exists: trap memory has no read path at the point of action, while `hints.md` is loaded by every session. A recorded config-sourcing trap recurred two weeks later because nothing surfaced it. Promotion and revision proposals are synchronous like any trap proposal, and a hint change ships through a sonmat release (`VERSIONING.md`).
+3. **Choose the scope**:
    - Project-specific lesson → `{name}.md` in the per-project scribe dir (see File Locations)
    - Universal lesson (applies across projects) → `trap_{name}.md` in `$SONMAT_MEMORY_DIR` (default `~/.sonmat/memory/`)
-3. **Propose** the memory record synchronously:
+4. **Propose** the memory record synchronously:
 
    ```
    💡 Novel trap detected: {short title}
       Record as {project | universal} memory? [Yes / No / Edit first]
    ```
 
-4. **Write** only after user confirms, using this format:
+5. **Write** only after user confirms, using this format:
 
 ```markdown
 # Trap: {title}
@@ -218,7 +224,7 @@ The dispatch includes:
 {When this trap is likely to recur}
 ```
 
-5. **Spec amendment proposal (only when flavor = `spec_gap` AND project has `docs/specs/` with `sonmat.spec_awareness: enabled`)**: if both conditions hold, after writing the trap memory, offer to generate a successor spec rather than only logging. This implements ADR `2026-04-26-spec-evolution-loop.md` (T2-C). Conditions:
+6. **Spec amendment proposal (only when flavor = `spec_gap` AND project has `docs/specs/` with `sonmat.spec_awareness: enabled`)**: if both conditions hold, after writing the trap memory, offer to generate a successor spec rather than only logging. This implements ADR `2026-04-26-spec-evolution-loop.md` (T2-C). Conditions:
 
    - Project must have `docs/specs/` directory with an `_index.md` declaring `sonmat.spec_awareness: enabled`. If absent, skip this step entirely — Stage 0 projects log to trap memory only.
    - The novel trap dispatch must carry `flavor: spec_gap` (i.e., the action ran outside spec coverage, not a verification failure of existing discipline).
@@ -255,7 +261,7 @@ The dispatch includes:
 
    This is the LPS-5-conversation LEARN step (`docs/research/architecture-methodology-and-spec-discipline.md` A4). Captured even when no amendment generated, because the deferred decisions are themselves data for later retrospective.
 
-6. **Dispatch GitHub feedback (optional)**: after writing, offer to submit as a GitHub issue to the sonmat repo. This is purely optional — if the user declines, the memory record stays local.
+7. **Dispatch GitHub feedback (optional)**: after writing, offer to submit as a GitHub issue to the sonmat repo. This is purely optional — if the user declines, the memory record stays local.
 
    ```
    💬 This trap could help other sonmat users. Submit to GitHub?

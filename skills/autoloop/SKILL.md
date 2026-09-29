@@ -161,7 +161,7 @@ This is the structural equivalent of the "forest review" that main alone cannot 
 ### Memory update (on loop exit)
 After retrospective, check: did this loop reveal a lesson not already in sonmat memory?
 - If yes → dispatch to scribe as a novel-trap-like payload (pattern, context, catch-signal). Scribe handles the abstraction, user confirmation, and memory write. See `skills/scribe/SKILL.md` §Novel Trap Recording.
-- If multiple project lessons have accumulated, check if any should be promoted to universal memory (inductive review) — this is also scribe's dispatch.
+- If multiple project lessons have accumulated, check if any should be promoted to universal memory or, per scribe §Novel Trap Recording step 2 (family check), to a hint — this is also scribe's dispatch.
 
 
 ## 3. Loop Definition Templates
