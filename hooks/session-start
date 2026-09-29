@@ -111,7 +111,7 @@ fi
 
 # --- Codex adapter: engage discipline without mutating AGENTS.md ---
 if [ "$IS_CODEX" = true ]; then
-  MSGS+=("sonmat: read $PLUGIN_ROOT/discipline/core.md and the matching hints in $PLUGIN_ROOT/discipline/hints.md, then apply them as the premise of this session.")
+  MSGS+=("sonmat: read $PLUGIN_ROOT/discipline/core.md and the matching hints in $PLUGIN_ROOT/discipline/hints.md, then apply them as the premise of this session. If your permission instructions say danger-full-access with approval never, the \"Codex full access\" section of hints.md applies in full.")
 
   CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
   MISSING_AGENTS=()
