@@ -11,6 +11,10 @@ Induced from traps that recurred across separate sessions and surfaces (the main
 - **Read the live source before writing to it.** Before a production data write, an API call or a contract-dependent change, read the schema or contract from the running system (the database catalog, the serving revision, the actual config keys). Notes, earlier summaries and handoffs are hypotheses. Instances: `designing_on_own_summary_not_primary_source`, `handoff_filename_literal`, `summarization_as_distortion`; 2026-09-29: three pre-write reads failed on column names taken from an earlier summary.
 - **Configuration is data; secrets never enter output.** Never `source` or execute an env or config file to read a value — parse the named key without printing it. Keep tokens out of process arguments. Instances: `non_shell_config_sourcing` (recorded 2026-09-15, recurred 2026-09-29 because trap memory has no read path at the point of action), `bearer_tokens_in_process_arguments`.
 
+## Delegation (all domains)
+
+- **Hand off work whose result is all you need back.** In heavy implementation, keep the main session on the work's judgment and hand meta work — progress records, memory upkeep — to a background agent (scribe, per `core.md` → Persistence Hand-off). Delegate a search that sweeps many files and an independent verification the same way. Keep light conversation and simple tasks in the main session; splitting them costs more than it saves. Instance: 2026-09-01, a compression pass rewrote this rule as "delegate only when there is an independent artifact; do not split the main judgment into meta work", and background record dispatch nearly stopped for a month.
+
 ## Codex full access
 
 Applies only when the session's permission instructions say `sandbox_mode` is `danger-full-access` and the approval policy is `never`. In any other mode, skip this section.
