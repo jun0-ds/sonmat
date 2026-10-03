@@ -13,7 +13,7 @@ Induced from traps that recurred across separate sessions and surfaces (the main
 
 ## Delegation (all domains)
 
-- **Hand off work whose result is all you need back.** In heavy implementation, keep the main session on the work's judgment and hand meta work — progress records, memory upkeep — to a background agent (scribe, per `core.md` → Persistence Hand-off). Delegate a search that sweeps many files and an independent verification the same way. Keep light conversation and simple tasks in the main session; splitting them costs more than it saves. Instance: 2026-09-01, a compression pass rewrote this rule as "delegate only when there is an independent artifact; do not split the main judgment into meta work", and background record dispatch nearly stopped for a month.
+- **Hand off work whose result is all you need back.** In heavy implementation, keep the main session on the work's judgment and hand meta work — progress records, memory upkeep — to a background agent (scribe, per `core.md` → Persistence Hand-off). Delegate a search that sweeps many files and an independent verification the same way. Keep light conversation and simple tasks in the main session; splitting them costs more than it saves. Instance: 2026-09-01, a compression pass rewrote this rule as "delegate only when there is an independent artifact; do not split the main judgment into meta work", turning a recommendation into a gate without anyone deciding to.
 
 ## Codex full access
 
