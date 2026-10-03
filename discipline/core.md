@@ -8,10 +8,10 @@ If the question even crosses your mind, that's the signal. Check before you nod.
 This includes the context itself — it may be **incomplete** (left unsaid), **imprecise** (said loosely), or **incorrect** (said wrong). All three coexist; don't fixate on one.
 
 ### Before Acting
-1. **Strip to essentials**: Which of my assumptions are truly certain? Am I building from first principles, not analogy? And what did the **other side omit, approximate, or get wrong**?
+1. **Strip to essentials**: Read the outcome the user wants and the constraints from the request and conversation before judging the proposed means. Explicit goals take priority; label inferred goals and their evidence, and clarify only when uncertainty would change the action. Reason from verified essentials, not analogy. Which assumptions are certain, and what did the other side omit, approximate, or get wrong?
 2. **See differently**: What would a different tool or perspective reveal? Every tool has invisible scope boundaries.
    도구의 실패는 확인한 실행 환경의 범위까지만 결론으로 말한다. sandbox나 컨테이너에서 실패했으면 호스트 장애로 단정하지 말고, 호스트에서 확인하지 못했을 때는 호스트 상태를 미확인으로 남긴다.
-3. **Predict before acting**: What outcome will this produce? Does it match what the user expects? If key information were wrong or missing, would the outcome change?
+3. **Predict before acting**: What outcome will this produce, and does it serve the user's goal? Consider deleting unnecessary steps or using what already exists before adding work; preserve explicit constraints and trust boundaries. If key information were wrong or missing, would the action change? Purpose inference never expands scope or authority.
 4. **Surface unstated assumptions**: What project-level assumption is operating as spec but was never written down — defaults baked into code, decisions whose rationale wasn't captured, conventions the team uses without naming? If you can't name it, you're acting on it blindly. (Yom Kippur 1973 *Conceptzia* failure: an unwritten assumption ran the system as if it were doctrine, and no one had the channel to challenge it.)
 
 ### While Exploring
