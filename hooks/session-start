@@ -125,39 +125,41 @@ if [ "$IS_CODEX" = true ]; then
   fi
 fi
 
-# --- Update check (time-based: every 3 hours) — NOTIFY only ---
+# --- Update check (time-based: every 3 hours) — NOTIFY only, opt-in ---
 # Installed plugin copies are managed by their harness. The hook detects a
 # version mismatch against main and asks the user to use that harness's update
 # path instead of trying to mutate a cache or marketplace checkout in place.
-UPDATE_CHECK_FILE="$SONMAT_HOME/.last_update_check"
-UPDATE_INTERVAL=10800  # 3 hours in seconds
+if [ "$(cat "$SONMAT_HOME/update-notify" 2>/dev/null)" = on ]; then
+  UPDATE_CHECK_FILE="$SONMAT_HOME/.last_update_check"
+  UPDATE_INTERVAL=10800  # 3 hours in seconds
 
-SHOULD_CHECK=false
-if [ ! -f "$UPDATE_CHECK_FILE" ]; then
-  SHOULD_CHECK=true
-else
-  LAST_CHECK=$(cat "$UPDATE_CHECK_FILE" 2>/dev/null)
-  NOW=$(date +%s)
-  if [ -n "$LAST_CHECK" ] && [ $((NOW - LAST_CHECK)) -ge $UPDATE_INTERVAL ]; then
+  SHOULD_CHECK=false
+  if [ ! -f "$UPDATE_CHECK_FILE" ]; then
     SHOULD_CHECK=true
+  else
+    LAST_CHECK=$(cat "$UPDATE_CHECK_FILE" 2>/dev/null)
+    NOW=$(date +%s)
+    if [ -n "$LAST_CHECK" ] && [ $((NOW - LAST_CHECK)) -ge $UPDATE_INTERVAL ]; then
+      SHOULD_CHECK=true
+    fi
   fi
-fi
 
-if [ "$SHOULD_CHECK" = true ]; then
-  date +%s > "$UPDATE_CHECK_FILE"
+  if [ "$SHOULD_CHECK" = true ]; then
+    date +%s > "$UPDATE_CHECK_FILE"
 
-  MANIFEST_DIR=".claude-plugin"
-  if [ "$IS_CODEX" = true ]; then
-    MANIFEST_DIR=".codex-plugin"
-  fi
-  LOCAL_VER=$(grep '"version"' "$PLUGIN_ROOT/$MANIFEST_DIR/plugin.json" 2>/dev/null | head -1 | sed 's/.*"version": *"//;s/".*//')
-  REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/sonmat/main/$MANIFEST_DIR/plugin.json" | grep '"version"' | head -1 | sed 's/.*"version": *"//;s/".*//')
-
-  if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER" ]; then
+    MANIFEST_DIR=".claude-plugin"
     if [ "$IS_CODEX" = true ]; then
-      MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. Tell the user once and offer to review the diff before running 'codex plugin marketplace upgrade <source>' and 'codex plugin add sonmat@<source>'.")
-    else
-      MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. At the START of the session, briefly tell the user in Korean: sonmat ${LOCAL_VER} → ${REMOTE_VER} 업데이트가 있어요 — '/plugin update sonmat@sonmat' 후 '/reload-plugins'로 적용하세요. 손맛은 코드가 공개돼 있어 적용 전후로 변경 내용을 함께 점검할 수 있어요. If the user wants to review before updating, the marketplace clone at ~/.claude/plugins/marketplaces/sonmat is a git repo tracking main — show its recent commits/diff and check for security concerns (unexpected network calls, credential or file access, destructive commands). If declined, move on and do not nag.")
+      MANIFEST_DIR=".codex-plugin"
+    fi
+    LOCAL_VER=$(grep '"version"' "$PLUGIN_ROOT/$MANIFEST_DIR/plugin.json" 2>/dev/null | head -1 | sed 's/.*"version": *"//;s/".*//')
+    REMOTE_VER=$(curl -sf --max-time 3 "https://raw.githubusercontent.com/jun0-ds/sonmat/main/$MANIFEST_DIR/plugin.json" | grep '"version"' | head -1 | sed 's/.*"version": *"//;s/".*//')
+
+    if [ -n "$REMOTE_VER" ] && [ -n "$LOCAL_VER" ] && [ "$LOCAL_VER" != "$REMOTE_VER" ]; then
+      if [ "$IS_CODEX" = true ]; then
+        MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. Tell the user once and offer to review the diff before running 'codex plugin marketplace upgrade <source>' and 'codex plugin add sonmat@<source>'.")
+      else
+        MSGS+=("sonmat ${LOCAL_VER} → ${REMOTE_VER} is available. At the START of the session, briefly tell the user in Korean: sonmat ${LOCAL_VER} → ${REMOTE_VER} 업데이트가 있어요 — '/plugin update sonmat@sonmat' 후 '/reload-plugins'로 적용하세요. 손맛은 코드가 공개돼 있어 적용 전후로 변경 내용을 함께 점검할 수 있어요. If the user wants to review before updating, the marketplace clone at ~/.claude/plugins/marketplaces/sonmat is a git repo tracking main — show its recent commits/diff and check for security concerns (unexpected network calls, credential or file access, destructive commands). If declined, move on and do not nag.")
+      fi
     fi
   fi
 fi

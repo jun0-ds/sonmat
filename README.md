@@ -207,6 +207,18 @@ A: Yes. Codex has a native plugin manifest, a harness-aware SessionStart branch,
 **Q: Does sonmat slow down my workflow?**
 A: Claude Code uses a prompt-first architecture: after the one-time `CLAUDE.md` bootstrap, the hook has no discipline-context overhead. Codex adds one small SessionStart instruction that tells the agent to read and apply the discipline files. The verification skills and agents run only when their workflow calls for them.
 
+**Q: How do I enable update notifications?**
+A: They are off by default. On each device, create the state directory if needed, then choose `on` or `off`:
+
+```bash
+mkdir -p "${SONMAT_HOME:-$HOME/.sonmat}"
+printf 'on\n' > "${SONMAT_HOME:-$HOME/.sonmat}/update-notify"
+# To turn notifications off:
+printf 'off\n' > "${SONMAT_HOME:-$HOME/.sonmat}/update-notify"
+```
+
+When it contains exactly `on`, the SessionStart hook checks for a new version at its usual three-hour interval and tells you the appropriate update command. This flag only controls notifications; harness automatic updates continue to follow that CLI's own settings.
+
 **Q: What are the six verification axes?**
 A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against raw user intent and the approved execution baseline. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
 
