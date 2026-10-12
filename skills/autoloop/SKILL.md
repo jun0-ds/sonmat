@@ -141,8 +141,8 @@ Before dispatching scribe, spawn witness at **session forest scope** if any of t
 Forest-scale witness receives (a) the full session's user-turn cascade, (b) the approved-baseline envelope when one exists, and (c) the session's accumulated `git diff`. Its findings route as follows:
 
 - `PASS` or `WARN` → continue to scribe dispatch. WARN surfaces to user verbatim; user can override.
-- `BLOCK` → do not dispatch scribe yet. Report BLOCK findings to user. Loop exit is paused; user decides to fix (return to [Execute]) or override (proceed with acknowledged mismatch).
-- `AUTHORITY_CONFLICT` → do not dispatch scribe or return to `[Execute]`. Report the conflicting sources and wait for the user to choose which authority to revise.
+- `BLOCK` → for ordinary keep exit, do not dispatch scribe yet. Report BLOCK findings to user. Loop exit is paused; user decides to fix (return to [Execute]) or override (proceed with acknowledged mismatch).
+- `AUTHORITY_CONFLICT` → for ordinary exit, do not dispatch scribe or return to `[Execute]`. Report the conflicting sources and wait for the user to choose which authority to revise.
 - `INSUFFICIENT_GROUND_TRUTH` → report to user, proceed to scribe dispatch.
 
 This is the structural equivalent of the "forest review" that main alone cannot reliably perform at session end — a comparator running with user-turn isolation catches the multi-file partial application / dead-reference class of misses that main's chain-of-thought would rubber-stamp. See `agents/sonmat-witness.md` §Scope scales for the full definition.
@@ -150,7 +150,8 @@ This is the structural equivalent of the "forest review" that main alone cannot 
 **Scribe dispatch** (on exit, after forest witness):
 - **keep**: Dispatch scribe with mode `all` (bridge + journal + progress). Include loop report, git diff, and forest-witness verdict as artifacts.
 - **discard**: Dispatch scribe with mode `journal` only. Record what was tried and why it failed.
-- Scribe runs in background. Do NOT wait for it. Proceed with user interaction immediately.
+- **explicit session wrap-up / handoff**, in either keep or discard: use scribe's wrap-up protocol to review bridge + journal needs. If `BLOCK` or `AUTHORITY_CONFLICT` remains unresolved, record the halted state and open decision rather than suppressing persistence. This is a handoff of incomplete work, not a keep verdict or an override; execution remains stopped. Witness isolation still applies: compact verdict marker only in bridge, findings in journal.
+- For ordinary exit, scribe runs in background; proceed with user interaction without waiting. If exit answers an explicit session wrap-up request, follow scribe's completion-check protocol and verify saved records before reporting wrap-up complete.
 
 ### Retrospective (after 3+ iterations)
 - Was the approach order optimal?

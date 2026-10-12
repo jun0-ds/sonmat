@@ -10,7 +10,7 @@ Scribe owns one axis of the sonmat system: **everything that should outlive the 
 
 This is a role distinct from detection (guard), comparison (witness), or completeness (punch). Those skills find things. Scribe decides what of what they found is worth keeping, and where it goes.
 
-Scribe is **not** user-invocable (no `/scribe` command). It is a protocol invoked by other skills — autoloop dispatches background scribe at loop exit, guard hands off novel traps and project rules during work, witness verdicts flow into scribe from the `[Judge]` pipeline. `user-invocable: false` is deliberate: scribe does not have a task the user thinks in terms of; it has persistence work that happens because other skills produced findings.
+Scribe is **not** user-invocable (no `/scribe` command). It is a protocol invoked by main and other skills — main dispatches it for a session wrap-up request, autoloop dispatches background scribe at loop exit, guard hands off novel traps and project rules during work, and witness verdicts flow into scribe from the `[Judge]` pipeline. The user asks to wrap up or preserve context; they do not need to name scribe.
 
 ---
 
@@ -20,10 +20,10 @@ Scribe runs in two distinct modes depending on what is being persisted. The dist
 
 | Mode | When | Blocks main? | Operations |
 |---|---|---|---|
-| **Background** | After work completes (loop exit, task completion, session end) | No — main continues interacting with user | Bridge notes, journal appends, progress checkbox updates, witness verdict logging |
+| **Background** | After work completes (loop exit, task completion, session end) | No for ordinary dispatch; verify completion before closing an explicitly wrapped-up session | Bridge notes, journal appends, progress checkbox updates, witness verdict logging |
 | **Synchronous** | During work, when a finding needs user confirmation before writing | Yes — main pauses to get user yes/no | Project rule proposals (writes to `AGENTS.md`), novel trap proposals (writes to memory) |
 
-Background writes are fire-and-forget: dispatch sonmat-scribe agent with artifacts, do not wait. Synchronous writes are confirmation-gated: main itself runs the proposal dialogue inline, because writing declarative files like `AGENTS.md` or memory records must never happen without explicit user approval.
+Ordinary background writes are fire-and-forget: dispatch sonmat-scribe with artifacts and continue interacting. For an explicit session wrap-up request, main waits for the result and verifies the saved records before reporting wrap-up complete. Synchronous writes are confirmation-gated: main itself runs the proposal dialogue inline, because writing declarative files like `AGENTS.md` or memory records must never happen without explicit user approval.
 
 Both modes belong to scribe because the **axis is the same** (persistence of session findings) — only the interaction contract differs. Do not split them into separate skills; that would fragment the persistence axis and leave other skills unsure who to hand off to.
 
@@ -47,13 +47,16 @@ Witness spawn prompts must **never** include bridge-notes, journal excerpts, or 
 
 ### When to dispatch
 
+An explicit request to close or hand off the current session overrides automatic small-task and conversation skip conditions. Recognize the user's intent in context, not a fixed phrase list; explaining or quoting a closing expression is not a request. Main supplies a factual session handoff artifact when there is no code diff. Review what is worth persisting, avoid duplicate records, and report when there is nothing new to save. This request does not authorize new project rules or trap records beyond the existing confirmation protocols.
+
 | Condition | Mode | Functions |
 |-----------|------|-----------|
+| Explicit session wrap-up / handoff request (any task size, including conversation) | Background; verify before closing | bridge + journal as warranted; follow local persistence rules |
 | Loop exit with **keep** | Background | bridge + journal + progress + witness verdict |
 | Loop exit with **discard** | Background | journal only |
 | Non-loop task completed (3+ files changed) | Background | bridge + journal |
 | Non-loop task completed (1-2 files) | — (no dispatch) | overhead > value |
-| Session ending with unfinished context | Background | bridge only |
+| Session ending with unfinished context (automatic dispatch, no explicit wrap-up request) | Background | bridge only |
 | L0 / trivial task | — (no dispatch) | — |
 | **Novel trap detected by guard** (any task size) | **Synchronous** | `novel_trap` — user confirmation, then write to memory |
 | **Project rule pattern detected** (any task size) | **Synchronous** | `project_rule` — user confirmation, then write to `AGENTS.md` |
@@ -68,6 +71,7 @@ Spawn `sonmat-scribe` as a background agent with this prompt structure:
 ## Scribe Dispatch
 
 **Mode**: {bridge | journal | progress | witness_log | all}
+**Completion check**: {verify before closing for explicit session wrap-up | ordinary background}
 **Timestamp**: {ISO 8601, KST}
 
 ### Artifacts
@@ -76,15 +80,17 @@ Spawn `sonmat-scribe` as a background agent with this prompt structure:
 - Loop report: {paste if available, or "N/A"}
 - Test results: {pass/fail summary, or "N/A"}
 - Witness verdicts: {list of verdicts from the [Judge] pipeline this session — e.g. "PASS (iter 1), WARN (iter 2, not-covered-by-tests), PASS (iter 3)". "N/A" if none.}
+- Session handoff: {agreed decisions, corrections, current status, unresolved work with decision owner and resumption conditions, and supporting references; use when there is no code diff}
 
 ### Context hint
 {1-2 sentences about what was done — enough for scribe to write a useful bridge note.
-This is the ONLY conversation context scribe receives. Be precise.}
+Do not send the full conversation or speculate about user motivation.}
 ```
 
 ### After dispatch
 
-- Do NOT wait for scribe to finish. Continue with user interaction.
+- For ordinary background dispatch, continue with user interaction without waiting.
+- For explicit session wrap-up, collect DONE / PARTIAL / SKIP and the file paths written. Verify this session's entries in those files before reporting completion; report unsaved work or no new material explicitly. Dispatch alone is not completion.
 - Scribe writes `bridge-note.md` and `journal.md` to the per-project scribe dir (see File Locations), and `progress.md` to the project root.
 - On next task start, read `bridge-note.md` if it exists. Use it as context, then proceed.
 
