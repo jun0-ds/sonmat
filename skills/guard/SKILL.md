@@ -52,16 +52,16 @@ Before any commit, check in order:
 
 ## 3. Novel Trap Detection
 
-When a verification failure is discovered that is NOT covered by existing hints or memory, guard flags it as a **novel trap** — a class of failure that existing discipline and memory did not anticipate. Guard's job stops at detection and flagging; recording, abstracting, and persisting the trap belong to scribe.
+When a verification failure is discovered, check whether an existing hint or memory covers it. An uncovered failure is a **novel trap**; a covered failure may mean the existing hint was not found, loaded, or applied. Both go to scribe's family check. Guard's job stops at detection and flagging; recording, abstracting, and deciding whether to revise or add a lesson belong to scribe.
 
 ### What guard does
 
-1. **Detect**: a verification failure occurs, and the failure pattern does not match any existing hint or memory entry.
-2. **Flag** it in the output as `Novel trap` with a 1-2 line description: what happened, why existing discipline didn't catch it.
-3. **Dispatch to scribe** at the end of the current task with the trap payload (pattern, context, what-would-have-caught-it). See `skills/scribe/SKILL.md` §Novel Trap Recording.
-4. **Not optional**: guard must dispatch. If a novel trap is detected and not dispatched, the verification layer is not complete.
+1. **Detect**: a verification failure occurs. Note any existing hint that appears to cover it and what is known about its loading or application; do not invent the cause.
+2. **Flag** it with a 1-2 line description: what happened and what could have caught it. Use `Novel trap` for an uncovered pattern or `Existing hint did not fire` for a covered one.
+3. **Dispatch to scribe** at the end of the current task with the payload (pattern, context, catch-signal, relevant existing hint if any). See `skills/scribe/SKILL.md` §Novel Trap Recording. Scribe checks the family before proposing a new record or a hint revision.
+4. **Not optional**: guard must dispatch either kind. Detection without that handoff leaves the verification layer incomplete.
 
-Guard does **not** write memory files itself, does not propose formats to the user, and does not manage the sonmat memory directory. All of that is scribe's territory — guard's role is to notice that something new happened and hand the raw signal off.
+Guard does **not** write memory files itself, does not propose formats to the user, and does not manage the sonmat memory directory. All of that is scribe's territory — guard hands off the raw failure signal, whether the pattern is new or already covered.
 
 ---
 

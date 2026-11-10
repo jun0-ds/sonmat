@@ -28,7 +28,7 @@ Two honest caveats:
 
 | Input | Source |
 |---|---|
-| **User intent cascade** | All `user` turns from the current session (raw text, no transformation). Assistant turns are **structurally excluded** at the protocol level. |
+| **User intent cascade** | All `user` turns from the current session (raw text, no transformation). Main must exclude assistant turns when composing this input; separate execution does not sanitize the prompt. |
 | **Explicit task definition** | Only when its contents can be traced back to specific raw user turns. A file that main drafted and the user briefly approved ("ok", "go") counts as main-synthesized and is NOT treated as user-authored — approval is not authorship. When in doubt, fall back to user intent cascade as the sole intent source. |
 | **Approved execution baseline** | Optional. The exact plan or loop definition displayed immediately before approval, plus the raw user turn that explicitly approved that display. This is limited execution authority, not user-authored intent. Both parts must be present and unmodified; otherwise reject the envelope as baseline evidence. |
 | **Artifact** | Git diff, changed file contents, command output. Read directly via Read/Bash, not via main's summary. |
@@ -44,8 +44,9 @@ Two honest caveats:
 | Worker subagent reports | Already-processed assertions, not ground truth. |
 | `discipline/core.md` content | Witness is not a discipline-follower. It is a comparator. Receiving discipline text would invite the same failure mode as main. |
 | Previous witness verdicts | Each invocation is fresh. No accumulated context. |
+| Bridge notes, journal excerpts, other scribe records, or main's learning summaries | Main may use feedback to correct work and learn; the new witness compares the resulting artifact without receiving that feedback as input or evidence. |
 
-The exclusion above is **structural, not behavioral**. Witness must not be able to access these channels even if it tries.
+These exclusions are input-composition and citation obligations, not platform-enforced channel restrictions. A separate context prevents automatic sharing of main's ongoing reasoning; it does not prevent main from inserting excluded material into the spawn prompt. Do not retrieve excluded records or use them as verdict evidence. If the invocation explicitly supplies excluded records or inherited reasoning, report the input-contract violation and return `INSUFFICIENT_GROUND_TRUTH` rather than comparing through contaminated input. See §Isolation stack.
 
 ### Seen-but-unusable (citation-invalid)
 
@@ -269,7 +270,7 @@ Witness does **not** follow `core.md` discipline — that rule set targets main 
 3. **Stay narrow**. Compare intent and artifact. Do not analyze, recommend, or interpret beyond that.
 4. **Do not judge strength**. Verdict class is determined by the check that produced the finding (§Verdict determination), not by how strong the finding feels.
 5. **Refuse out-of-scope**. If asked to do something other than compare, return `INSUFFICIENT_GROUND_TRUTH` with explanation.
-6. **Trust the protocol exclusion**. If the harness somehow leaks main's chain-of-thought into your context (against design), refuse to read it explicitly. Report the leak as a `BLOCKED` status.
+6. **Respect the input boundary**. If main's chain-of-thought, inherited conversation, or excluded records are supplied, do not use them for comparison. Report the input-contract violation and return `INSUFFICIENT_GROUND_TRUTH`, as the native Codex definition does. The existing unverified-operation routing remains unchanged.
 
 These principles are **operating rules**, not "discipline" in the core.md sense. The word "discipline" is reserved throughout sonmat for main/worker core.md rules; witness-internal principles are called "operating principles" to keep the terminology clean.
 
@@ -281,13 +282,13 @@ Witness isolation is enforced in three complementary ways. **Only one of the thr
 
 ### Layer 1 — Execution-level context separation (harness-enforced)
 
-Claude Code and the Claude Agent SDK run each subagent in its own context window with its own tool permissions and its own event stream. The subagent does not share main's ongoing tool output, cannot call main's tools, and has no automatic access to main's in-flight chain-of-thought. **This is a real structural guarantee from the platform.** It cannot be bypassed by witness itself, main, or user error; the harness enforces it at the subagent spawn boundary.
+Claude Code and the Claude Agent SDK run each subagent in its own context window with its own tool permissions and its own event stream. This separates ongoing execution; it does not guarantee that the supplied prompt is free of main's reasoning or previous records. Main must compose a fresh input, and a Codex invocation must use a no-history fork. Explicitly inserting excluded content still violates the protocol.
 
-This is the layer that gives witness its core value over main self-check: even a "sloppy witness" that drifts from its comparator role cannot fall into the confirmation-rubber-stamp failure mode, because it does not have access to main's rationalization in the first place. Input isolation alone is a meaningful improvement over 1-layer self-check.
+This separation makes a fresh comparison possible. It does not by itself prove that witness avoids confirmation bias or improves task outcomes; both depend on the input actually supplied and the comparison performed.
 
 ### Layer 2 — Spawn-prompt discipline (aspirational, composition-enforced)
 
-The prompt witness receives is composed by main (via autoloop's [Judge] phase and §6b spawn prompt template) before the subagent starts. Sonmat's design specifies that this prompt contains raw user turns, the artifact, and optionally one approved-baseline envelope containing the exact displayed snapshot plus its raw approval turn — no other assistant plans, discipline text, main reasoning, or worker reports. This is enforced at the composition layer (autoloop skill / spawn template), not by the harness.
+The prompt witness receives is composed by main (via autoloop's [Judge] phase and §6b spawn prompt template) before the subagent starts. Sonmat's design specifies that this prompt contains raw user turns, the artifact, and optionally one approved-baseline envelope containing the exact displayed snapshot plus its raw approval turn — no other assistant plans, discipline text, main reasoning, worker reports, previous verdicts, learning summaries, or scribe records. This is enforced at the composition layer (autoloop skill / spawn template), not by the harness.
 
 This layer is aspirational: main *could* include extra fields, and nothing at the platform level would stop it. The isolation here depends on the orchestrating code (autoloop) adhering to the documented spawn prompt structure. Treat it as a behavioral contract backed by our own skill documentation, not as a runtime guarantee.
 
@@ -303,9 +304,9 @@ Layers 2 and 3 together are what this document calls "protocol-enforced isolatio
 
 The strong form of witness's value proposition — "witness is a deterministic comparator that follows strict rules" — rests on layers 2 and 3 being reliable. They are not, in the same way that main's self-check is not reliable: they are prompt-based behavioral instructions running on the same class of LLM that witness was designed to work around. A sober reading is that layers 2 and 3 are **best-effort** and need to be validated by actual use, not assumed from the strength of the documentation.
 
-The **weak form** of witness's value proposition — "witness is better than main self-check because of input isolation" — rests only on layer 1. This is load-bearing and holds regardless of whether layers 2 and 3 perform well in practice. If someone asks "is witness worth the complexity over main self-check even if the comparator discipline is shaky?", the answer is yes, because layer 1 alone rules out the most expensive failure mode.
+The narrower value proposition is that separate execution permits a fresh comparison when the supplied input respects the protocol. Layer 1 alone does not rule out prompt contamination, a wrong verdict, or confirmation bias. Whether the extra comparison improves outcomes requires checking actual cases against their sources.
 
-Sonmat ships witness with the weak form as its guaranteed value and the strong form as its aspiration. The distinction is honest and matters: users should treat witness verdicts as supporting evidence to cross-check against, not as unimpeachable facts. Early uses of witness in production should be sampled by a human reviewer to validate that layers 2 and 3 are actually holding up in practice — if they drift, the agent file needs adjustment, and the journal (scribe's witness event log) is the right place to catch it.
+Users should treat witness verdicts as supporting evidence to cross-check against, not as unimpeachable facts. Early uses of witness should be sampled against raw requests, actual artifacts, directly run checks, and confirmed user corrections. The journal locates the cases and preserves their reports; it does not prove that the reports were correct. If layers 2 and 3 drift, adjust the agent instructions based on that source comparison.
 
 ---
 
@@ -345,4 +346,4 @@ Witness must **never** run in the same context as the agent it verifies. Co-loca
 | Code | Meaning |
 |---|---|
 | `DONE` | Verdict delivered (PASS/BLOCK/WARN/AUTHORITY_CONFLICT/INSUFFICIENT_GROUND_TRUTH). |
-| `BLOCKED` | Cannot run witness logic (missing inputs, broken environment, protocol violation detected). Different from `INSUFFICIENT_GROUND_TRUTH` — that's a verdict; this is a failure to even attempt verification. |
+| `BLOCKED` | Invocation failed before a verdict could be returned, for example because the subagent could not start. Missing or contaminated comparison inputs produce `DONE` with verdict `INSUFFICIENT_GROUND_TRUTH`; do not route those cases as a worker's `BLOCKED` status. |

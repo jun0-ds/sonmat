@@ -43,7 +43,7 @@ Witness's comparator discipline is prompt-level, not runtime-enforced (see `agen
 - Does it pause on AUTHORITY_CONFLICT instead of choosing a refinement target?
 - Does it respect the "suspect first" default posture?
 
-Data source: `journal.md` witness event log. Scribe captures witness verdicts exactly for this purpose.
+Case index: the `journal.md` witness event log locates reports and their source references. Check each sampled verdict against the raw request, the artifact at that time, directly run tests, or confirmed user corrections. A journal's claim that verification happened is not evidence that the verdict was correct. Separate invocation, instruction loading, compliance, and task correctness; distinguish unmeasured from zero.
 
 Feedback loop: if drift is observed, the fix lives in `agents/sonmat-witness.md` agent file. Adjust the prompt, not the code around it.
 

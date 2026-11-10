@@ -1,6 +1,6 @@
 ---
 name: autoloop
-description: 범용 자율 루프 — 기획→정의→실행→평가→판단→기록→반복. 에스컬레이션 판단 포함.
+description: 범용 자율 루프 — 기획→정의→실행→평가→판단→기록→반복. 필요하면 에스컬레이션 여부를 판단한다.
 user-invocable: true
 ---
 
@@ -160,8 +160,8 @@ This is the structural equivalent of the "forest review" that main alone cannot 
 - Include 1-2 line summary in loop report.
 
 ### Memory update (on loop exit)
-After retrospective, check: did this loop reveal a lesson not already in sonmat memory?
-- If yes → dispatch to scribe as a novel-trap-like payload (pattern, context, catch-signal). Scribe handles the abstraction, user confirmation, and memory write. See `skills/scribe/SKILL.md` §Novel Trap Recording.
+After retrospective, check: did this loop reveal an uncovered failure or a failure that an existing hint should have caught?
+- If yes → dispatch to scribe as a novel-trap-like payload (pattern, context, catch-signal, relevant existing hint if any). Scribe's family check distinguishes a new lesson from a loading, activation, or application problem, then handles abstraction, user confirmation, and any memory or hint change. See `skills/scribe/SKILL.md` §Novel Trap Recording.
 - If multiple project lessons have accumulated, check if any should be promoted to universal memory or, per scribe §Novel Trap Recording step 2 (family check), to a hint — this is also scribe's dispatch.
 
 
@@ -346,7 +346,7 @@ Spawn prompt composition is different from worker's:
 [5. Principle candidate] — (optional, principle-coverage only) literal phrase anchored to user turns
 ```
 
-The approved-baseline envelope is the only assistant-authored plan content allowed. Include it only when the approval turn unambiguously refers to that exact displayed snapshot. **Never include**: other assistant plans or summaries, discipline/core.md, hints.md, main's chain-of-thought, main's application notes, worker reports, or commit messages as separate inputs. Comments and commit messages embedded in the artifact are visible but citation-invalid (see witness.md §Seen-but-unusable).
+The approved-baseline envelope is the only assistant-authored plan content allowed. Include it only when the approval turn unambiguously refers to that exact displayed snapshot. **Never include**: other assistant plans or summaries, discipline/core.md, hints.md, main's chain-of-thought, main's application notes or learning summaries, worker reports, previous witness verdicts, bridge notes, journal excerpts, other scribe records, or commit messages as separate inputs. Main may use feedback to correct the artifact; the new witness compares that artifact without receiving the earlier feedback. A separate context or no-history fork does not sanitize material explicitly inserted into the prompt. Comments and commit messages embedded in the artifact are visible but citation-invalid (see witness.md §Seen-but-unusable).
 
 #### Witness verdict → loop routing
 

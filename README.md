@@ -4,7 +4,7 @@
 
 > Your AI is confident. Your AI is wrong. And neither of you noticed.
 
-손맛은 AI와 사용자 양쪽에 **의심하고 검증하는 습관**을 심는 Claude Code·Codex 플러그인입니다.
+손맛은 AI와 사용자가 함께 **의심하고 검증하는 습관**을 기르도록 돕는 Claude Code·Codex 플러그인입니다.
 
 ## What this is
 
@@ -14,7 +14,7 @@ Your AI delivers answers with confidence but no verification. You accept them be
 
 sonmat breaks this cycle:
 
-- **For the AI** — injects a verification discipline into every agent, including subagents. Break it (find where it fails), Cross it (verify independently), Ground it (execute, don't assume).
+- **For the AI** — engages a verification discipline in the main session and every worker. Witness instead follows its own independent-comparison rules. Break it (find where it fails), Cross it (verify independently), Ground it (execute, don't assume).
 - **For you** — surfaces the AI's reasoning transparently so you can actually judge instead of just trusting.
 
 That's it. Everything else is implementation.
@@ -43,7 +43,7 @@ The hook engages the discipline through session context without editing `AGENTS.
 
 ### Reinstall
 
-스킬이 보이지 않을 때 (터미널에서 직접 실행):
+스킬이 보이지 않으면 터미널에서 다음 명령을 직접 실행하세요.
 
 ```bash
 # 재설치
@@ -51,7 +51,7 @@ claude plugin marketplace add jun0-ds/sonmat
 claude plugin install sonmat@sonmat
 ```
 
-위 방법이 안 되면 수동 클론 후 등록:
+위 방법으로 해결되지 않으면 저장소를 직접 복제한 뒤 플러그인을 등록하세요.
 
 ```bash
 rm -rf ~/.claude/plugins/marketplaces/sonmat
@@ -59,7 +59,7 @@ git clone https://github.com/jun0-ds/sonmat.git ~/.claude/plugins/marketplaces/s
 claude plugin install sonmat@sonmat
 ```
 
-자세한 진단 방법은 [Troubleshooting](docs/troubleshooting.md) 참고.
+자세한 진단 방법은 [문제 해결 안내](docs/troubleshooting.md)를 참고하세요.
 
 ### Platform notes
 
@@ -70,7 +70,7 @@ sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is
 - The script finds Git for Windows bash (`C:\Program Files\Git\bin\bash.exe`) or any bash on PATH
 - No extra setup needed if Git for Windows is installed
 
-> **Git Bash (MSYS2) 주의**: Git Bash에서 `/plugin install` 등 슬래시 명령 실행 시 MSYS2가 경로를 자동 변환하여 `C:/Program Files/Git/plugin`처럼 깨질 수 있다. `MSYS_NO_PATHCONV=1` 환경변수를 설정하거나, WSL2 사용을 권장한다.
+> **Git Bash (MSYS2) 주의**: Git Bash에서 `/plugin install`처럼 슬래시로 시작하는 명령을 실행하면 MSYS2가 이를 `C:/Program Files/Git/plugin`과 같은 경로로 바꿀 수 있습니다. `MSYS_NO_PATHCONV=1`로 경로 변환을 끄거나 WSL2를 사용하세요.
 >
 > ```bash
 > # Git Bash에서 경로 변환 비활성화
@@ -80,7 +80,7 @@ sonmat works on both Windows and Linux/macOS. The hook layer (`run-hook.cmd`) is
 **Windows (WSL2) — recommended**
 - Claude Code runs inside WSL2, so hooks execute as plain bash
 - Paths stay Linux-native (`~/.claude/...`) — no cross-filesystem issues
-- Git Bash의 MSYS2 경로 변환 문제가 없음
+- Git Bash의 MSYS2 경로 변환 문제가 발생하지 않습니다.
 - `settings.json` hooks should point to the bash script directly:
   ```json
   {
@@ -165,7 +165,7 @@ Codex uses the same SessionStart hook but follows a different branch. It never c
 
 ```
 sonmat/
-├── skills/          # autoloop, guard, plan, inspect
+├── skills/          # autoloop, guard, inspect, punch, devil, scribe
 ├── discipline/      # core.md (verification) + hints.md (domain traps)
 ├── agents/          # Claude Code worker, witness, and scribe definitions
 ├── codex/agents/    # Codex-native custom-agent definitions
@@ -190,7 +190,7 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 |--------|---------------|
 | superpowers TDD/debug/review | `discipline/core.md` + `hints.md` |
 | superpowers brainstorming | `skills/autoloop/` planning questions |
-| GSD spec → plan → execute | `skills/plan/` + `skills/autoloop/` |
+| GSD spec → plan → execute | `skills/autoloop/` planning and execution phases |
 | karpathy-skills principles | `discipline/core.md` |
 
 ## FAQ
@@ -199,7 +199,7 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 A: sonmat is a Claude Code and Codex plugin that builds verification habits into AI-human collaboration. It provides six reactive checking axes — guard, inspect, witness, punch, devil's advocate, and scribe — so that errors in AI outputs get caught before they compound. The name (손맛, "hand taste") refers to the unique quality a skilled cook brings — the gap between generic output and verified, grounded work.
 
 **Q: How is sonmat different from other Claude Code plugins like superpowers or ultrathink?**
-A: The key difference is discipline propagation. Every popular plugin keeps its rules in the main session only — subagents and workers start blank, with no verification rules. sonmat injects discipline into every agent at dispatch time, so verification works at every level, not just the top.
+A: The key difference is discipline propagation. sonmat includes the verification discipline when dispatching workers. Witness receives its separate comparison rules and excludes the executing agent's reasoning.
 
 **Q: Does sonmat work with Codex CLI or Gemini CLI?**
 A: Yes. Codex has a native plugin manifest, a harness-aware SessionStart branch, and optional native custom agents. Gemini CLI still uses the one-time manual setup because sonmat does not ship a Gemini-specific adapter.
@@ -223,11 +223,22 @@ When it contains exactly `on`, the SessionStart hook checks for a new version at
 A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against raw user intent and the approved execution baseline. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
 
 **Q: Can I use only some of the skills?**
-A: Yes. Each skill is independent — use `/guard` before commits, `/punch` before delivery, or `/devil` before big decisions. You don't have to use all six at once.
+A: Yes. Each axis has its own trigger. Guard runs in the main session automatically; you can invoke `/punch` before delivery or `/devil` before big decisions. You don't have to use all six at once.
 
 ## Troubleshooting
 
-설치 문제, Windows 경로 변환, 스킬 미표시 등 → [docs/troubleshooting.md](docs/troubleshooting.md)
+설치가 실패하거나 Windows 경로가 변환되는 문제, 스킬이 보이지 않는 문제는 [문제 해결 안내](docs/troubleshooting.md)를 참고하세요.
+
+## Development checks
+
+Run these from the repository root in Linux or WSL:
+
+```bash
+bash tests/test-codex-support.sh
+bash tests/test-update-notify.sh
+```
+
+The support tests use `uv run --no-project python` to parse actual hook output and check that path text survives JSON encoding. These parser dependencies are only for tests; the hook itself uses Bash. The path fixtures include control characters that Windows native filenames do not allow, so these checks do not certify Windows native behavior.
 
 ## Attribution
 

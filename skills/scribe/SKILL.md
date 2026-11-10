@@ -31,15 +31,15 @@ Both modes belong to scribe because the **axis is the same** (persistence of ses
 
 ## Isolation boundaries (witness protection)
 
-Scribe writes into channels that future sessions will read. This creates a potential re-injection path: if witness findings end up in bridge-notes that main reads next session, witness's protocol isolation would be defeated on the second run.
+Main may use witness feedback to correct an artifact and learn from the result. Isolation applies to each new witness invocation: it compares the raw user request, a valid approved baseline when present, and the actual artifact without receiving earlier verdicts or the executor's interpretation. Main learning from feedback does not itself break that boundary.
 
-**The isolation boundary**:
+The isolation boundary:
 
-- **Bridge notes** (read by main on next task start) must **not** contain witness findings, raw witness verdicts beyond a compact PASS/WARN/BLOCK/AUTHORITY_CONFLICT marker, or anything main-synthesized from witness output. Main is allowed to see that witness ran and what the overall verdict was — it is not allowed to re-enter witness's citation content through the bridge-note channel.
-- **Journal** (not auto-loaded, user-readable only) is the durable place where witness findings live. Journal is scribe's append-only record; witness findings go there in full.
-- **AGENTS.md Project Rules** and **memory trap records** are user-facing reference files, not main's automatic context. They are safe targets for synchronous writes.
+- Bridge notes, read by main on next task start, may contain a compact PASS/WARN/BLOCK/AUTHORITY_CONFLICT marker, separately verified correction results, approved decisions, and unresolved status. Keep raw findings, quoted verdict rationale, and summaries that merely repeat that rationale in the journal; link there when detail is needed.
+- The journal holds detailed witness findings and their citations. It is not auto-loaded, but main may read it for a retrospective or planning under §Journal Access. A recorded verdict remains a report to check against its sources, not proof that the verdict was correct.
+- AGENTS.md Project Rules, approved memory records, and promoted hints can reach main and workers through their normal loading paths. AGENTS.md is loaded natively by Codex. Persisting or revising these rules still requires the existing confirmation and family-check procedures; a witness finding alone does not authorize a new rule.
 
-Witness spawn prompts must **never** include bridge-notes, journal excerpts, or any scribe-managed file as input. Witness receives raw user turns, the artifact, and optionally one approved-baseline envelope containing the exact displayed plan plus its raw approval turn; scribe-managed files are outside the witness input contract. This boundary is enforced by autoloop's Task-tool spawn composition (§6b Witness dispatch in `skills/autoloop/SKILL.md`): the spawn prompt template explicitly lists what goes in, and bridge-notes / journal are not in that list. Scribe carries the policy responsibility for not authoring the content that would then need to be excluded — if scribe ever writes witness content into a channel that flows back to main, the isolation is broken at the composition layer, even if the spawn template excludes it.
+Witness spawn prompts must never include previous verdicts, main's interpretations or learning summaries, worker reports, bridge notes, journal excerpts, or other scribe records. Witness receives raw user turns, the artifact, and optionally one approved-baseline envelope containing the exact displayed plan plus its raw approval turn. Main must compose that fresh input under §6b Witness dispatch in `skills/autoloop/SKILL.md`; a separate context or no-history fork does not prevent main from explicitly inserting excluded material. Input composition and citation rules are protocol obligations, not a platform guarantee. See [the feedback-boundary decision](../../docs/decisions/2026-11-10-feedback-and-witness-input-boundary.md).
 
 ---
 
@@ -137,7 +137,9 @@ Read it only when:
 
 When a witness verdict is included in the dispatch artifacts, scribe records it as a discrete journal line (not just a summary). `BLOCK`, `WARN`, and `AUTHORITY_CONFLICT` events are particularly valuable as learning signals — they represent moments where main's execution diverged from raw user intent or the approved baseline, and are worth reviewing in retrospectives. `PASS` events record as a single compact line.
 
-Witness verdicts go to the journal only. They do **not** go to bridge notes. The full rationale for this routing is in §Isolation boundaries at the top of this file — the short version is that bridge notes flow back into main's context on the next session, which would defeat witness's isolation guarantee on subsequent runs. Journal is read-on-demand and does not auto-inject, so it is safe.
+Detailed findings and their citations go to the journal. A compact verdict marker may go to the bridge along with separately verified correction results, approved decisions, and unresolved status. These records support main's follow-up and retrospective; none are inputs to a new witness invocation. See §Isolation boundaries.
+
+For an actual case being compared, record the original request and artifact references, the source/test/confirmed user correction used to check the verdict (or "unverified"), the observed follow-up state, and any observed recurrence or cost. Add only fields supported by the case; do not expand every PASS into a report. Invocation, instruction loading, compliance, and task correctness are different observations, and unmeasured is not zero.
 
 ---
 
@@ -173,7 +175,7 @@ Guard (or main observation) dispatches a project-rule proposal to scribe when an
 3. **Write** to the `## Project Rules` section of the project's `AGENTS.md` only after user confirms. Create the file and section if they do not exist.
 4. **Never write without confirmation**. Project rules are declarative and persistent; a wrong one is expensive to debug later.
 
-This is how the "빈 공간" shrinks over time — rules accumulate from practice, not declaration. But the accumulation itself is scribe's axis: observing patterns, abstracting them, persisting the abstraction.
+Project rules accumulate from observed practice. Scribe owns that accumulation: observing patterns, abstracting them, and persisting the abstraction.
 
 ---
 
@@ -186,7 +188,7 @@ The two flavors:
 - **Verification failure** (classic novel trap): discipline ran but missed a real problem. The catch-signal is what would have caught it earlier.
 - **Spec gap** (improvisation surfacing): discipline didn't fail; the spec/rule was simply silent on the case, and the actor had to improvise. The catch-signal is what kind of case the spec should have covered.
 
-Both reach scribe via the same channel — guard for the first, main observation or autoloop retrospective for the second. The Wehrmacht *Gefechtsbericht* lesson: a successful improvisation that revealed a doctrinal gap is just as valuable as a verification failure, and both belong in the next edition of the rule book.
+Both reach scribe via the same channel — guard for the first, main observation or autoloop retrospective for the second. Also send failures covered by an existing hint: scribe's family check decides whether the hint was missed or needs a different activation or loading path. A witness finding is a candidate signal, not an automatic policy change; check its cited source, raw user intent, and current state before abstracting a lesson. The Wehrmacht *Gefechtsbericht* lesson: a successful improvisation that revealed a doctrinal gap is just as valuable as a verification failure, and both belong in the next edition of the rule book.
 
 ### What scribe receives from guard (or main observation)
 

@@ -49,6 +49,7 @@ Rules:
 - Overwrite the previous bridge-note (not append). One note, always current.
 - If nothing is worth carrying forward, write "No carryover." — don't leave a stale note.
 - Keep it under 20 lines. This will be read into a future context window.
+- Keep raw witness findings and their quoted rationale in the journal. The bridge may carry a compact verdict marker, separately verified correction results, approved decisions, and unresolved status; do not use a summary to move the raw rationale into the bridge.
 
 ### 2. Journal — Post-Work Summary
 
@@ -68,6 +69,13 @@ Entry format:
 Rules:
 - One entry per task/loop, not per commit.
 - If the journal exceeds 50 entries, archive older entries to `journal-archive.md` in the scribe dir.
+- Record detailed witness findings and their citations here. Main may read them for follow-up or retrospective and verify them against the source; a logged verdict is not proof of correctness. For cases under comparison, preserve request/artifact references, independent verdict checks, follow-up state, and observed recurrence/cost when available. Do not require extra fields for every PASS or turn unmeasured values into zero.
+
+### Feedback and new witness inputs
+
+Main may use witness feedback to correct work and learn. A new witness must compare fresh raw user turns, a valid approved-baseline envelope when present, and the actual artifact. Never pass previous verdicts, main's interpretations or learning summaries, worker reports, bridge notes, journal excerpts, or other scribe records into that invocation.
+
+Before proposing a rule from a witness finding, recheck the source, raw user intent, and current state, then follow the family-check and user-confirmation procedures in [scribe's recording protocol](../skills/scribe/SKILL.md). An existing hint that failed to fire is part of that same review. `AGENTS.md` and promoted hints can be loaded by main/workers; do not describe them as outside automatic context. No-history or separate-context execution does not prevent excluded material from being explicitly inserted into a prompt.
 
 ### 3. Progress — Lightweight Tracking (absorbed from plan skill)
 
