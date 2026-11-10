@@ -171,8 +171,16 @@ for msg in "${MSGS[@]}"; do
   CONTEXT="${CONTEXT}${msg}"
 done
 
-# Escape for JSON
-CONTEXT=$(echo "$CONTEXT" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g')
+# JSON strings must escape all U+0001–U+001F control characters as well as
+# quotes and backslashes. NUL cannot occur in Bash strings or Unix paths.
+CONTEXT="${CONTEXT//\\/\\\\}"
+CONTEXT="${CONTEXT//\"/\\\"}"
+for ((control_code = 1; control_code < 32; control_code++)); do
+  printf -v control_char '\\%03o' "$control_code"
+  printf -v control_char '%b' "$control_char"
+  printf -v json_escape '\\u%04x' "$control_code"
+  CONTEXT="${CONTEXT//"$control_char"/"$json_escape"}"
+done
 
 cat << EOF
 {
