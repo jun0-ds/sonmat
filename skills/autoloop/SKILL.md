@@ -314,6 +314,24 @@ Spawn sonmat-worker with the prompt from section 4 (Discipline Injection). Worke
 - Same discipline, different task instructions.
 - Wait for all → check conflicts → merge or escalate to user.
 
+#### Dispatch board (2+ subagents)
+
+Keep a board only when two or more subagents run at once or in a chain (e.g. research worker → implementation worker → witness → scribe). Skip it for L0–L2 single dispatch. Write it as one markdown table in the conversation — no new file, tool, or JSON ledger — and update it only when a unit changes state.
+
+```markdown
+Dispatch board — G1 (requirement as of <turn>)
+| Unit (ID · write scope) | Status | Result (one-line pointer) | Cross-impact / open |
+|---|---|---|---|
+| research-a · WRITE notes-a.md | VERIFIED G1 | 12 cases → notes-a.md §2 | ! overlaps research-b on 2 cases — dedupe at merge |
+| impl · WRITE src/auth/ | RETURNED G1 | token refresh patched | ! not run against staging |
+```
+
+- **Status**: `DISPATCHED` → `RETURNED` (report received, not checked) → `VERIFIED` (you checked the artifact) / `BLOCKED` (reason) / `CANCELED`. A worker's `DONE` makes a unit `RETURNED`, not `VERIFIED`.
+- **Generation**: when the requirement changes mid-flight, bump `G1` → `G2`. A result from an older generation is re-judged before it is merged.
+- **`!` items**: put merge constraints, effects on a neighbouring unit, and unverified premises in the last column, so they are not lost behind a completion report. Resolve or report every `!` before delivery.
+
+The board stays small on purpose: a tracker that costs more to update than the work it tracks gets skipped and then misreports state.
+
 #### Worker status → loop routing
 
 | Status | Loop action |

@@ -165,7 +165,7 @@ Codex uses the same SessionStart hook but follows a different branch. It never c
 
 ```
 sonmat/
-├── skills/          # autoloop, guard, inspect, punch, devil, scribe
+├── skills/          # autoloop, guard, inspect, punch, devil, scribe, requery
 ├── discipline/      # core.md (verification) + hints.md (domain traps)
 ├── agents/          # Claude Code worker, witness, and scribe definitions
 ├── codex/agents/    # Codex-native custom-agent definitions
@@ -222,8 +222,11 @@ When it contains exactly `on`, the SessionStart hook checks for a new version at
 **Q: What are the six verification axes?**
 A: **Guard** blocks bad commits (sensitive files, broken tests). **Inspect** checks blast radius on shared code, auth, or infra changes. **Witness** independently compares what was built against raw user intent and the approved execution baseline. **Punch** audits completeness — finds omissions and leftover artifacts. **Devil** surfaces counter-arguments before irreversible decisions. **Scribe** persists findings after work completes.
 
+**Q: What does requery do?**
+A: Requery is the retrieval side of the same loop. When a first search of indexes, headers, or `grep` misses, it rephrases the question by synonym, time frame, abstraction level, or viewpoint and searches again, from structured to unstructured records. It adds no index or tool; scribe writes the records that requery reads. Invoke `/requery` when a past decision or handoff can't be found.
+
 **Q: Can I use only some of the skills?**
-A: Yes. Each axis has its own trigger. Guard runs in the main session automatically; you can invoke `/punch` before delivery or `/devil` before big decisions. You don't have to use all six at once.
+A: Yes. Each axis has its own trigger. Guard runs in the main session automatically; you can invoke `/punch` before delivery or `/devil` before big decisions, and `/requery` when a search misses. You don't have to use them all at once.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 {
   "name": "sonmat",
-  "version": "0.23.4",
+  "version": "0.24.0",
   "description": "External verification system with six verification axes and autonomous-loop orchestration.",
   "author": {
     "name": "jun0-ds",
@@ -13,7 +13,7 @@
   "interface": {
     "displayName": "sonmat",
     "shortDescription": "Verification discipline for agentic work",
-    "longDescription": "Six verification axes, a disciplined autonomous loop, and Codex-native worker, witness, and scribe agent definitions.",
+    "longDescription": "Six verification axes, a disciplined autonomous loop, a requery retrieval cycle, and Codex-native worker, witness, and scribe agent definitions.",
     "developerName": "jun0-ds",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
