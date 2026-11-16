@@ -142,7 +142,7 @@ Install sonmat into your environment.
    so you can use them when needed.
 ```
 
-Claude Code와 Codex는 플러그인 어댑터가 규율을 불러온다. 다른 CLI에서는 위 지시를 받은 AI가 스스로 설정한다.
+Claude Code와 Codex에서는 플러그인 어댑터가 규율을 불러온다. 다른 CLI에서는 위 지시를 받은 AI가 스스로 설정한다.
 
 ## 설계 철학
 

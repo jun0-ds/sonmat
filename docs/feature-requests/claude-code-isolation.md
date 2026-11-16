@@ -1,27 +1,27 @@
-# 기능 요청 — 검증용 서브에이전트를 위한 Claude Code 격리 기본 기능
+# Feature Request — Claude Code isolation primitives for verifier subagents
 
-**날짜**: 2026-04-15
-**배경**: sonmat-witness를 설계하면서 나온 요청이다. sonmat-witness는 산출물이 의도와 맞는지 비교하는 구조적으로 격리된 비교자로, 실행한 에이전트의 추론에 오염되지 않은 채 커밋을 사용자 발화 원문에 대조한다.
+**Date**: 2026-04-15
+**Context**: Designing sonmat-witness, a structurally isolated intent-artifact comparator that verifies commits against raw user turns without being contaminated by the executing agent's reasoning.
 
-## 빈틈
+## The gap
 
-두 번째 에이전트가 첫 번째 에이전트의 작업을 사용자의 원래 의도에 대조하는 검증 구조를 만들려면 세 가지 기능이 필요하다. 지금의 Claude Code / Claude Agent SDK는 그중 하나를 일부만 지원한다.
+Building a verification architecture where a second agent checks the first agent's work against the user's original intent requires three capabilities. Current Claude Code / Claude Agent SDK supports part of one.
 
-| 기능 | 현재 상태 | sonmat-witness에 필요한 정도 |
+| Capability | Current status | Sonmat-witness need |
 |---|---|---|
-| 서브에이전트와 부모 에이전트 사이의 **실행 수준 컨텍스트 격리** | ✅ 지원 | 쓰고 있음 |
-| **추론 수준 컨텍스트 격리** — 서브에이전트가 부모 에이전트의 시스템 프롬프트, 이전 도구 출력, 진행 중인 사고 과정을 보지 못하게 막기 | ❌ 문서화된 방법 없음 | 구조적 격리에 필요 |
-| **서브에이전트 중첩 위임** — 서브에이전트가 자기 아래 서브에이전트를 띄우기 | ❌ 명시적으로 금지됨 ([multi-agent 문서](https://platform.claude.com/docs/en/managed-agents/multi-agent.md)) | 검증자 위에 조율자-worker 층을 두려면 필요 |
-| **세션 수준 의도 추출 층** — 메인 세션이 처리하기 전에 사용자 발화를 읽고, 격리된 검증자에게 보낼 수 있는 구성 요소 | ❌ 문서에 그런 개념 없음 | witness의 입력을 준비하는 일에서 메인 세션을 빼려면 필요 |
-| **PreToolUse hook → 동기적인 서브에이전트 판정 → 거부** 파이프라인 | ❌ 문서화되지 않음. agent hook은 `Stop` 이벤트에서만 예시가 있음 | ~~커밋 관문에서 막으려면 필요~~ — 다시 생각해 보니 필요 없다. autoloop의 [Judge] 단계가 Task 도구로 witness를 띄우고, 강제는 autoloop의 다른 단계와 마찬가지로 규율 수준에서 한다 |
+| **Execution-level context isolation** between subagent and parent | ✅ Supported | Used |
+| **Reasoning-level context isolation** — preventing the subagent from seeing parent's system prompt, prior tool outputs, or in-flight chain-of-thought | ❌ No documented mechanism | Required for structural isolation |
+| **Nested subagent delegation** — a subagent spawning its own sub-subagents | ❌ Explicitly forbidden ([multi-agent docs](https://platform.claude.com/docs/en/managed-agents/multi-agent.md)) | Needed for orchestrator-worker layering above verifier |
+| **Session-level intent extraction layer** — a component that reads user turns before main processes them and can route them to isolated verifiers | ❌ No such concept in docs | Needed to remove main's role in preparing witness's input |
+| **PreToolUse hook → synchronous subagent verdict → deny** pipeline | ❌ Not documented; agent hooks only shown for `Stop` event | ~~Needed for commit-gate blocking~~ — not needed on reflection; autoloop [Judge] phase spawns witness via Task tool, enforcement is discipline-level like all other autoloop phases |
 
-## 추론 수준 격리가 중요한 이유
+## Why reasoning-level isolation matters
 
-검증용 서브에이전트가 막으려는 핵심 실패는 Huang et al. 2023("LLMs Cannot Self-Correct Reasoning Yet")이 기록한 것과 같다. 검증자가 실행자와 컨텍스트를 공유하면 실행자의 합리화를 물려받아, 독립적인 점검이 아니라 확인 도장을 찍어 주는 역할로 전락한다.
+The core failure mode that verifier subagents exist to prevent is the same one documented in Huang et al. 2023 ("LLMs Cannot Self-Correct Reasoning Yet"): when a verifier shares context with the executor, it inherits the executor's rationalizations and becomes a confirmation rubber-stamp instead of an independent check.
 
-실행 수준 격리(따로 된 컨텍스트 창, 따로 된 도구 권한)는 실행자가 검증자를 *조종하지* 못하게 막는다. 그러나 *띄우는 프롬프트*를 통해 실행자의 추론이 세탁되어 검증자의 입력에 들어가는 것까지는 막지 못한다. 지금 sonmat-witness 설계는 이것을 절차로 강제한다. 띄우는 프롬프트에는 사용자 발화 원문, 산출물, 좁게 구성한 승인 기준선 묶음 하나(그때 보여 준 계획 그대로와 그 승인 발화 원문)만 넣을 수 있고, 메인 세션이 쓴 다른 해석은 넣지 않는다. 이것은 하네스가 아니라 조율 층의 규율이 강제한다.
+Execution-level isolation (separate context window, separate tool permissions) prevents the executor from *driving* the verifier, but it does not prevent the *spawn prompt* from laundering the executor's reasoning into the verifier's input. Today, the sonmat-witness design enforces this by protocol: the spawn prompt may contain raw user turns, the artifact, and one narrowly formed approved-baseline envelope (the exact displayed plan plus its raw approval turn), but no other main-authored interpretation. This is discipline-enforced at the orchestration layer, not harness-enforced.
 
-"이 서브에이전트는 채널 X에서만 입력을 받아야 하고, 다른 채널은 플랫폼이 거부한다"고 선언할 수 있는 하네스 수준의 선택지가 있으면, 이 보장이 규율에서 구조로 옮겨 간다. 예시 형태:
+A harness-level option to declare "this subagent must receive input from channel X only, and other channels are platform-rejected" would move this from discipline to structure. Example shape:
 
 ```yaml
 subagent:
@@ -30,48 +30,48 @@ subagent:
   forbidden_channels: [parent_system_prompt, parent_tool_outputs, parent_messages]
 ```
 
-금지 채널은 띄우는 시점에 강제된다. 금지 채널을 넣으려 하면 조용히 통과시키지 않고 플랫폼 오류를 돌려준다.
+Forbidden channels would be enforced at spawn time; attempting to include them would return a platform error rather than silently passing them through.
 
-## 중첩 위임이 중요한 이유
+## Why nested delegation matters
 
-sonmat 구조는 세 역할로 나뉘기를 바란다.
+The sonmat architecture wants a three-role structure:
 
-- **세션 층**: 대화의 경계에서 사용자 발화를 뽑아 검증자에게 보낸다
-- **조율자**: 실행을 이끌고, 무엇을 고칠지 결정한다
-- **worker**: 개별 도구 호출을 수행한다
+- **Session layer**: extracts user turns at the boundary of the conversation, routes them to verifiers
+- **Orchestrator**: drives execution, makes decisions about what to modify
+- **Worker**: carries out individual tool calls
 
-중첩 위임이 지원되면 검증자(witness)가 조율자 위에 자리 잡고, 조율자가 그 입력에 색을 입힐 틈 없이 모든 결정 지점을 가로챌 수 있다. 지금은 다음 이유로 불가능하다.
+If nested delegation were supported, the verifier (witness) could live above the orchestrator and intercept every decision point without the orchestrator having any opportunity to colour its input. Today this is impossible because:
 
-1. 서브에이전트를 띄울 수 있는 에이전트는 메인 세션(대화와 조율을 함께 맡는다)뿐이다
-2. 서브에이전트는 서브에이전트를 더 띄울 수 없다
+1. Main (conversation + orchestration combined) is the only agent that can spawn subagents
+2. Subagents cannot spawn further subagents
 
-결과: witness의 입력 파이프라인은 메인 세션을 *거쳐* 간다. 그런데 메인 세션이 바로 witness가 그 추론에서 격리되어야 할 실행자다. 구성상 격리가 부분적일 수밖에 없다.
+Consequence: witness's input pipeline runs *through* main, which is exactly the executor whose reasoning witness is supposed to be isolated from. The isolation is partial by construction.
 
-중첩 제한을 풀어 위임을 **한 단계만 더** 허용하면(조율자가 worker를 띄우고, 조율자 위의 세션 층이 검증자를 띄울 수 있게) 이 빈틈이 닫힌다. 무제한 중첩은 필요 없다. 위임 두 단계면 이 용도와, 검증자를 쓰는 비슷한 구조 대부분을 감당한다.
+Lifting the nesting restriction to allow **one additional level** of delegation (so orchestrator can spawn workers, and a session layer above orchestrator can spawn the verifier) would close this gap. Unbounded nesting is not needed; two levels of delegation would cover this use case and most similar verifier-based architectures.
 
-## 세션 수준 의도 추출이 중요한 이유
+## Why session-level intent extraction matters
 
-지금은 "사용자가 말한 것"과 "사용자가 뜻했다고 메인 세션이 판단한 것" 사이의 경계가 메인 세션 안에 있다. 사용자 의도에 대한 메인 세션의 해석을 읽는 검증자는 그 해석의 편향까지 물려받는다. 메인 세션이 보기 전에 사용자 발화 원문의 흐름을 뽑아 메인 세션과 검증자에게 따로 건네는 세션 층이 있으면, 의도는 메인 세션을 거친 산출물이 아니라 함께 기대는 정본이 된다.
+Currently, the boundary between "what the user said" and "what main decided the user meant" lives inside main. A verifier that reads main's interpretation of user intent inherits main's interpretation bias. A session layer that extracts the raw user-turn stream before main sees it, and passes it to both main and the verifier independently, would make intent the shared source of truth rather than a main-mediated artifact.
 
-hook이 사용자 발화를 여러 하류 채널로 나눠 보낼 수 있고 그중 하나가 오래 유지되는 자기 컨텍스트를 가진 서브에이전트일 수 있다면, 이 층은 `UserPromptSubmit` hook 위에 만들 수 있다.
+This could be built on top of `UserPromptSubmit` hooks if hooks were allowed to fork the user turn into multiple downstream channels, one of which is a subagent with its own long-lived context.
 
-## ~~PreToolUse hook → 서브에이전트 판정 → 차단을 문서화하는 것이 중요한 이유~~
+## ~~Why PreToolUse hook → subagent verdict → block documentation matters~~
 
-*2026-04-15 철회.* 다시 생각해 보니 witness에는 hook 수준의 강제가 필요 없다. autoloop의 [Judge] keep 파이프라인이 알맞은 연동 지점이다. 이 파이프라인은 이미 단계 순서가 정해진 절차로 커밋 결정을 이끌고 있고, witness Task 호출을 더하는 것은 그 절차에 한 단계를 보태는 일일 뿐이며, 다른 모든 단계와 같은 autoloop 규율로 강제된다. hook 수준의 PreToolUse 강제는 메인 세션이 autoloop을 무시해도 우회할 수 없다는 점에서 더 강하다. 그러나 그 더 강한 보장은 (a) 지금 플랫폼에서 쓸 수 없고, (b) 우리가 신경 쓰는 용도에 실제로 필요하지 않으며, (c) 관문이 걸린 도구 호출마다 지연을 더해 얻는 것보다 잃는 것이 클 가능성이 높다.
+*Retracted 2026-04-15.* On reflection, witness does not need hook-level enforcement. Autoloop's [Judge] keep pipeline is the right integration point: it already drives commit decisions in a phase-ordered protocol, and adding a witness Task call is just one more step in that protocol, enforced by the same autoloop discipline as every other phase. A hook-level PreToolUse enforcement would be stronger in that main could not bypass it even by ignoring autoloop, but that stronger guarantee is (a) not available on the current platform, (b) not actually necessary for the use cases we care about, and (c) would add latency to every gated tool call in a way that probably costs more than it saves.
 
-사용자가 autoloop 밖에서 일하면서 그때그때의 도구 호출에 witness를 붙이고 싶다면 그것은 다른 용도다. 지금 권하는 방법은 위험한 작업 전에 witness를 부르는 전용 스킬 래퍼(예: `/commit-verified`)를 쓰는 것이다. 이것은 플랫폼 기능 요청이 아니라 사용자 쪽 스킬 패턴이다.
+If a user runs outside autoloop and wants witness on ad-hoc tool calls, that is a different use case, and the current recommendation is to use a dedicated skill wrapper (e.g., `/commit-verified`) that invokes witness before the risky operation. That is not a platform feature request — it is a user-side skill pattern.
 
-## 요청하지 않는 것
+## Non-goals
 
-- 무제한 서브에이전트 중첩. 위임 두 단계면 검증자 구조와 대부분의 조율 패턴에 충분하다.
-- 메인 세션이 자기 서브에이전트의 프롬프트를 짜는 능력을 없애는 것. 이 기능 요청은 *추가* 채널 통제에 관한 것이지, 있는 유연성을 빼앗자는 것이 아니다.
-- 에이전트가 결정하는 모델을 하네스가 결정하는 모델로 바꾸는 것. 우리는 이 부분에서 Anthropic이 택한 구조를 이해하며, 되돌려 달라고 요청하지 않는다. 우리가 요청하는 것은 검증자 구조가 에이전트가 결정하는 모델 안에서 무리 없이 살 수 있게 해 주는 구조적 기본 기능 하나(채널 수준의 입력 제한)다.
+- Unbounded subagent nesting. Two levels of delegation are sufficient for verifier architectures and most orchestration patterns.
+- Removing main's ability to compose prompts for its own subagents. This feature request is about *additional* channel controls, not about taking away existing flexibility.
+- Replacing agent-decides model with harness-decides. We understand Anthropic's architectural choice here and are not asking for it to be reversed. We are asking for one additional structural primitive (channel-level input restriction) that lets verifier architectures live comfortably inside the agent-decides model.
 
-## 그동안 sonmat이 하는 일
+## What sonmat is doing in the meantime
 
-- 지금 있는 기본 기능 위에 witness를 두 층 구조(witness 짝 구조)로 만든다
-- 격리의 세 층을 정직하게 문서화한다: 실행 수준(하네스가 강제) + 띄우는 프롬프트의 규율(설계가 강제) + 인용 규칙(행동으로 지킴)
-- 문서에서 위 구성을 "구조적 격리(structural isolation)"가 아니라 "절차상 격리(protocol isolation)"로 부른다
-- witness는 PreToolUse agent hook(그 이벤트 유형에는 문서화되지 않음)이 아니라 autoloop의 [Judge] 단계에서 Task 도구(문서화되고 지원되는 경로)로 띄운다
+- Building witness as a 2-layer (witness-pair) architecture on the primitives available today
+- Documenting the isolation stack honestly: execution-level (harness-enforced) + spawn-prompt discipline (design-enforced) + citation rule (behavioral)
+- Treating the above as "protocol isolation" rather than "structural isolation" in the documentation
+- Spawning witness via the Task tool from autoloop's [Judge] phase (documented, supported path) rather than via a PreToolUse agent hook (undocumented for that event type)
 
-이 기능들 없이도 동작하는 witness 짝 구조를 내놓을 수 있다. 이 기능들이 있으면 더 강한 구조를 내놓을 수 있다.
+We can ship a functional witness-pair architecture without these features. The features would let us ship a stronger one.
