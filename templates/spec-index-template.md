@@ -1,7 +1,7 @@
-# Spec catalog (`docs/specs/_index.md`)
+# 명세 목록 (Spec catalog, `docs/specs/_index.md`)
 
-> Place this at `docs/specs/_index.md` in your project. Keep ≤ 50 lines (sonmat token-budget convention for index files).
-> One spec = one row. Do not embed spec content here.
+> 프로젝트의 `docs/specs/_index.md`에 둔다. 50줄을 넘기지 않는다(인덱스 파일의 토큰 예산에 관한 sonmat 관례).
+> 명세 하나에 한 행을 쓴다. 명세 내용을 여기에 옮겨 적지 않는다.
 
 ---
 
@@ -13,13 +13,13 @@ sonmat:
 
 ---
 
-## Active specs
+## 현재 명세 (Active specs)
 
 | ID | Title | Status | Modal | Last updated |
 |----|-------|--------|-------|--------------|
 | SPEC-20260426-example | Example spec | draft | should | 2026-04-26 |
 
-## Superseded / archived
+## 대체·보관된 명세 (Superseded / archived)
 
 | ID | Title | Superseded by | Sunset |
 |----|-------|---------------|--------|
@@ -27,9 +27,9 @@ sonmat:
 
 ---
 
-## Notes
+## 참고 (Notes)
 
-- New spec: copy `spec-template.md` to `docs/specs/SPEC-{YYYYMMDD}-{slug}.md`. Add row above.
-- Amendment: do not edit a `published` spec body. Create successor with `supersedes: SPEC-...` metadata. Add row above and mark this row's `Status` to `archived`.
-- `sonmat.spec_awareness: enabled` activates Stage 1 — sonmat reads this index at task start and inline-references relevant specs (alert only, no blocking). See ADR `2026-04-26-spec-auto-reference.md`.
-- Stage 2 (active verification — witness/guard extension) requires opt-in after baseline measurement.
+- 새 명세: `spec-template.md`를 `docs/specs/SPEC-{YYYYMMDD}-{slug}.md`로 복사하고 위 표에 행을 더한다.
+- 개정: `published` 상태인 명세의 본문은 고치지 않는다. `supersedes: SPEC-...` 메타데이터를 단 후속 명세를 만들고, 위 표에 그 행을 더한 뒤 이 명세 행의 `Status`를 `archived`로 바꾼다.
+- `sonmat.spec_awareness: enabled`로 두면 Stage 1이 켜진다. sonmat은 작업을 시작할 때 이 인덱스를 읽고 관련 명세를 본문 안에서 알려 준다(알림만 하고 막지는 않는다). ADR `2026-04-26-spec-auto-reference.md`를 본다.
+- Stage 2(witness·guard를 넓혀 실제로 검증하는 단계)는 기준선을 잰 뒤 따로 켜야 한다.

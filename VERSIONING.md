@@ -1,35 +1,37 @@
-# Versioning
+# 버전 관리
 
-sonmat follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+sonmat은 [유의적 버전(Semantic Versioning)](https://semver.org/)을 따른다: `MAJOR.MINOR.PATCH`.
 
-## What each number means
+## 숫자마다 뜻하는 것
 
-| | When to bump | Example |
+| | 올리는 때 | 예 |
 |---|---|---|
-| **MAJOR** | Breaking changes — discipline structure, skill interface, or hook contract changes that require users to update their setup | `1.0.0` → `2.0.0` |
-| **MINOR** | New features — new skills, new domain hints, multi-CLI support, new capabilities that don't break existing setups | `0.2.1` → `0.3.0` |
-| **PATCH** | Fixes — typos, wording improvements, bug fixes in hooks/scripts | `0.3.0` → `0.3.1` |
+| **MAJOR** | 호환을 깨는 변경. 규율 구조, 스킬 인터페이스, 훅 계약이 바뀌어 사용자가 설정을 고쳐야 할 때 | `1.0.0` → `2.0.0` |
+| **MINOR** | 새 기능. 새 스킬, 새 분야 힌트, 여러 CLI 지원처럼 기존 설정을 깨지 않고 할 수 있는 일이 늘어날 때 | `0.2.1` → `0.3.0` |
+| **PATCH** | 수정. 오탈자, 문장 다듬기, 훅·스크립트의 버그 수정 | `0.3.0` → `0.3.1` |
 
-## How to release
+## 릴리스 절차
 
-1. Update version in all plugin manifests:
+1. 모든 플러그인 매니페스트의 버전을 고친다.
    - `.claude-plugin/plugin.json` → `"version": "X.Y.Z"`
-   - `.claude-plugin/marketplace.json` → `"version": "X.Y.Z"` (appears twice)
+   - `.claude-plugin/marketplace.json` → `"version": "X.Y.Z"` (두 군데)
    - `.codex-plugin/plugin.json` → `"version": "X.Y.Z"`
 
-2. Commit:
+2. 커밋한다.
    ```bash
    git add -A
    git commit -m "release: vX.Y.Z — (one-line summary)"
    ```
 
-3. Tag:
+3. 태그를 단다.
    ```bash
    git tag vX.Y.Z
    git push origin main --tags
    ```
 
-## Version history
+## 버전 이력 (Version history)
+
+이력 표는 기록이라 각 행을 쓴 당시의 영어 그대로 둔다.
 
 | Version | Date | Summary |
 |---------|------|---------|

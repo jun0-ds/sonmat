@@ -1,144 +1,145 @@
-# Deferred tracks
+# 미뤄 둔 작업 (Deferred tracks)
 
-Work left over from the 2026-04-15 witness session. Pick up later when relevant.
+2026-04-15 witness 세션에서 남은 일이다. 관련 있을 때 다시 집어 든다.
 
 ---
 
-## Track 3 remaining — additional assumption audits
+## Track 3의 남은 일 — 가정 감사 더 하기
 
-Session did three rounds of devil CCT and flipped three assumptions (see `docs/posts/2026-04-15-witness-v0.9.md`). Two more candidates identified but not yet audited:
+그 세션에서는 devil CCT를 세 차례 돌려 가정 세 개를 뒤집었다(`docs/posts/2026-04-15-witness-v0.9.md` 참고). 후보 두 개를 더 찾았지만 아직 감사하지 않았다.
 
-### #3 — "punch residue check is mechanical grep, not reasoning"
+### #3 — "punch의 잔재 검사는 추론이 아니라 기계적인 grep이다"
 
-Claim in `skills/punch/SKILL.md` §Phase 3 Residue-free check:
+`skills/punch/SKILL.md` §Phase 3 — 체계적인 빈틈 찾기 (Systematic gap search)의 `Residue-free?` 검사에 이런 주장이 있다.
 
-> "This check is mechanical — it is not reasoning, it is grep."
+> "이 검사는 기계적이다. 추론이 아니라 grep이다." (영어 원문: "This check is mechanical — it is not reasoning, it is grep.")
 
-Suspect: detecting "retired terminology" or "orphaned examples" still requires knowing *which* terminology was retired and *what counts as archival context*. That knowledge is session-state interpretation, not pure grep. The claim may be overstated.
+의심하는 점: "폐기한 용어"나 "고아가 된 예시"를 찾으려면 *어떤* 용어를 폐기했는지, 그리고 *무엇을* 보관할 맥락으로 칠지 알아야 한다. 그 앎은 순수한 grep이 아니라 세션 상태를 해석하는 일이다. 이 주장은 부풀려졌을 수 있다.
 
-Audit approach when picked up: apply devil CCT to this specific claim. Load-bearing question is probably whether the "knowing what was retired" step is itself mechanical (e.g., derivable from git diff of the same session) or requires reasoning.
+다시 집어 들 때의 감사 방법: 이 주장 하나에 devil CCT를 적용한다. 결론을 좌우할 질문은 아마 "무엇을 폐기했는지 아는" 단계 자체가 기계적인지(예를 들어 같은 세션의 git diff에서 끌어낼 수 있는지), 아니면 추론이 필요한지일 것이다.
 
-### #4 — "discovery-led principle actually converges with the five verification traditions"
+### #4 — "발견 주도 원칙이 다섯 검증 전통과 실제로 수렴한다"
 
-Claim in `memory/domain/discipline_forced_protocols.md` §Cascade 해석 (165-182):
+`memory/domain/discipline_forced_protocols.md` §Cascade 해석 (165-182)에 이런 주장이 있다.
 
 > "The five verification traditions (chess CCT, surgical Time Out, aviation CRM, mindfulness noting, pre-mortem) all map to active discovery → depth cascade."
+> (다섯 검증 전통, 곧 체스 CCT, 수술 Time Out, 항공 CRM, 마음챙김 noting, pre-mortem은 모두 능동적 발견 → 깊이 cascade에 대응한다.)
 
-Suspect: this may be an analogy error. The five traditions are human-organizational checklist protocols; LLM reasoning passes are a different domain. The structural isomorphism may be something we projected onto the evidence rather than something the evidence supports.
+의심하는 점: 유비의 오류일 수 있다. 다섯 전통은 사람과 조직을 위한 체크리스트 절차이고, LLM이 추론하는 과정은 다른 영역이다. 구조가 같아 보이는 것은 증거가 뒷받침해서가 아니라 우리가 증거에 덧씌운 것일 수 있다.
 
-Audit approach when picked up: for each of the five traditions, check whether the original literature describes it with a "discovery → depth" structure, or whether that framing is our retrospective imposition. This is a literature audit, not a devil round.
-
----
-
-## Runtime monitoring (continuous)
-
-### Witness behavior validation
-
-Witness's comparator discipline is prompt-level, not runtime-enforced (see `agents/sonmat-witness.md` §Isolation stack, layers 2-3 are aspirational). Early uses need human sampling to validate:
-
-- Does witness actually produce citations from valid sources only?
-- Does it keep approved-baseline clauses separate from raw user intent rather than treating approval as authorship?
-- Does it follow source-based verdict rules (§0 → AUTHORITY_CONFLICT, §1/§2/§4/§5 → BLOCK, §3 → WARN)?
-- Does it drift into strength judgment, producing WARN because something "feels" weak?
-- Does it pause on AUTHORITY_CONFLICT instead of choosing a refinement target?
-- Does it respect the "suspect first" default posture?
-
-Case index: the `journal.md` witness event log locates reports and their source references. Check each sampled verdict against the raw request, the artifact at that time, directly run tests, or confirmed user corrections. A journal's claim that verification happened is not evidence that the verdict was correct. Separate invocation, instruction loading, compliance, and task correctness; distinguish unmeasured from zero.
-
-Feedback loop: if drift is observed, the fix lives in `agents/sonmat-witness.md` agent file. Adjust the prompt, not the code around it.
-
-### Autoloop [Judge] pipeline observance
-
-Main's adherence to the three-gate keep pipeline (self-review → guard → witness → commit) is discipline-enforced, not hook-enforced. Watch for:
-
-- Does main actually spawn witness at [Judge] keep pipeline, or does it skip when pressed for time?
-- Does main override witness BLOCK verdicts "because it seemed wrong"?
-- Does `loop.yaml` `witness.commit: skip` get used only for its intended use cases (subjective domains), or does it creep into use as a default bypass?
-
-Feedback loop: autoloop memory / retrospective should surface patterns. If bypass becomes common, the problem is either (a) witness is producing false positives that justify bypass, or (b) discipline enforcement is too weak and the design needs a structural backup.
+다시 집어 들 때의 감사 방법: 다섯 전통마다 원래 문헌이 그것을 "발견 → 깊이" 구조로 설명하는지, 아니면 그 틀이 우리가 나중에 끼워 맞춘 것인지 확인한다. devil 한 차례가 아니라 문헌 감사다.
 
 ---
 
-## Feature request track
+## 실행 중 관찰 (계속)
 
-`docs/feature-requests/claude-code-isolation.md` lists four Claude Code platform capabilities that would strengthen sonmat-witness. None are blockers; all are improvements. When/if Anthropic expresses interest in platform feedback on isolation primitives, this is the document to submit.
+### witness 동작 검증
 
-Summary of the four:
+witness의 비교자 규율은 프롬프트 수준에 있고, 실행 중에 강제되지 않는다(`agents/sonmat-witness.md` §격리의 세 층 (Isolation stack)을 본다. 2층과 3층은 지켜지기를 바라는 층이다). 쓰기 시작한 초기에는 사람이 표본을 뽑아 다음을 검증해야 한다.
 
-1. **Harness-enforced input channel restriction** for subagents (declare allowed/forbidden input channels, platform rejects prompts that include forbidden channels)
-2. **Nested subagent delegation** (one additional level — orchestrator → workers, session layer → orchestrator)
-3. **Session-level intent extraction layer** (UserPromptSubmit-hook-style primitive that can fork user turns into multiple downstream channels, one being a long-lived subagent)
-4. ~~PreToolUse → agent hook → synchronous deny documentation~~ (retracted 2026-04-15, not actually needed — Task tool path works for autoloop integration)
+- witness가 실제로 유효한 출처에서만 인용하는가?
+- 승인을 사용자가 직접 쓴 것처럼 다루지 않고, 승인 기준선의 조항을 사용자 원문 의도와 따로 두는가?
+- 출처에 따른 판정 규칙(§0 → AUTHORITY_CONFLICT, §1/§2/§4/§5 → BLOCK, §3 → WARN)을 따르는가?
+- 무언가가 약하게 "느껴져서" WARN을 내는 식으로 강도 판단에 빠지지 않는가?
+- AUTHORITY_CONFLICT에서 refine할 대상을 고르지 않고 멈추는가?
+- 기본 자세인 "먼저 의심한다"를 지키는가?
+
+사례 찾기: `journal.md`의 witness 이벤트 기록에서 보고와 그 출처 참조를 찾는다. 표본으로 고른 판정마다 원래 요청, 그때의 산출물, 직접 돌린 테스트, 확인된 사용자 수정과 대조한다. journal에 검증했다고 적혀 있어도 그 판정이 옳았다는 증거는 되지 않는다. 호출됐는지, 지시를 불러왔는지, 지시를 따랐는지, 작업이 맞았는지를 따로 보고, 재지 않은 것과 0인 것을 구분한다.
+
+고치는 경로: 어긋남이 보이면 `agents/sonmat-witness.md` 에이전트 파일을 고친다. 그 둘레의 코드가 아니라 프롬프트를 손본다.
+
+### autoloop [Judge] 파이프라인 준수
+
+메인 세션이 세 관문으로 된 keep 파이프라인(자기 검토 → guard → witness → commit)을 지키는지는 hook이 아니라 규율로 강제된다. 다음을 지켜본다.
+
+- 메인 세션이 [Judge] keep 파이프라인에서 실제로 witness를 띄우는가, 아니면 시간에 쫓기면 건너뛰는가?
+- 메인 세션이 "틀린 것 같아서"라며 witness의 BLOCK 판정을 뒤집는가?
+- `loop.yaml`의 `witness.commit: skip`을 원래 용도(주관적인 분야)에만 쓰는가, 아니면 기본 우회로처럼 슬금슬금 쓰게 되는가?
+
+고치는 경로: autoloop 메모리나 회고에서 패턴이 드러나야 한다. 우회가 흔해지면 원인은 둘 중 하나다. (a) witness가 거짓 양성을 내서 우회할 핑계를 주거나, (b) 규율의 강제가 너무 약해서 설계에 구조적인 보완책이 필요하다.
 
 ---
 
-## Hook integration — actually unused
+## 기능 요청 트랙
 
-`hooks/hooks.json` currently only has a SessionStart command hook. Witness integration is entirely at the autoloop skill layer (Task tool spawn from [Judge]). No PreToolUse hook configuration exists.
+`docs/feature-requests/claude-code-isolation.md`에는 sonmat-witness를 강하게 해 줄 Claude Code 플랫폼 기능 네 가지가 있다. 어느 것도 막는 문제는 아니고, 모두 개선 사항이다. Anthropic이 격리 기본 기능에 관한 플랫폼 피드백에 관심을 보이면 이 문서를 낸다.
 
-If a future use case requires ad-hoc tool-call gating outside autoloop (e.g., a user running tools manually and wanting witness on risky commits), the cleanest path is a dedicated skill wrapper like `/commit-verified` that spawns witness before the risky operation. Do not try to force this into PreToolUse hooks — that path is undocumented and fragile (see v0.9.0 release notes).
+네 가지 요약:
 
----
-
-## Other outstanding items
-
-- `loop.yaml` template files: currently only exist as documentation examples inside `skills/autoloop/SKILL.md` §3. No standalone template files in `templates/` or similar. Users copying the examples from docs is the current workflow.
-- dev.to + velog posts: `docs/posts/2026-04-15-witness-v0.9.md` exists in Korean. English version for dev.to and final velog adaptation are deferred to the branding track (see `~/.claude/memory/domain/branding_plan.md`).
-- `.claude-plugin/marketplace.json`: currently points at `./` as source. If the marketplace structure changes in the future (e.g., separate sonmat from other plugins), revisit this field.
+1. 서브에이전트의 **입력 채널을 하네스가 강제로 제한** (허용·금지 입력 채널을 선언하면, 금지 채널이 들어간 프롬프트를 플랫폼이 거부한다)
+2. **서브에이전트 중첩 위임** (한 단계만 더. 조율자 → worker, 세션 층 → 조율자)
+3. **세션 수준의 의도 추출 층** (UserPromptSubmit hook 같은 기본 기능으로, 사용자 발화를 여러 하류 채널로 나눠 보낼 수 있고 그중 하나는 오래 사는 서브에이전트다)
+4. ~~PreToolUse → agent hook → 동기 거부에 관한 문서화~~ (2026-04-15 철회. 실제로는 필요 없다. Task 도구 경로로 autoloop과 잘 맞물린다)
 
 ---
 
-## Reward-loop framing — self-referential verification ceiling (2026-05-22)
+## hook 연동 — 실제로는 쓰지 않음
 
-From a control-tower reasoning session. Background + full argument: `~/.claude/memory/domain/reward_loop_external_oracle.md` (global memory). This track is a *frame* that several existing items above turn out to be instances of, plus concrete edit candidates. Handed off here for a future sonmat work session.
+`hooks/hooks.json`에는 지금 SessionStart 명령 hook 하나만 있다. witness 연동은 모두 autoloop 스킬 층에서 이루어진다([Judge]에서 Task 도구로 띄운다). PreToolUse hook 설정은 없다.
 
-### Core claim
+나중에 autoloop 밖에서 그때그때 도구 호출을 막아야 하는 용도가 생기면(예를 들어 사용자가 도구를 손으로 돌리면서 위험한 커밋에 witness를 붙이고 싶을 때), 가장 깔끔한 길은 위험한 작업 전에 witness를 띄우는 `/commit-verified` 같은 전용 스킬 래퍼다. 이것을 PreToolUse hook에 억지로 넣으려 하지 않는다. 그 경로는 문서화되지 않았고 깨지기 쉽다(v0.9.0 릴리스 노트 참고).
 
-> The currency of reward is the *derivative* of prediction improvement, and for an LLM that loop never closes at inference time — so self-referential scaffolds (devil / punch / witness) hit a ceiling and only become reliable when an **external oracle** is present. Code work has a built-in oracle (compiler / tests / types); planning/spec work does not, and needs a human or a *separate* model as oracle.
+---
 
-Same conclusion as `discipline_forced_protocols.md` ("the second locus must be isolated from the first's rationalization") and Huang et al. 2023 ("LLMs Cannot Self-Correct Reasoning Yet"), pushed one layer down: *why* (no closed reward loop) and *how far* (only with an objective oracle).
+## 그 밖에 남은 일
 
-### Existing items this reframes
+- `loop.yaml` 템플릿 파일: 지금은 `skills/autoloop/SKILL.md` §3 loop 정의 템플릿 (Loop Definition Templates) 안의 문서 예시로만 있다. `templates/` 같은 곳에 따로 된 템플릿 파일은 없다. 지금은 사용자가 문서의 예시를 복사해 쓴다.
+- dev.to와 velog 글: `docs/posts/2026-04-15-witness-v0.9.md`가 한국어로 있다. dev.to용 영어판과 velog용 최종 손질은 브랜딩 트랙으로 미뤘다(`~/.claude/memory/domain/branding_plan.md` 참고).
+- `.claude-plugin/marketplace.json`: 지금은 소스로 `./`를 가리킨다. 나중에 마켓플레이스 구조가 바뀌면(예를 들어 sonmat을 다른 플러그인과 분리하면) 이 필드를 다시 본다.
 
-- **#3 (punch = mechanical grep?)**: punch's "did I miss anything?" is self-referential — a blind spot is by definition invisible to self-check. The grep claim being overstated is a *symptom* of this ceiling, not a separate bug.
-- **#4 (discovery ↔ 5 traditions)**: the five traditions all externalize the locus; that is their load-bearing common feature, which this frame names directly.
-- **Witness validation ("feels weak" drift; journal as data)**: using `journal.md` (self-report) to validate witness is itself a self-report-as-ground trap. Witness validation needs an external ground, not journal alone.
-- **Autoloop [Judge] (main overrides BLOCK "because it seemed wrong")**: override-by-feeling is the self-reference ceiling acting at the orchestration layer.
+---
 
-### Edit candidates (the actual work, when picked up)
+## 보상 루프로 보는 틀 — 자기 참조 검증의 한계 (2026-05-22)
 
-- `discipline/core.md` "Cross it" / "Ground it": state explicitly that a self-pass (devil) is *not* an oracle; route through a model-external oracle (tests / another model / human) when one exists.
-- `discipline/hints.md`: add a hint keyed on task type — code has a built-in oracle, planning/spec does not.
-- `skills/punch`, `agents/sonmat-witness.md`: completeness and intent-artifact judgments must not be grounded in self-report (journal); require external ground where available.
-- `skills/scribe`: when journal records "verified", force naming *what* served as oracle (test / human / other model / none) — prevents the self-report-as-quality trap.
-- Worker dispatch / orchestration: window curation (load-bearing info at front/end, not the middle — "lost in the middle"), adaptive per-task reasoning length, and a "scaffold-execution-record ≠ quality-evidence" reminder.
+control-tower에서 추론하던 세션에서 나왔다. 배경과 전체 논증은 `~/.claude/memory/domain/reward_loop_external_oracle.md`(전역 메모리)에 있다. 이 트랙은 위의 여러 항목이 실은 그 사례였음을 보여 주는 *틀*이고, 구체적인 수정 후보도 함께 담았다. 다음 sonmat 작업 세션을 위해 여기 넘겨 둔다.
 
-### Relation to existing spec/verification machinery (raised 2026-05-22)
+### 핵심 주장
 
-Is "oracle" a new component, or does it merge with what already exists? Working hypothesis: **oracle is not a new component — it is an axis cutting across the existing verification machinery.**
+> 보상의 화폐는 예측이 나아지는 정도의 *변화율*이다. LLM은 추론하는 동안 그 루프가 닫히지 않는다. 그래서 자기를 참조하는 비계(devil / punch / witness)는 한계에 부딪히고, **외부 오라클**이 있을 때만 믿을 만해진다. 코드 작업에는 오라클이 내장돼 있다(컴파일러 / 테스트 / 타입). 기획·명세 작업에는 그런 오라클이 없어서, 사람이나 *별개의* 모델이 오라클이 되어야 한다.
 
-- **spec** (`docs/specs/`, RFC 2119): provides the *criterion half* of an oracle (intent externalized to a doc). A criterion alone is not an oracle — if the model judges its own spec-conformance, that is still self-check (the ceiling). spec becomes an oracle only when conformance is *judged externally*. Degree of merge ∝ spec's checkability: a machine-checkable spec (types, contracts, test cases) *is* an oracle; a natural-language spec ("good UX", a SHOULD a human must read) gives only the criterion and leaves judgment outside. To promote spec → oracle, wire each MUST to *how* it gets judged (test / human / other model).
-- **guard**: already partly an oracle (runs tests = external verdict).
-- **witness**: an oracle only if grounded in external state, not in journal (self-report). Cf. #Witness validation above.
-- **punch**: no oracle (self-referential completeness check).
+`discipline_forced_protocols.md`("두 번째 판단 자리는 첫 번째 자리의 합리화에서 격리돼야 한다")와 Huang et al. 2023("LLMs Cannot Self-Correct Reasoning Yet")의 결론과 같다. 다만 한 층 더 내려가 *왜*(보상 루프가 닫히지 않아서)와 *어디까지*(객관적인 오라클이 있을 때만)를 말한다.
 
-So: do NOT add a standalone "oracle" component (duplication). Instead re-map existing components along an "oracle present? built-in / external / none" axis.
+### 이 틀로 다시 보이는 기존 항목
 
-Broader structural review: check whether munteok's components are well-factored — not "must be independent", but look for (a) duplication across things split apart, (b) over-coupling within one thing. Right granularity is found by working, not decided up front. Cf. `deep_module_design.md` (Ousterhout). Same "right-size" question as window/CoT length, applied to module boundaries.
+- **#3 (punch = 기계적인 grep?)**: punch가 묻는 "빠뜨린 게 있나?"는 자기 참조다. 사각지대는 정의상 자기 점검에 보이지 않는다. grep 주장이 부풀려진 것은 별개의 버그가 아니라 이 한계의 *증상*이다.
+- **#4 (발견 ↔ 다섯 전통)**: 다섯 전통은 모두 판단 자리를 바깥으로 옮긴다. 그것이 결론을 떠받치는 공통점이고, 이 틀은 그것을 직접 이름 붙인다.
+- **witness 검증("약하게 느껴진다"는 어긋남, journal을 자료로 쓰기)**: 자기 보고인 `journal.md`로 witness를 검증하는 것 자체가 자기 보고를 근거로 삼는 함정이다. witness 검증에는 journal만이 아니라 외부 근거가 필요하다.
+- **autoloop [Judge] (메인 세션이 "틀린 것 같아서" BLOCK을 뒤집는다)**: 느낌으로 뒤집는 것은 조율 층에서 작동하는 자기 참조의 한계다.
 
-**Category note** — core / spec / witness / oracle are not parallel layers; they are different *categories*:
+### 수정 후보 (다시 집어 들 때 할 실제 작업)
 
-- **Component** (entity): core, witness, guard — actual code/prompt. Within components there *is* a vertical layer: core (orchestration / meta-gate) sits above witness·guard·punch (specific verification tasks).
-- **Artifact** (input): spec — a document carrying the criterion.
-- **Role / empty slot**: oracle — the judging function itself, *filled by* a component (witness with external ground, guard running tests), an artifact (machine-checkable spec), or an external party (human).
+- `discipline/core.md`의 "Cross it" / "Ground it": 자기 점검(devil)은 오라클이 *아니라고* 분명히 적는다. 모델 바깥의 오라클(테스트 / 다른 모델 / 사람)이 있으면 그쪽을 거치게 한다.
+- `discipline/hints.md`: 작업 유형에 따른 힌트를 더한다. 코드에는 오라클이 내장돼 있지만 기획·명세에는 없다.
+- `skills/punch`, `agents/sonmat-witness.md`: 완성도 판단이나 산출물이 의도와 맞는지에 관한 판단을 자기 보고(journal)에 기대지 않게 한다. 외부 근거가 있으면 그것을 요구한다.
+- `skills/scribe`: journal에 "검증함"이라고 적을 때 *무엇이* 오라클이었는지(테스트 / 사람 / 다른 모델 / 없음) 반드시 적게 한다. 자기 보고를 품질로 여기는 함정을 막는다.
+- worker 위임·조율: 컨텍스트 창을 고른다(결론을 좌우할 정보는 가운데가 아니라 앞이나 끝에 둔다 — "lost in the middle"). 작업마다 추론 길이를 맞춘다. "비계를 실행했다는 기록 ≠ 품질의 증거"라는 알림을 넣는다.
 
-So oracle is not a peer of the others — it is the slot they fill; comparing them side by side is a category mix. And the judgment splits two layers: core does the **meta-judgment** ("did it pass an oracle?") and must *not* be the oracle itself (same-model self-judgment = the ceiling); the **first-order judgment** ("does the artifact meet the spec?") is domain-specific (tests for code, a human for planning). Why spec ≠ enough: a clear spec still needs an external judge, because the failure isn't distrust of the spec (A) but distrust of the model's self-conformance-judgment (B) — a blind spot survives self-check. Merge degree ∝ spec checkability (machine-checkable spec collapses criterion+judge into one).
+### 기존 명세·검증 장치와의 관계 (2026-05-22 제기)
 
-### Decided vs open
+"오라클"은 새 구성 요소인가, 아니면 이미 있는 것과 합쳐지는가? 작업 가설: **오라클은 새 구성 요소가 아니라, 기존 검증 장치를 가로지르는 축이다.**
 
-- **Decided**: do *not* inject "encouragement" (lowers verification, feeds sycophancy). "Progress sense" → implement as explicit state tracking, not as an emotion. Do *not* add a standalone oracle component — oracle is an axis, not a box.
-- **Open**: (a) how to *enforce* external-oracle routing in prompt/code; (b) how spec-conformance judgment gets wired to an actual judge; (c) the component re-mapping along the oracle axis — these are the design questions for the work session.
+- **명세(spec)** (`docs/specs/`, RFC 2119): 오라클의 *기준 절반*을 준다(의도를 문서로 밖에 꺼내 둔 것). 기준만으로는 오라클이 아니다. 모델이 자기 명세 준수를 스스로 판단하면 여전히 자기 점검이다(그 한계). 준수 여부를 *바깥에서 판단할* 때만 명세가 오라클이 된다. 얼마나 합쳐지는지는 명세를 얼마나 확인할 수 있는지에 비례한다. 기계로 확인할 수 있는 명세(타입, 계약, 테스트 케이스)는 그 자체로 오라클이다. 자연어 명세("좋은 UX", 사람이 읽어야 하는 SHOULD)는 기준만 주고 판단은 바깥에 남긴다. 명세를 오라클로 올리려면 MUST마다 *어떻게* 판단하는지(테스트 / 사람 / 다른 모델)를 연결한다.
+- **guard**: 이미 일부는 오라클이다(테스트를 돌린다 = 외부 판정).
+- **witness**: journal(자기 보고)이 아니라 외부 상태에 근거할 때만 오라클이다. 위의 witness 검증 항목을 본다.
+- **punch**: 오라클이 없다(자기 참조 완성도 점검).
 
-### Evidence note
+그러니 따로 떨어진 "오라클" 구성 요소를 더하지 않는다(중복이다). 대신 기존 구성 요소를 "오라클이 있는가? 내장 / 외부 / 없음" 축에 다시 배치한다.
 
-Diagnosed by contrasting a planning-heavy track (no built-in oracle, more human-QA defects) with an implementation track (built-in oracle: tests/types). Caveat: confounded — the planning track was an immature new effort, so defect count alone is not proof; the structural argument stands on its own. A self-report trap actually occurred during this very diagnosis (treating a journal's "devil 2 rounds / browser-verified" record as quality evidence), which is itself a data point for the claim.
+더 넓은 구조 검토: munteok의 구성 요소가 잘 나뉘어 있는지 확인한다. "반드시 독립적이어야 한다"는 뜻이 아니라, (a) 갈라 놓은 것들 사이의 중복과 (b) 한 덩어리 안의 지나친 결합을 찾는다. 알맞은 크기는 미리 정하는 것이 아니라 일하면서 찾는다. `deep_module_design.md`(Ousterhout)를 참고한다. 컨텍스트 창이나 CoT 길이에서 묻던 "알맞은 크기" 질문을 모듈 경계에 적용한 것이다.
+
+**범주에 관한 메모** — core / spec / witness / oracle은 나란한 층이 아니라 서로 다른 *범주*다.
+
+- **구성 요소** (실체): core, witness, guard — 실제 코드나 프롬프트다. 구성 요소 사이에는 세로 층이 *있다*. core(조율 / 메타 관문)가 witness·guard·punch(구체적인 검증 작업) 위에 있다.
+- **산출물** (입력): spec — 기준을 담은 문서다.
+- **역할 / 빈자리**: oracle — 판단하는 기능 자체다. 구성 요소(외부 근거를 쓰는 witness, 테스트를 돌리는 guard), 산출물(기계로 확인할 수 있는 명세), 외부 당사자(사람)가 이 자리를 *채운다*.
+
+그러니 오라클은 다른 것들과 같은 급이 아니라 그것들이 채우는 자리다. 나란히 놓고 비교하면 범주를 섞게 된다. 판단도 두 층으로 갈린다. core는 **메타 판단**("오라클을 통과했는가?")을 하고, 스스로 오라클이 되어서는 *안 된다*(같은 모델의 자기 판단 = 그 한계). **1차 판단**("산출물이 명세를 만족하는가?")은 분야마다 다르다(코드는 테스트, 기획은 사람). 명세만으로 부족한 이유: 명세가 분명해도 외부 판단자가 필요하다. 실패의 원인이 명세를 못 믿는 것(A)이 아니라 모델이 스스로 내리는 준수 판단을 못 믿는 것(B)이기 때문이다. 사각지대는 자기 점검을 통과해 살아남는다. 합쳐지는 정도는 명세를 확인할 수 있는 정도에 비례한다(기계로 확인할 수 있는 명세는 기준과 판단자를 하나로 합친다).
+
+### 정한 것과 열린 것
+
+- **정한 것**: "격려"를 넣지 *않는다*(검증을 느슨하게 하고 아첨을 부추긴다). "진척감"은 감정이 아니라 명시적인 상태 추적으로 구현한다. 따로 떨어진 오라클 구성 요소를 더하지 *않는다*. 오라클은 상자가 아니라 축이다.
+- **열린 것**: (a) 외부 오라클을 거치게 하는 것을 프롬프트나 코드에서 어떻게 *강제할지*, (b) 명세 준수 판단을 실제 판단자에게 어떻게 연결할지, (c) 오라클 축을 따라 구성 요소를 어떻게 다시 배치할지 — 이것들이 작업 세션에서 풀 설계 질문이다.
+
+### 증거에 관한 메모
+
+기획 비중이 큰 트랙(내장 오라클이 없고, 사람의 QA에서 결함이 더 많이 나왔다)과 구현 트랙(테스트·타입이라는 내장 오라클이 있다)을 대조해서 진단했다. 단서: 교란 요인이 있다. 기획 트랙은 아직 덜 자란 새 작업이었으므로 결함 수만으로는 증명이 되지 않는다. 구조적인 논증은 그것과 별개로 선다. 바로 이 진단을 하는 동안에도 자기 보고 함정이 실제로 일어났다(journal에 적힌 "devil 2회 / 브라우저 검증" 기록을 품질의 증거로 여겼다). 그 일 자체가 이 주장을 뒷받침하는 자료 하나다.
