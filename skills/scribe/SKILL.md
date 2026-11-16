@@ -1,71 +1,71 @@
 ---
 name: scribe
-description: Post-work persistence layer — observes completed work and writes what should outlive the session. Bridge notes, journal, progress, project rules discovered from user corrections, novel traps detected by guard, witness verdicts.
+description: 작업 뒤 기록 층이다. 끝난 작업을 살펴보고 세션이 끝난 뒤에도 남아야 할 것을 적는다. bridge note, journal, 진행 기록, 사용자가 바로잡은 내용에서 찾은 프로젝트 규칙, guard가 감지한 새 함정, witness 판정을 맡는다.
 user-invocable: false
 ---
 
-# Scribe — Post-Work Persistence Layer
+# Scribe — 작업 뒤 기록 층 (Post-Work Persistence Layer)
 
-Scribe owns one axis of the sonmat system: **everything that should outlive the current session**. Bridge notes for the next session, journal entries for history, progress checkboxes for milestones, project rules discovered from repeated user corrections, novel traps flagged by guard, witness verdicts from the `[Judge]` pipeline. All persistence flows through scribe.
+scribe는 sonmat 체계에서 축 하나를 맡는다. **지금 세션이 끝난 뒤에도 남아야 하는 모든 것**이다. 다음 세션을 위한 bridge note, 이력을 위한 journal 항목, 마일스톤 진행 체크박스, 사용자가 같은 것을 되풀이해 바로잡으면서 드러난 프로젝트 규칙, guard가 표시한 새 함정, `[Judge]` 파이프라인에서 나온 witness 판정이 여기에 든다. 기록은 모두 scribe를 거친다.
 
-This is a role distinct from detection (guard), comparison (witness), or completeness (punch). Those skills find things. Scribe decides what of what they found is worth keeping, and where it goes.
+이 역할은 감지(guard), 비교(witness), 완결성 확인(punch)과 다르다. 그 스킬들은 무언가를 찾아낸다. scribe는 찾아낸 것 가운데 무엇을 남길 만한지, 어디에 둘지를 정한다.
 
-Scribe is **not** user-invocable (no `/scribe` command). It is a protocol invoked by main and other skills — main dispatches it for a session wrap-up request, autoloop dispatches background scribe at loop exit, guard hands off novel traps and project rules during work, and witness verdicts flow into scribe from the `[Judge]` pipeline. The user asks to wrap up or preserve context; they do not need to name scribe.
+scribe는 사용자가 직접 부르지 **않는다**(`/scribe` 명령이 없다). 메인 세션과 다른 스킬이 부르는 절차다. 세션 마무리를 요청받으면 메인 세션이 위임하고, 루프를 끝낼 때 autoloop가 백그라운드 scribe에 위임하고, 작업 중에 guard가 새 함정과 프로젝트 규칙을 넘기고, `[Judge]` 파이프라인에서 나온 witness 판정이 scribe로 흘러든다. 사용자는 마무리하자거나 맥락을 남겨 달라고 말하면 되고, scribe라는 이름을 댈 필요는 없다.
 
 ---
 
-## Operation modes: synchronous vs background
+## 작동 방식: 동기와 백그라운드 (Operation modes: synchronous vs background)
 
-Scribe runs in two distinct modes depending on what is being persisted. The distinction matters because they have different interaction contracts.
+scribe는 무엇을 기록하느냐에 따라 두 방식으로 돈다. 방식마다 사용자와 주고받는 약속이 달라서 이 구분이 중요하다.
 
-| Mode | When | Blocks main? | Operations |
+| 방식 | 언제 | 메인 세션을 멈추는가? | 하는 일 |
 |---|---|---|---|
-| **Background** | After work completes (loop exit, task completion, session end) | No for ordinary dispatch; verify completion before closing an explicitly wrapped-up session | Bridge notes, journal appends, progress checkbox updates, witness verdict logging |
-| **Synchronous** | During work, when a finding needs user confirmation before writing | Yes — main pauses to get user yes/no | Project rule proposals (writes to `AGENTS.md`), novel trap proposals (writes to memory) |
+| **백그라운드** | 작업이 끝난 뒤(루프 종료, 작업 완료, 세션 종료) | 평범한 위임이면 멈추지 않는다. 사용자가 명시적으로 마무리를 요청한 세션이면 닫기 전에 완료를 확인한다 | bridge note, journal 추가, 진행 체크박스 갱신, witness 판정 기록 |
+| **동기** | 작업 도중, 발견 사항을 쓰기 전에 사용자 확인이 필요할 때 | 멈춘다. 메인 세션이 멈추고 사용자에게 예/아니오를 받는다 | 프로젝트 규칙 제안(`AGENTS.md`에 쓴다), 새 함정 제안(메모리에 쓴다) |
 
-Ordinary background writes are fire-and-forget: dispatch sonmat-scribe with artifacts and continue interacting. For an explicit session wrap-up request, main waits for the result and verifies the saved records before reporting wrap-up complete. Synchronous writes are confirmation-gated: main itself runs the proposal dialogue inline, because writing declarative files like `AGENTS.md` or memory records must never happen without explicit user approval.
+평범한 백그라운드 기록은 맡기고 잊는다. 산출물을 주어 sonmat-scribe에 위임하고 사용자와 계속 대화한다. 사용자가 명시적으로 세션 마무리를 요청했다면 메인 세션은 결과를 기다리고, 저장된 기록을 확인한 뒤에 마무리를 알린다. 동기 기록은 사용자 확인을 거쳐야 한다. `AGENTS.md`나 메모리 기록처럼 선언적인 파일은 사용자의 명시적 승인 없이 절대 쓰면 안 되기 때문에, 제안을 주고받는 대화는 메인 세션이 직접 그 자리에서 진행한다.
 
-Both modes belong to scribe because the **axis is the same** (persistence of session findings) — only the interaction contract differs. Do not split them into separate skills; that would fragment the persistence axis and leave other skills unsure who to hand off to.
-
----
-
-## Isolation boundaries (witness protection)
-
-Main may use witness feedback to correct an artifact and learn from the result. Isolation applies to each new witness invocation: it compares the raw user request, a valid approved baseline when present, and the actual artifact without receiving earlier verdicts or the executor's interpretation. Main learning from feedback does not itself break that boundary.
-
-The isolation boundary:
-
-- Bridge notes, read by main on next task start, may contain a compact PASS/WARN/BLOCK/AUTHORITY_CONFLICT marker, separately verified correction results, approved decisions, and unresolved status. Keep raw findings, quoted verdict rationale, and summaries that merely repeat that rationale in the journal; link there when detail is needed.
-- The journal holds detailed witness findings and their citations. It is not auto-loaded, but main may read it for a retrospective or planning under §Journal Access. A recorded verdict remains a report to check against its sources, not proof that the verdict was correct.
-- AGENTS.md Project Rules, approved memory records, and promoted hints can reach main and workers through their normal loading paths. AGENTS.md is loaded natively by Codex. Persisting or revising these rules still requires the existing confirmation and family-check procedures; a witness finding alone does not authorize a new rule.
-
-Witness spawn prompts must never include previous verdicts, main's interpretations or learning summaries, worker reports, bridge notes, journal excerpts, or other scribe records. Witness receives raw user turns, the artifact, and optionally one approved-baseline envelope containing the exact displayed plan plus its raw approval turn. Main must compose that fresh input under §6b Witness dispatch in `skills/autoloop/SKILL.md`; a separate context or no-history fork does not prevent main from explicitly inserting excluded material. Input composition and citation rules are protocol obligations, not a platform guarantee. See [the feedback-boundary decision](../../docs/decisions/2026-11-10-feedback-and-witness-input-boundary.md).
+두 방식이 모두 scribe에 속하는 까닭은 **축이 같기** 때문이다(세션에서 찾은 것을 기록한다). 다른 것은 사용자와 주고받는 약속뿐이다. 둘을 서로 다른 스킬로 나누지 않는다. 나누면 기록 축이 쪼개지고, 다른 스킬은 무엇을 누구에게 넘겨야 할지 헷갈리게 된다.
 
 ---
 
-## Dispatch Protocol
+## witness를 보호하는 격리 경계 (Isolation boundaries)
 
-### When to dispatch
+메인 세션은 witness 피드백을 바탕으로 산출물을 고치고 그 결과에서 배워도 된다. 격리는 witness를 새로 부를 때마다 적용된다. 새 witness는 이전 판정이나 실행한 쪽의 해석을 받지 않고, 사용자 원래 요청, 있을 때는 유효한 승인 기준선, 실제 산출물을 비교한다. 메인 세션이 피드백에서 배운다고 해서 그것만으로 이 경계가 깨지지는 않는다.
 
-An explicit request to close or hand off the current session overrides automatic small-task and conversation skip conditions. Recognize the user's intent in context, not a fixed phrase list; explaining or quoting a closing expression is not a request. Main supplies a factual session handoff artifact when there is no code diff. Review what is worth persisting, avoid duplicate records, and report when there is nothing new to save. This request does not authorize new project rules or trap records beyond the existing confirmation protocols.
+격리 경계는 다음과 같다.
 
-| Condition | Mode | Functions |
+- 다음 작업을 시작할 때 메인 세션이 읽는 bridge note에는 짧은 PASS/WARN/BLOCK/AUTHORITY_CONFLICT 표시, 따로 확인한 수정 결과, 승인된 결정, 아직 풀리지 않은 상태를 담을 수 있다. 발견 사항 원문, 판정 근거를 인용한 글, 그 근거를 되풀이할 뿐인 요약은 journal에 두고, 자세한 내용이 필요하면 journal로 링크한다.
+- journal에는 witness 발견 사항과 그 인용을 자세히 담는다. 자동으로 불러오지는 않지만, 메인 세션이 회고나 기획을 할 때 §journal 열람 (Journal Access)에 따라 읽을 수 있다. 기록된 판정은 그 출처에 대조해 확인할 보고일 뿐, 판정이 옳았다는 증거가 아니다.
+- AGENTS.md의 Project Rules, 승인된 메모리 기록, 승격된 힌트는 평소 불러오는 경로로 메인 세션과 worker에 닿을 수 있다. AGENTS.md는 Codex가 기본으로 불러온다. 이런 규칙을 기록하거나 고치려면 여전히 기존 확인 절차와 계열 확인 절차를 거쳐야 한다. witness 발견 사항 하나만으로 새 규칙을 만들 수는 없다.
+
+witness를 띄우는 프롬프트에는 이전 판정, 메인 세션의 해석이나 학습 요약, worker 보고, bridge note, journal 발췌, 그 밖의 scribe 기록을 절대 넣지 않는다. witness가 받는 것은 사용자 발화 원문, 산출물, 그리고 선택적으로 승인 기준선 묶음 하나다. 이 묶음에는 그때 보여 준 계획 그대로와 승인 발화 원문이 들어 있다. 메인 세션은 `skills/autoloop/SKILL.md`의 §6b witness 위임 (Witness dispatch)에 따라 이 입력을 새로 구성해야 한다. 별도 컨텍스트나 대화 이력을 물려받지 않는 분기(no-history fork)를 쓴다고 해서, 제외해야 할 자료를 메인 세션이 프롬프트에 직접 넣는 일까지 막히지는 않는다. 입력 구성 규칙과 인용 규칙은 절차상 의무이고 플랫폼이 보장하는 것이 아니다. [피드백 경계 결정](../../docs/decisions/2026-11-10-feedback-and-witness-input-boundary.md)을 본다.
+
+---
+
+## 위임 절차 (Dispatch Protocol)
+
+### 언제 위임하는가 (When to dispatch)
+
+사용자가 지금 세션을 닫거나 넘기자고 명시적으로 요청하면, 작은 작업이나 대화라서 자동으로 건너뛰는 조건보다 그 요청이 앞선다. 정해진 문구 목록이 아니라 맥락에서 사용자의 뜻을 알아본다. 마무리 표현을 설명하거나 인용하는 것은 요청이 아니다. 코드 diff가 없으면 메인 세션이 사실만 정리한 세션 인계를 산출물로 넘긴다. 무엇을 남길 만한지 검토하고, 같은 기록을 겹쳐 쓰지 않으며, 새로 남길 것이 없으면 그렇다고 알린다. 이 요청이 있다고 해서 기존 확인 절차를 넘어 새 프로젝트 규칙이나 함정 기록을 써도 되는 것은 아니다.
+
+| 조건 | 방식 | 기능 |
 |-----------|------|-----------|
-| Explicit session wrap-up / handoff request (any task size, including conversation) | Background; verify before closing | bridge + journal as warranted; follow local persistence rules |
-| Loop exit with **keep** | Background | bridge + journal + progress + witness verdict |
-| Loop exit with **discard** | Background | journal only |
-| Non-loop task completed (3+ files changed) | Background | bridge + journal |
-| Non-loop task completed (1-2 files) | — (no dispatch) | overhead > value |
-| Session ending with unfinished context (automatic dispatch, no explicit wrap-up request) | Background | bridge only |
-| L0 / trivial task | — (no dispatch) | — |
-| **Novel trap detected by guard** (any task size) | **Synchronous** | `novel_trap` — user confirmation, then write to memory |
-| **Project rule pattern detected** (any task size) | **Synchronous** | `project_rule` — user confirmation, then write to `AGENTS.md` |
+| 명시적인 세션 마무리 / 인계 요청 (작업 크기와 상관없이, 대화만 했어도) | 백그라운드, 닫기 전에 확인 | 필요한 만큼 bridge + journal. 로컬 기록 규칙을 따른다 |
+| **keep**으로 루프 종료 | 백그라운드 | bridge + journal + progress + witness 판정 |
+| **discard**로 루프 종료 | 백그라운드 | journal만 |
+| 루프 밖 작업 완료 (파일 3개 이상 변경) | 백그라운드 | bridge + journal |
+| 루프 밖 작업 완료 (파일 1~2개) | — (위임하지 않음) | 들이는 비용이 얻는 값보다 크다 |
+| 맥락이 끝나지 않은 채 세션 종료 (자동 위임, 명시적 마무리 요청 없음) | 백그라운드 | bridge만 |
+| L0 / 사소한 작업 | — (위임하지 않음) | — |
+| **guard가 새 함정 감지** (작업 크기와 상관없이) | **동기** | `novel_trap` — 사용자 확인 뒤 메모리에 쓴다 |
+| **프로젝트 규칙 패턴 감지** (작업 크기와 상관없이) | **동기** | `project_rule` — 사용자 확인 뒤 `AGENTS.md`에 쓴다 |
 
-Synchronous dispatches (bottom two rows) are handled inline by main using the protocols in §Project Rule Recording and §Novel Trap Recording below. Background dispatches spawn the sonmat-scribe agent with the prompt structure below.
+동기 위임(아래 두 줄)은 메인 세션이 아래 §프로젝트 규칙 기록 (Project Rule Recording)과 §새 함정 기록 (Novel Trap Recording)의 절차를 따라 그 자리에서 처리한다. 백그라운드 위임은 아래 프롬프트 구조로 sonmat-scribe 에이전트를 띄운다.
 
-### How to dispatch (background)
+### 위임하는 방법 — 백그라운드 (How to dispatch)
 
-Spawn `sonmat-scribe` as a background agent with this prompt structure:
+`sonmat-scribe`를 백그라운드 에이전트로 띄우고 다음 프롬프트 구조를 쓴다.
 
 ```
 ## Scribe Dispatch
@@ -87,137 +87,141 @@ Spawn `sonmat-scribe` as a background agent with this prompt structure:
 Do not send the full conversation or speculate about user motivation.}
 ```
 
-### After dispatch
+### 위임한 뒤 (After dispatch)
 
-- For ordinary background dispatch, continue with user interaction without waiting.
-- For explicit session wrap-up, collect DONE / PARTIAL / SKIP and the file paths written. Verify this session's entries in those files before reporting completion; report unsaved work or no new material explicitly. Dispatch alone is not completion.
-- Scribe writes `bridge-note.md` and `journal.md` to the per-project scribe dir (see File Locations), and `progress.md` to the project root.
-- On next task start, read `bridge-note.md` if it exists. Use it as context, then proceed.
+- 평범한 백그라운드 위임이면 기다리지 말고 사용자와 계속 대화한다.
+- 명시적인 세션 마무리라면 DONE / PARTIAL / SKIP과 기록한 파일 경로를 받는다. 완료를 알리기 전에 그 파일들에 이번 세션 항목이 실제로 있는지 확인한다. 저장하지 못한 것이 있거나 새로 남길 것이 없으면 그렇다고 분명히 알린다. 위임했다는 것만으로는 완료가 아니다.
+- scribe는 `bridge-note.md`와 `journal.md`를 프로젝트별 scribe 디렉터리(파일 위치 참조)에, `progress.md`를 프로젝트 루트에 쓴다.
+- 다음 작업을 시작할 때 `bridge-note.md`가 있으면 읽는다. 맥락으로 쓰고 작업을 이어 간다.
 
 ---
 
-## Bridge Note Consumption
+## bridge note 읽기 (Bridge Note Consumption)
 
-At the start of any non-trivial task:
+간단하지 않은 작업을 시작할 때마다:
 
-1. Check if `bridge-note.md` exists in the scribe dir (see File Locations; legacy `.claude/sonmat/` as fallback).
-2. If yes, read it silently. Use the context but don't quote it to the user.
-3. If a carry-forward item is directly relevant to the new task, mention it naturally:
+1. scribe 디렉터리에 `bridge-note.md`가 있는지 확인한다(파일 위치 참조. 없으면 예전 위치인 `.claude/sonmat/`를 본다).
+2. 있으면 말없이 읽는다. 맥락으로 쓰되 사용자에게 인용하지 않는다.
+3. 넘겨받은 항목이 새 작업과 직접 관련되면 자연스럽게 언급한다.
    ```
-   참고: 이전 작업에서 {relevant item}이 나왔는데, 이번에 연관될 수 있어요.
+   참고: 이전 작업에서 {관련 항목}이 나왔는데, 이번 작업과 연관될 수 있어요.
    ```
-4. If nothing is relevant, ignore it.
-5. **Treat the bridge note as hypothesis, not fact**. The previous session may have written it under partial understanding. Before acting on a claim from the bridge note, verify it against the actual code/state. If the claim disagrees with what you observe, trust observation and flag the bridge-note divergence in your next dispatch.
+4. 관련된 것이 없으면 무시한다.
+5. **bridge note는 사실이 아니라 가설로 다룬다**. 이전 세션은 부분적으로만 이해한 채 썼을 수 있다. bridge note의 주장을 근거로 행동하기 전에 실제 코드나 상태에 대조해 확인한다. 주장이 관찰과 다르면 관찰을 믿고, 다음 위임 때 bridge note가 어긋났다고 표시한다.
 
 ---
 
-## Bridge Note Authoring Principles
+## bridge note 작성 원칙 (Bridge Note Authoring Principles)
 
-When scribe writes a bridge note, four principles are load-bearing. Sections beyond these are optional — write what the work demands, omit what would pad. (A3 lesson: what doesn't fit the page wasn't essential.)
+scribe가 bridge note를 쓸 때는 네 원칙이 핵심이다. 그 밖의 절은 선택이다. 작업에 필요한 것은 쓰고, 분량만 늘릴 것은 뺀다. (A3 교훈: 한 장에 들어가지 않는 것은 핵심이 아니었다.)
 
-1. **Open work in status form, never imperative.** Write "X is not yet implemented; depends on Y being finalized first" — not "Implement X next." Imperative phrasing makes the next session execute blindly without verifying the premise (Auftragstaktik intent-not-method principle, also Toby T2 handoff lesson). The next session decides what to do; scribe records what stands.
-2. **Traps to Avoid is mandatory when present.** Failed approaches, dead ends, hypotheses that turned out wrong — these vanish from code but matter for the next session. If the work hit any failed branch, that record is part of the bridge note. (Phase 2 induction §15: minority/failed positions preserved are future optionality.)
-3. **The bridge note is hypothesis, not fact.** Scribe writes from limited synthesis; the next session must verify. Phrase claims in a form that signals tentativeness ("appears to / observed / decided based on") rather than asserting. Include enough file/line references that the next session can confirm independently.
-4. **Brevity over completeness.** Aim for a note the next session reads in under a minute. If detail is needed, link to a separate artifact (journal, ADR, report) rather than inlining. A bridge note that has to be skimmed is a bridge note that loses the point it was making.
+1. **남은 일은 지시가 아니라 상태로 쓴다.** "X를 다음에 구현할 것"이 아니라 "X는 아직 구현되지 않았다. Y가 먼저 확정되어야 한다"로 쓴다. 지시형으로 쓰면 다음 세션이 전제를 확인하지 않고 그대로 실행한다(방법이 아니라 의도를 전하는 Auftragstaktik 원칙, Toby T2 인계 교훈). 무엇을 할지는 다음 세션이 정하고, scribe는 지금 어떤 상태인지를 기록한다.
+2. **피해야 할 함정(Traps to Avoid)이 있으면 반드시 쓴다.** 실패한 방법, 막다른 길, 틀린 것으로 드러난 가설은 코드에서는 사라지지만 다음 세션에는 중요하다. 작업이 실패한 갈래를 하나라도 거쳤다면 그 기록은 bridge note에 들어가야 한다. (Phase 2 귀납 §15: 소수 의견이나 실패한 입장을 남겨 두면 나중에 고를 수 있는 선택지가 된다.)
+3. **bridge note는 사실이 아니라 가설이다.** scribe는 제한된 종합을 바탕으로 쓰고, 다음 세션은 확인해야 한다. 주장을 단정하지 말고 잠정적이라는 것이 드러나게 쓴다("~로 보인다 / 관찰했다 / ~를 근거로 정했다"). 다음 세션이 혼자서 확인할 수 있도록 파일과 줄 위치를 충분히 적는다.
+4. **완결성보다 간결함을 앞세운다.** 다음 세션이 1분 안에 읽을 수 있는 노트를 목표로 한다. 자세한 내용이 필요하면 본문에 넣지 말고 별도 산출물(journal, ADR, 보고서)에 링크한다. 훑어 읽어야 하는 bridge note는 하려던 말을 놓친다.
 
-Sections like Summary, Key Decisions, Relevant Files, Working Agreements, or a Prompt for New Chat may be useful — include them when the work justifies, skip them when they would be padding. The structure is free; the four principles above are not.
-
----
-
-## Journal Access
-
-The journal (`journal.md` in the scribe dir — see File Locations) is a passive record. It is NOT loaded into context automatically.
-
-Read it only when:
-- User asks "what did we do last time?"
-- User asks for progress summary
-- Retrospective or planning needs historical context
-
-### Witness events in the journal
-
-When a witness verdict is included in the dispatch artifacts, scribe records it as a discrete journal line (not just a summary). `BLOCK`, `WARN`, and `AUTHORITY_CONFLICT` events are particularly valuable as learning signals — they represent moments where main's execution diverged from raw user intent or the approved baseline, and are worth reviewing in retrospectives. `PASS` events record as a single compact line.
-
-Detailed findings and their citations go to the journal. A compact verdict marker may go to the bridge along with separately verified correction results, approved decisions, and unresolved status. These records support main's follow-up and retrospective; none are inputs to a new witness invocation. See §Isolation boundaries.
-
-For an actual case being compared, record the original request and artifact references, the source/test/confirmed user correction used to check the verdict (or "unverified"), the observed follow-up state, and any observed recurrence or cost. Add only fields supported by the case; do not expand every PASS into a report. Invocation, instruction loading, compliance, and task correctness are different observations, and unmeasured is not zero.
+Summary, Key Decisions, Relevant Files, Working Agreements, Prompt for New Chat 같은 절은 쓸모가 있을 수 있다. 작업에 필요하면 넣고, 분량만 늘릴 것 같으면 뺀다. 구조는 자유지만 위의 네 원칙은 자유가 아니다.
 
 ---
 
-## Project Rule Recording (absorbed from guard §2)
+## journal 열람 (Journal Access)
 
-Project rules are implicit conventions the user assumes the assistant knows. Guard detects the signals during work; scribe persists them to `AGENTS.md`.
+journal(scribe 디렉터리의 `journal.md`, 파일 위치 참조)은 쌓아만 두는 기록이다. 컨텍스트에 자동으로 불러오지 **않는다**.
 
-### Project instruction file contract
+다음 경우에만 읽는다.
+- 사용자가 "지난번에 뭐 했지?"라고 물을 때
+- 사용자가 진행 요약을 달라고 할 때
+- 회고나 기획에 이력 맥락이 필요할 때
 
-- `AGENTS.md` is the canonical project instruction file and the only target for `## Project Rules`. Codex loads it natively. Do not create or use `CODEX.md` for this purpose.
-- `CLAUDE.md`, when a project needs one, is a Claude Code adapter: it imports `@AGENTS.md` and may contain only Claude-specific additions beyond that import.
-- Never overwrite or silently migrate an existing `CLAUDE.md`. If it has project rules but no `AGENTS.md`, show the proposed split and obtain a separate user approval before editing either file.
-- A Codex SessionStart hook does not create either file. A user-approved project-rule recording may create `AGENTS.md`; creating or changing a Claude adapter remains an explicit, reviewable change.
+### journal의 witness 기록 (Witness events in the journal)
 
-### Signals that reach scribe
+위임 산출물에 witness 판정이 들어 있으면 scribe는 그것을 요약에 섞지 않고 journal에 따로 한 줄로 기록한다. `BLOCK`, `WARN`, `AUTHORITY_CONFLICT`는 특히 값진 학습 신호다. 메인 세션의 실행이 사용자 원문 의도나 승인 기준선에서 벗어난 순간을 보여 주므로 회고에서 다시 볼 만하다. `PASS`는 짧게 한 줄로 기록한다.
 
-Guard (or main observation) dispatches a project-rule proposal to scribe when any of these occur:
+자세한 발견 사항과 그 인용은 journal에 둔다. bridge에는 짧은 판정 표시와 함께, 따로 확인한 수정 결과, 승인된 결정, 아직 풀리지 않은 상태를 둘 수 있다. 이 기록들은 메인 세션의 후속 작업과 회고를 돕는다. 어느 것도 새 witness 호출의 입력이 되지 않는다. §witness를 보호하는 격리 경계 (Isolation boundaries)를 본다.
 
-- **Direct statement**: user says "이 프로젝트에서는 항상 X" or equivalent
-- **Repeated correction**: same fix requested 2+ times
-- **Structural inference**: config files, test patterns, or naming conventions imply a rule
+실제로 비교하는 사례라면 원래 요청과 산출물 참조, 판정을 확인하는 데 쓴 출처·테스트·확인된 사용자 정정(없으면 "unverified"), 관찰한 후속 상태, 관찰한 재발이나 비용을 기록한다. 사례가 뒷받침하는 필드만 더하고, PASS마다 보고서로 부풀리지 않는다. 호출 여부, 지침 로드 여부, 준수 여부, 작업이 맞았는지는 서로 다른 관찰이며, 재지 않은 것은 0이 아니다.
 
-### What scribe does
+---
 
-1. **Draft**: formulate the rule in one or two lines, in the project's primary language.
-2. **Propose synchronously** (not background) — this is one of the few scribe operations that blocks on user confirmation, because the outcome writes into a file the user reads directly:
+## 프로젝트 규칙 기록 (Project Rule Recording)
+
+예전 guard §2에서 옮겨 왔다.
+
+프로젝트 규칙은 사용자가 어시스턴트도 당연히 안다고 여기는 암묵적 관례다. 작업 중에 guard가 신호를 감지하고, scribe가 그것을 `AGENTS.md`에 기록한다.
+
+### 프로젝트 지침 파일 계약 (Project instruction file contract)
+
+- `AGENTS.md`는 프로젝트 지침의 정본이며 `## Project Rules`를 쓸 유일한 대상이다. Codex는 이 파일을 기본으로 불러온다. 이 목적으로 `CODEX.md`를 만들거나 쓰지 않는다.
+- 프로젝트에 `CLAUDE.md`가 필요하면 그것은 Claude Code용 어댑터다. `@AGENTS.md`를 불러오고, 그 밖에는 Claude에만 해당하는 추가 내용만 담을 수 있다.
+- 기존 `CLAUDE.md`를 덮어쓰거나 말없이 옮기지 않는다. 그 파일에 프로젝트 규칙이 있는데 `AGENTS.md`가 없으면, 나눌 방안을 보여 주고 사용자에게 따로 승인을 받은 뒤에 어느 파일이든 고친다.
+- Codex SessionStart hook은 두 파일 어느 것도 만들지 않는다. 사용자가 승인한 프로젝트 규칙 기록으로 `AGENTS.md`를 만들 수는 있다. Claude 어댑터를 만들거나 바꾸는 일은 여전히 명시적이고 검토할 수 있는 변경으로 남는다.
+
+### scribe에 닿는 신호 (Signals that reach scribe)
+
+다음 가운데 하나라도 일어나면 guard(또는 메인 세션의 관찰)가 프로젝트 규칙 제안을 scribe에 위임한다.
+
+- **직접 말함**: 사용자가 "이 프로젝트에서는 항상 X" 같은 말을 한다
+- **되풀이한 정정**: 같은 수정을 2번 이상 요청한다
+- **구조에서 짐작**: 설정 파일, 테스트 패턴, 이름 짓는 관례가 어떤 규칙을 함축한다
+
+### scribe가 하는 일 (What scribe does)
+
+1. **초안**: 규칙을 한두 줄로, 프로젝트의 주 언어로 쓴다.
+2. **동기적으로 제안한다** (백그라운드가 아니다). scribe가 하는 일 가운데 사용자 확인을 기다리며 멈추는 몇 안 되는 작업이다. 결과가 사용자가 직접 읽는 파일에 쓰이기 때문이다.
 
    ```
    💡 Project rule detected: {draft rule}
       Add to AGENTS.md? [Yes / No / Rephrase]
    ```
 
-3. **Write** to the `## Project Rules` section of the project's `AGENTS.md` only after user confirms. Create the file and section if they do not exist.
-4. **Never write without confirmation**. Project rules are declarative and persistent; a wrong one is expensive to debug later.
+3. 사용자가 확인한 뒤에만 프로젝트 `AGENTS.md`의 `## Project Rules` 절에 **쓴다**. 파일이나 절이 없으면 만든다.
+4. **확인 없이 절대 쓰지 않는다**. 프로젝트 규칙은 선언적이고 오래 남는다. 잘못 쓴 규칙은 나중에 원인을 찾는 데 비용이 크다.
 
-Project rules accumulate from observed practice. Scribe owns that accumulation: observing patterns, abstracting them, and persisting the abstraction.
+프로젝트 규칙은 관찰한 실제 작업 방식에서 쌓인다. 그 쌓는 일, 곧 패턴을 지켜보고 일반화하고 그 일반화를 기록하는 일을 scribe가 맡는다.
 
 ---
 
-## Novel Trap Recording (absorbed from guard §4)
+## 새 함정 기록 (Novel Trap Recording)
 
-A novel trap is **either** a verification failure pattern that existing discipline and memory did not anticipate, **or** a "spec didn't cover this" moment — a case where discipline ran fine but the existing rules/spec/contract had a gap that the situation exposed. Both are inputs to memory because both signal that the system's prior model of "what to watch for" is incomplete.
+예전 guard §4에서 옮겨 왔다.
 
-The two flavors:
+새 함정은 둘 가운데 **하나**다. 기존 규율과 메모리가 예상하지 못한 검증 실패 패턴이거나, "명세가 이 경우를 다루지 않았다"는 순간이다. 뒤의 것은 규율은 제대로 돌았지만 기존 규칙·명세·계약에 빈틈이 있었고 상황이 그 빈틈을 드러낸 경우다. 둘 다 "무엇을 살펴야 하는가"에 관한 체계의 기존 모델이 불완전하다는 신호이므로 메모리에 넣을 입력이 된다.
 
-- **Verification failure** (classic novel trap): discipline ran but missed a real problem. The catch-signal is what would have caught it earlier.
-- **Spec gap** (improvisation surfacing): discipline didn't fail; the spec/rule was simply silent on the case, and the actor had to improvise. The catch-signal is what kind of case the spec should have covered.
+두 갈래(flavor)는 다음과 같다.
 
-Both reach scribe via the same channel — guard for the first, main observation or autoloop retrospective for the second. Also send failures covered by an existing hint: scribe's family check decides whether the hint was missed or needs a different activation or loading path. A witness finding is a candidate signal, not an automatic policy change; check its cited source, raw user intent, and current state before abstracting a lesson. The Wehrmacht *Gefechtsbericht* lesson: a successful improvisation that revealed a doctrinal gap is just as valuable as a verification failure, and both belong in the next edition of the rule book.
+- **검증 실패** (전형적인 새 함정): 규율이 돌았지만 실제 문제를 놓쳤다. 포착 신호는 그 문제를 더 일찍 잡았을 무언가다.
+- **명세 빈틈** (즉흥 대응이 드러난 경우): 규율이 실패한 것이 아니다. 명세나 규칙이 그 경우에 아무 말도 하지 않아서 행위자가 즉흥으로 대응해야 했다. 포착 신호는 명세가 다뤘어야 할 경우가 어떤 종류인지다.
 
-### What scribe receives from guard (or main observation)
+둘 다 같은 경로로 scribe에 닿는다. 앞의 것은 guard가, 뒤의 것은 메인 세션의 관찰이나 autoloop 회고가 보낸다. 기존 힌트가 다루는 실패도 보낸다. 그 힌트를 놓친 것인지, 발동 조건이나 불러오는 경로를 바꿔야 하는지는 scribe의 계열 확인이 정한다. witness 발견 사항은 후보 신호일 뿐 자동으로 정책을 바꾸지 않는다. 교훈을 일반화하기 전에 그것이 인용한 출처, 사용자 원문 의도, 현재 상태를 확인한다. 독일 국방군 *Gefechtsbericht*(전투 보고)의 교훈: 교리의 빈틈을 드러낸 즉흥 대응의 성공은 검증 실패만큼 값지며, 둘 다 다음 판 교범에 들어가야 한다.
 
-The dispatch includes:
-- **Flavor**: `verification_failure` or `spec_gap`
-- **Pattern**: what was missed and how
-- **Context**: what was being done when it surfaced
-- **Catch-signal**: the specific check or signal that would have caught it earlier (verification failure) or the kind of case the spec should have covered (spec gap)
+### guard(또는 메인 세션의 관찰)에서 받는 것 (What scribe receives from guard)
 
-### What scribe does
+위임에는 다음이 들어 있다.
+- **갈래(Flavor)**: `verification_failure` 또는 `spec_gap`
+- **패턴**: 무엇을 어떻게 놓쳤는가
+- **맥락**: 드러났을 때 무엇을 하고 있었는가
+- **포착 신호**: 더 일찍 잡았을 구체적인 검사나 신호(검증 실패), 또는 명세가 다뤘어야 할 경우의 종류(명세 빈틈)
 
-1. **Abstract the pattern**: convert the concrete incident into a general-form description. Strip project-specific identifiers that would prevent reuse.
-2. **Family check (induction)**: compare the abstracted pattern with `discipline/hints.md` and the existing `trap_*` / `insight_*` files in `$SONMAT_MEMORY_DIR`. A family is a shared failure shape — the same wrong inference — not the same tool or project. Settle on exactly one outcome:
-   - **A hint already covers it** → antibody failure: the hint existed and did not fire. Propose revising that hint (wording, activation condition, or how it is loaded) and adding the incident to its instance list. Write a new trap file only if the incident adds a distinct catch-signal.
-   - **Second independent instance, no hint yet** → propose promotion: one hint in the matching `hints.md` section stating the pattern, the catch-signal, and the instance list (trap names). The trap files stay as evidence; the hint is the read path. Independent means a different session and a different surface (project, tool, or system).
-   - **No family** → record a new trap (steps 3–5).
+### scribe가 하는 일 (What scribe does)
 
-   Why this step exists: trap memory has no read path at the point of action, while `hints.md` is loaded by every session. A recorded config-sourcing trap recurred two weeks later because nothing surfaced it. Promotion and revision proposals are synchronous like any trap proposal, and a hint change ships through a sonmat release (`VERSIONING.md`).
-3. **Choose the scope**:
-   - Project-specific lesson → `{name}.md` in the per-project scribe dir (see File Locations)
-   - Universal lesson (applies across projects) → `trap_{name}.md` in `$SONMAT_MEMORY_DIR` (default `~/.sonmat/memory/`)
-4. **Propose** the memory record synchronously:
+1. **패턴을 일반화한다**: 구체적인 사건을 일반적인 형태의 설명으로 바꾼다. 재사용을 막는 프로젝트 고유 식별자는 지운다.
+2. **계열 확인 (귀납)**: 일반화한 패턴을 `discipline/hints.md`, 그리고 `$SONMAT_MEMORY_DIR`에 있는 기존 `trap_*` / `insight_*` 파일과 비교한다. 계열이란 같은 실패 모양, 곧 같은 잘못된 추론을 말한다. 같은 도구나 같은 프로젝트를 뜻하지 않는다. 결과는 정확히 하나로 정한다.
+   - **이미 다루는 힌트가 있다** → 항체 실패다. 힌트가 있었는데 발동하지 않았다. 그 힌트를 고치자고(문구, 발동 조건, 불러오는 방식) 제안하고 사건을 그 힌트의 사례 목록에 더한다. 사건이 별개의 포착 신호를 더할 때만 새 함정 파일을 쓴다.
+   - **독립된 두 번째 사례인데 아직 힌트가 없다** → 승격을 제안한다. 알맞은 `hints.md` 절에 힌트 하나를 두고, 거기에 패턴, 포착 신호, 사례 목록(함정 이름)을 적는다. 함정 파일은 증거로 남고, 읽히는 경로는 힌트가 맡는다. 독립이란 세션이 다르고 드러난 곳(프로젝트, 도구, 시스템)도 다르다는 뜻이다.
+   - **계열이 없다** → 새 함정을 기록한다(3~5단계).
+
+   이 단계가 있는 까닭: 함정 메모리는 행동하는 순간에 읽히는 경로가 없지만, `hints.md`는 모든 세션이 불러온다. 설정 출처에 관한 함정이 기록돼 있었는데도 아무것도 그것을 떠올려 주지 않아 2주 뒤에 같은 일이 되풀이됐다. 승격 제안과 개정 제안은 다른 함정 제안처럼 동기적으로 진행하고, 힌트 변경은 sonmat 릴리스(`VERSIONING.md`)로 배포한다.
+3. **범위를 고른다**:
+   - 프로젝트에만 해당하는 교훈 → 프로젝트별 scribe 디렉터리(파일 위치 참조)의 `{name}.md`
+   - 범용 교훈(여러 프로젝트에 적용된다) → `$SONMAT_MEMORY_DIR`(기본값 `~/.sonmat/memory/`)의 `trap_{name}.md`
+4. 메모리 기록을 동기적으로 **제안한다**.
 
    ```
    💡 Novel trap detected: {short title}
       Record as {project | universal} memory? [Yes / No / Edit first]
    ```
 
-5. **Write** only after user confirms, using this format:
+5. 사용자가 확인한 뒤에만 다음 형식으로 **쓴다**.
 
 ```markdown
 # Trap: {title}
@@ -232,13 +236,13 @@ The dispatch includes:
 {When this trap is likely to recur}
 ```
 
-6. **Spec amendment proposal (only when flavor = `spec_gap` AND project has `docs/specs/` with `sonmat.spec_awareness: enabled`)**: if both conditions hold, after writing the trap memory, offer to generate a successor spec rather than only logging. This implements ADR `2026-04-26-spec-evolution-loop.md` (T2-C). Conditions:
+6. **명세 개정 제안 (flavor = `spec_gap`이고 프로젝트에 `sonmat.spec_awareness: enabled`인 `docs/specs/`가 있을 때만)**: 두 조건이 모두 맞으면 함정 메모리를 쓴 뒤 기록만 남기지 말고 후속 명세를 만들지 제안한다. ADR `2026-04-26-spec-evolution-loop.md`(T2-C)를 구현한 것이다. 조건은 다음과 같다.
 
-   - Project must have `docs/specs/` directory with an `_index.md` declaring `sonmat.spec_awareness: enabled`. If absent, skip this step entirely — Stage 0 projects log to trap memory only.
-   - The novel trap dispatch must carry `flavor: spec_gap` (i.e., the action ran outside spec coverage, not a verification failure of existing discipline).
-   - There must be a clearly identifiable existing spec the gap relates to. If the gap doesn't map to any existing spec, skip — this is "new spec needed" territory, which is user-initiated, not scribe-initiated.
+   - 프로젝트에 `docs/specs/` 디렉터리가 있고, 그 안의 `_index.md`가 `sonmat.spec_awareness: enabled`를 선언해야 한다. 없으면 이 단계를 통째로 건너뛴다. Stage 0 프로젝트는 함정 메모리에만 기록한다.
+   - 새 함정 위임에 `flavor: spec_gap`이 실려 있어야 한다(곧, 기존 규율의 검증 실패가 아니라 행동이 명세가 다루는 범위 밖에서 일어났다).
+   - 빈틈과 관련된 기존 명세를 분명히 짚을 수 있어야 한다. 빈틈이 어느 기존 명세에도 대응하지 않으면 건너뛴다. 그것은 "새 명세가 필요한" 영역이고, scribe가 아니라 사용자가 시작할 일이다.
 
-   When all three hold, propose synchronously:
+   세 조건이 모두 맞으면 동기적으로 제안한다.
 
    ```
    💡 Spec gap detected: {pattern}
@@ -248,15 +252,15 @@ The dispatch includes:
       Propose amendment via successor spec? [Yes / No log only / Edit first]
    ```
 
-   On `Yes`: generate a draft successor spec at `docs/specs/SPEC-{YYYYMMDD}-{slug}.md` using the project's spec template (or the sonmat default at `templates/spec-template.md` if no project template exists). Set `supersedes: {original-spec-id}`. Update the original spec's frontmatter to add `superseded-by: {new-spec-id}` and propose `status: archived` only after user confirms full supersession (vs partial amendment that leaves original active).
+   `Yes`이면: 프로젝트의 명세 템플릿(프로젝트 템플릿이 없으면 sonmat 기본값 `templates/spec-template.md`)으로 `docs/specs/SPEC-{YYYYMMDD}-{slug}.md`에 후속 명세 초안을 만든다. `supersedes: {original-spec-id}`를 넣는다. 원래 명세의 frontmatter에 `superseded-by: {new-spec-id}`를 더하고, `status: archived`는 사용자가 완전히 대체한다고 확인한 뒤에만 제안한다(원래 명세를 살려 두는 부분 개정과 구분한다).
 
-   On `Edit first`: show the draft, let user modify, then write.
+   `Edit first`이면: 초안을 보여 주고 사용자가 고치게 한 뒤에 쓴다.
 
-   On `No log only`: do not generate successor. Trap memory record is sufficient.
+   `No log only`이면: 후속 명세를 만들지 않는다. 함정 메모리 기록으로 충분하다.
 
-   **Closure ceremony auto-trigger**: if user accepts full supersession (original `status: archived`), prompt for sunset date and fork-prevention declaration per `discipline/hints.md` "Closure ceremony" hint (PEP 404 model). Do not write `archived` without this metadata.
+   **폐기 의례 자동 발동**: 사용자가 완전 대체를 받아들이면(원래 명세 `status: archived`) `discipline/hints.md`의 "Closure ceremony" 힌트(PEP 404 모델)에 따라 종료 날짜와 분기 방지 선언을 묻는다. 이 메타데이터 없이 `archived`를 쓰지 않는다.
 
-   **LEARN journal entry (always, regardless of Yes/No/Edit)**: append to `journal.md`:
+   **LEARN journal 항목 (Yes/No/Edit와 상관없이 항상)**: `journal.md`에 덧붙인다.
 
    ```markdown
    ## YYYY-MM-DD [hostname] — Spec gap AAR
@@ -267,9 +271,9 @@ The dispatch includes:
    - Reasoning: {1-line justification}
    ```
 
-   This is the LPS-5-conversation LEARN step (`docs/research/architecture-methodology-and-spec-discipline.md` A4). Captured even when no amendment generated, because the deferred decisions are themselves data for later retrospective.
+   이것이 LPS 5대화의 LEARN 단계다(`docs/research/architecture-methodology-and-spec-discipline.md` A4). 개정안을 만들지 않았을 때도 기록하는 까닭은, 미룬 결정 자체가 나중 회고에 쓸 자료이기 때문이다.
 
-7. **Dispatch GitHub feedback (optional)**: after writing, offer to submit as a GitHub issue to the sonmat repo. This is purely optional — if the user declines, the memory record stays local.
+7. **GitHub 피드백 보내기 (선택)**: 기록한 뒤 sonmat 리포에 GitHub 이슈로 올릴지 제안한다. 전적으로 선택 사항이다. 사용자가 거절하면 메모리 기록은 로컬에만 남는다.
 
    ```
    💬 This trap could help other sonmat users. Submit to GitHub?
@@ -285,43 +289,45 @@ The dispatch includes:
       [Yes / No / Edit first]
    ```
 
-   If user approves: `gh issue create --repo jun0-ds/sonmat --template trap-report.md`.
-   If user wants to edit: show the full issue body, let them modify, then submit.
-   **Never send without showing the content first.**
+   사용자가 승인하면: `gh issue create --repo jun0-ds/sonmat --template trap-report.md`.
+   사용자가 고치고 싶어 하면: 이슈 본문 전체를 보여 주고 고치게 한 뒤 올린다.
+   **내용을 먼저 보여 주지 않고 절대 보내지 않는다.**
 
 
-**This is not optional on guard's side.** If guard detects a novel trap and does not dispatch to scribe, the verification + persistence loop is broken. The memory system grows through practice, not pre-definition, and scribe is the step that converts practice into persistence.
-
----
-
-## Progress Management (absorbed from plan skill)
-
-### What scribe handles (background)
-- Checking off completed tasks/phases in `progress.md`
-- Adding completion timestamps
-- Committing with `progress: {item} done`
-
-### What stays in foreground
-- Creating `progress.md` (user decision)
-- Adding new milestones/phases (structural change = loop L3)
-- Reordering or reprioritizing (user decision)
-
-### Milestone planning (formerly plan skill)
-Milestone-level planning ("create roadmap", "restructure milestones") is now handled by loop's L3 escalation. The planning questions from the old plan skill are absorbed into loop's [Plan] phase when escalated to L3.
+**guard 쪽에서는 이것이 선택 사항이 아니다.** guard가 새 함정을 감지하고도 scribe에 위임하지 않으면 검증과 기록이 이어지는 고리가 끊긴다. 메모리 체계는 미리 정의해서가 아니라 실제 작업을 거치며 자라고, 실제 작업을 기록으로 바꾸는 단계가 scribe다.
 
 ---
 
-## File Locations
+## 진행 관리 (Progress Management)
 
-sonmat state lives **outside `.claude/`** — Claude Code edit-protects every `.claude/` directory (prompting on each Edit/Write, unsuppressable except in `bypassPermissions`). Resolution:
+예전 plan 스킬에서 옮겨 왔다.
 
-- **Per-project scribe dir** (`<scribe-dir>` below) = `$SONMAT_PROJECTS_BASE/<slug>` (default `~/.sonmat/projects/<slug>`), where `<slug>` is the cwd path with `/`→`-` (e.g. `/home/u/proj` → `-home-u-proj`), mirroring Claude Code's own `~/.claude/projects/`.
-- **Universal memory** = `$SONMAT_MEMORY_DIR` (default `~/.sonmat/memory/`).
-- The session-start hook creates these and migrates legacy `.claude/sonmat/` + `~/.claude/sonmat/memory/` automatically. **Fallback**: if `<scribe-dir>` is empty but a legacy `.claude/sonmat/` has content, read the legacy path.
+### scribe가 맡는 일 — 백그라운드 (What scribe handles)
+- `progress.md`에서 끝난 작업·단계에 체크 표시
+- 완료 시각 추가
+- `progress: {item} done`으로 커밋
 
-| File | Location | Lifecycle |
+### 포그라운드에 남는 일 (What stays in foreground)
+- `progress.md` 만들기(사용자 결정)
+- 새 마일스톤·단계 추가(구조 변경 = loop L3)
+- 순서나 우선순위 바꾸기(사용자 결정)
+
+### 마일스톤 기획 — 예전 plan 스킬 (Milestone planning)
+마일스톤 수준의 기획("로드맵 만들어 줘", "마일스톤 재구성해 줘")은 이제 loop의 L3 에스컬레이션이 맡는다. 예전 plan 스킬의 기획 질문은 L3로 에스컬레이션할 때 loop의 [Plan] 단계로 흡수됐다.
+
+---
+
+## 파일 위치 (File Locations)
+
+sonmat 상태는 **`.claude/` 밖에** 둔다. Claude Code는 모든 `.claude/` 디렉터리를 편집 보호하기 때문이다(Edit/Write마다 묻고, `bypassPermissions`가 아니면 끌 수 없다). 위치는 다음과 같이 정한다.
+
+- **프로젝트별 scribe 디렉터리**(아래 `<scribe-dir>`) = `$SONMAT_PROJECTS_BASE/<slug>`(기본값 `~/.sonmat/projects/<slug>`). `<slug>`는 cwd 경로의 `/`를 `-`로 바꾼 값이다(예: `/home/u/proj` → `-home-u-proj`). Claude Code 자체의 `~/.claude/projects/` 방식을 따른 것이다.
+- **범용 메모리** = `$SONMAT_MEMORY_DIR`(기본값 `~/.sonmat/memory/`).
+- session-start hook이 이 디렉터리들을 만들고, 예전 위치인 `.claude/sonmat/`와 `~/.claude/sonmat/memory/`의 내용을 자동으로 옮긴다. **대체 경로**: `<scribe-dir>`가 비어 있는데 예전 `.claude/sonmat/`에 내용이 있으면 예전 경로를 읽는다.
+
+| 파일 | 위치 | 수명 |
 |------|----------|-----------|
-| `bridge-note.md` | `<scribe-dir>/bridge-note.md` | Overwritten each dispatch |
-| `journal.md` | `<scribe-dir>/journal.md` | Append-only, archived at 50 entries |
-| `journal-archive.md` | `<scribe-dir>/journal-archive.md` | Long-term storage |
-| `progress.md` | Project root | Managed jointly (foreground creates, scribe updates) |
+| `bridge-note.md` | `<scribe-dir>/bridge-note.md` | 위임할 때마다 덮어쓴다 |
+| `journal.md` | `<scribe-dir>/journal.md` | 덧붙이기만 하고, 50개 항목이 차면 보관한다 |
+| `journal-archive.md` | `<scribe-dir>/journal-archive.md` | 장기 보관 |
+| `progress.md` | 프로젝트 루트 | 함께 관리한다(포그라운드가 만들고 scribe가 갱신한다) |
