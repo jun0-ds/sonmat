@@ -1,45 +1,45 @@
 ---
 name: inspect
-description: Trigger-reactive discovery-led depth — when a System 1 signal surfaces (blast radius, shared code, infra, auth, migration), pull depth into side-effect, dependency, assumption, and rollback checks. Not a mode; a reaction.
+description: 발동 신호에 반응해 깊이를 끌어오는 점검이다. 영향 반경, 공유 코드, 인프라, 인증, 마이그레이션 같은 System 1 신호가 보이면 부작용·의존성·가정·롤백 점검으로 들어간다. 켜 두는 모드가 아니라 신호가 올 때마다 한 번 반응한다.
 user-invocable: true
 ---
 
-# Inspect — Discovery-Led Depth
+# Inspect — 발견 주도 깊이 점검 (Discovery-Led Depth)
 
-Inspect is **not a mode**. It is a set of checks that fire in response to a specific discovery. The **discovery-led principle**: active discovery pulls depth in, not the other way around — depth is not a dial you turn up before knowing what you are looking at.
+inspect는 **모드가 아니다**. 특정한 발견이 있을 때 그에 반응해 도는 점검 묶음이다. **발견 주도 원칙**(discovery-led principle)은 실제로 무언가를 발견해야 깊이를 끌어온다는 뜻이다. 순서가 거꾸로 되면 안 된다. 깊이는 무엇을 보고 있는지 알기도 전에 미리 올려 두는 다이얼이 아니다.
 
-When a System 1 signal (see Triggers below) surfaces, inspect pulls System 2 checks scoped to **that specific signal**. One discovery → depth on that discovery → checks resolve → back to default operation. No "inspect on / inspect off" state.
+System 1 신호(아래 발동 신호 참조)가 보이면 inspect는 **바로 그 신호**로 범위를 좁힌 System 2 점검을 끌어온다. 발견 하나 → 그 발견에 대한 깊이 점검 → 점검이 끝나면 → 평소 방식으로 돌아간다. "inspect 켬 / inspect 끔" 같은 상태는 없다.
 
-Manual invocation (`/inspect`) is still available when the user wants to force a depth pass without waiting for an auto-detected trigger — but even then, it runs once for the current change and exits.
+자동으로 잡힌 발동 신호를 기다리지 않고 깊이 점검을 강제로 하고 싶으면 사용자가 직접 부를 수도 있다(`/inspect`). 그때도 지금 변경에 대해 한 번만 돌고 끝난다.
 
 ---
 
-## What inspect does when triggered
+## 발동했을 때 inspect가 하는 일
 
-### Scope of a single depth pass
+### 깊이 점검 한 번의 범위
 
-| Default operation | Depth pass fires |
+| 평소 방식 | 깊이 점검이 돌 때 |
 |---------|---------|
-| Changed files only | Changed files + direct dependents |
-| Tests pass? | Tests pass + are tests covering the right cases? |
-| Does it work? | Does it work + what could it break? |
+| 바뀐 파일만 본다 | 바뀐 파일과 그 파일에 직접 기대는 코드까지 본다 |
+| 테스트가 통과하는가? | 테스트가 통과하는가 + 테스트가 맞는 경우를 다루는가? |
+| 동작하는가? | 동작하는가 + 무엇을 깨뜨릴 수 있는가? |
 
-The depth scope is bounded by the trigger. A "shared utility edit" trigger pulls depth into its dependents; it does not turn on "inspect mode" for the rest of the session.
+깊이 점검의 범위는 발동 신호가 정한다. "공유 유틸리티 수정"이라는 신호가 오면 그 유틸리티를 쓰는 코드까지 깊이 들어갈 뿐, 세션 내내 "inspect 모드"를 켜 두지는 않는다.
 
-### Additional checks (on top of guard)
+### guard 위에 더하는 점검
 
-Four check types. A depth pass does **not** run all four by default — which check fires is determined by the trigger. Running all four regardless of trigger would violate the discovery-led principle (depth chosen without a specific discovery).
+점검은 네 종류다. 깊이 점검은 기본적으로 넷을 다 돌리지 **않는다**. 어떤 점검을 돌릴지는 발동 신호가 정한다. 신호와 상관없이 넷을 다 돌리면, 구체적인 발견 없이 깊이를 고르는 셈이라 발견 주도 원칙을 어기게 된다.
 
-1. **Dependency trace**: For each modified function/module, list callers and downstream consumers. Flag any that might behave differently.
-2. **Side effect scan**: State changes (DB writes, file writes, env mutations, global state) — are they intended? Are they reversible?
-3. **Assumption audit**: What does this code assume about its inputs, environment, or execution order? Are those assumptions documented or tested?
-4. **Rollback viability**: If this change goes wrong in production, how do you undo it? Is there a migration, a flag, a revert path?
+1. **Dependency trace (의존성 추적)**: 고친 함수나 모듈마다 그것을 부르는 코드와 그 결과를 받아 쓰는 하류 소비자를 나열한다. 동작이 달라질 수 있는 곳을 표시한다.
+2. **Side effect scan (부작용 훑기)**: 상태를 바꾸는 일(DB 쓰기, 파일 쓰기, 환경 변경, 전역 상태)이 의도한 것인지, 되돌릴 수 있는지 본다.
+3. **Assumption audit (가정 점검)**: 이 코드가 입력, 실행 환경, 실행 순서에 대해 무엇을 전제하는지 본다. 그 전제가 문서나 테스트로 남아 있는지 확인한다.
+4. **Rollback viability (롤백 가능성)**: 이 변경이 운영에서 잘못되면 어떻게 되돌리는지 본다. 마이그레이션, 플래그, revert 경로 가운데 무엇이 있는지 확인한다.
 
-The trigger → check mapping is in §Triggers below (after trigger conditions are defined). Read the triggers first, then the mapping — the mapping refers to triggers by name.
+어떤 발동 신호가 어떤 점검을 부르는지는 아래 §발동 신호 (Triggers)에 있다(발동 조건을 먼저 정의한 뒤 대응표를 둔다). 대응표가 신호를 이름으로 가리키므로 발동 신호부터 읽고 대응표를 읽는다.
 
-### Output format
+### 출력 형식
 
-The report makes the discovery → depth chain visible. The trigger is stated at the top (so the reader can see *why* depth was paid), the checks that ran are named, and each finding cites a concrete location.
+보고서는 발견에서 깊이로 이어진 흐름이 드러나게 쓴다. 맨 위에 발동 신호를 적어 독자가 *왜* 깊이 점검에 비용을 들였는지 알 수 있게 하고, 돌린 점검의 이름을 밝히며, 발견 사항마다 구체적인 위치를 인용한다.
 
 ```
 [inspect] {TRIGGER} → checks fired: {list}
@@ -57,7 +57,7 @@ Findings:
 Summary: {1 line — "N findings, M critical" or equivalent}
 ```
 
-When a depth pass finds nothing noteworthy:
+깊이 점검에서 눈여겨볼 것이 나오지 않았을 때:
 
 ```
 [inspect] {TRIGGER} → checks fired: {list}
@@ -68,100 +68,100 @@ Scope:
 Summary: Clean — no side effects, dependency risks, or assumption violations detected.
 ```
 
-#### Severity definitions
+#### 심각도 정의
 
-Inspect severities describe *how much attention the finding deserves*, not whether to block. Inspect never blocks commits — blocking is guard's (operational) and witness's (intent) role. Inspect informs the decision to proceed; main / user decides.
+inspect의 심각도는 막을지 말지가 아니라 *그 발견 사항에 얼마나 주의를 기울여야 하는지*를 나타낸다. inspect는 커밋을 막지 않는다. 막는 일은 guard(작업 중 검증)와 witness(의도 확인)가 맡는다. inspect는 진행할지 판단할 재료를 줄 뿐이고, 결정은 메인 세션이나 사용자가 한다.
 
-| Severity | Meaning | Example |
+| 심각도 | 뜻 | 예 |
 |---|---|---|
-| **critical** | Finding represents a likely failure or data loss if the change ships as-is. | Migration with no rollback path; dependency that will break at runtime. |
-| **moderate** | Finding represents an assumption or side effect that is not obviously wrong but is worth verifying before shipping. | Assumption about input format that isn't documented; state mutation that could surprise a caller. |
-| **informational** | Finding is a fact worth noting but does not imply a fix. | "This function is now called by 14 other modules — worth knowing for future refactors." |
+| **critical** | 변경을 이대로 내보내면 실패나 데이터 손실이 일어날 가능성이 높다. | 롤백 경로가 없는 마이그레이션, 런타임에 깨질 의존성. |
+| **moderate** | 당장 틀렸다고 보기는 어렵지만 내보내기 전에 확인할 만한 가정이나 부작용이다. | 문서에 없는 입력 형식 가정, 호출하는 쪽이 예상하지 못할 상태 변경. |
+| **informational** | 알아 둘 만한 사실이지만 고칠 필요가 있다는 뜻은 아니다. | "이 함수를 이제 다른 모듈 14개가 부른다. 나중에 리팩터링할 때 알아 둘 만하다." |
 
-Citations are mandatory for every finding: `file:line`, a command output line, or a named state identifier. A finding without a concrete location is speculation; discard it or downgrade to an informational note with no citation claim.
+모든 발견 사항에는 인용이 반드시 있어야 한다. `file:line`, 명령 출력의 한 줄, 이름 붙은 상태 식별자 가운데 하나다. 구체적인 위치가 없는 발견 사항은 추측이다. 버리거나, 인용 근거를 주장하지 않는 informational 메모로 낮춘다.
 
 ---
 
-## What inspect is not
+## inspect가 아닌 것
 
-- **Not a persistent mode**. No on/off state. Each depth pass is bounded to a single triggering discovery.
-- **Not a depth dial**. "Go deep" is never a standalone decision — it is always the consequence of a specific discovery. If no discovery, no depth pass.
-- **Not a slowdown on trivial work**. A one-line fix with no triggering signal runs at default speed. Triggers gate the cost.
+- **계속 켜져 있는 모드가 아니다**. 켬/끔 상태가 없다. 깊이 점검 한 번은 그것을 부른 발견 하나에만 묶인다.
+- **깊이를 조절하는 다이얼이 아니다**. "깊게 보자"는 따로 내리는 결정이 아니라 언제나 구체적인 발견에서 따라 나온다. 발견이 없으면 깊이 점검도 없다.
+- **사소한 작업을 느리게 만들지 않는다**. 발동 신호가 없는 한 줄 수정은 평소 속도로 진행한다. 비용을 들일지는 발동 신호가 가른다.
 
-### Boundary with other sonmat skills
+### 다른 sonmat 스킬과의 경계
 
-Inspect shares the verification layer with guard, witness, and punch — each on a different axis. Clean boundaries matter because depth passes that drift across axes dilute the focus that makes discovery-led depth useful in the first place.
+inspect는 guard, witness, punch와 함께 검증 층을 이루며, 각자 다른 축을 맡는다. 경계를 분명히 해야 한다. 깊이 점검이 다른 축으로 번지면, 발견 주도 깊이 점검을 쓸모 있게 만드는 집중력이 흩어진다.
 
-| Skill | Axis | Question | Inspect overlap |
+| 스킬 | 축 | 묻는 것 | inspect와 겹치는 부분 |
 |---|---|---|---|
-| **guard** | Main-side verification | "Are tests passing? Sensitive files safe? Discipline followed?" | guard always runs; inspect adds depth when a signal warrants wider reach. guard is *always-on verification*, inspect is *triggered depth*. |
-| **witness** | Intent-artifact match | "Does the artifact match what the user asked for?" | None — witness asks whether user intent was fulfilled, inspect asks what the change might break. Same diff, different axes. |
-| **punch** | Completeness | "Is anything *missing* that should exist?" | None — inspect finds what *could break*, punch finds what *was never built*. Opposite directions. |
-| **scribe** | Post-work persistence | "Is anything worth keeping from what we found?" | Inspect reports findings to main; if a finding turns out to be novel (not covered by existing hints), main dispatches to scribe (via guard's novel-trap path). Inspect does not dispatch to scribe directly — novel judgment belongs to guard's hint-comparison step, not to inspect. |
+| **guard** | 메인 세션 검증 | "테스트가 통과하는가? 민감 파일은 안전한가? 규율을 지켰는가?" | guard는 늘 돈다. 신호가 더 넓게 볼 이유를 주면 inspect가 깊이를 더한다. guard는 *늘 켜진 검증*, inspect는 *신호가 와야 도는 깊이 점검*이다. |
+| **witness** | 의도와 산출물의 일치 | "산출물이 사용자가 요청한 것과 맞는가?" | 없다. witness는 사용자 의도를 채웠는지 묻고, inspect는 변경이 무엇을 깨뜨릴 수 있는지 묻는다. 같은 diff를 다른 축에서 본다. |
+| **punch** | 완결성 | "있어야 할 것이 *빠지지* 않았는가?" | 없다. inspect는 *깨질 수 있는 것*을, punch는 *아예 만들지 않은 것*을 찾는다. 방향이 반대다. |
+| **scribe** | 작업 뒤 기록 | "찾아낸 것 가운데 남길 만한 것이 있는가?" | inspect는 발견 사항을 메인 세션에 보고한다. 그것이 새로운 것(기존 힌트가 다루지 않는 것)으로 밝혀지면 메인 세션이 guard의 새 함정 경로를 거쳐 scribe에 위임한다. inspect가 scribe에 직접 위임하지는 않는다. 새로운지 판단하는 일은 inspect가 아니라 guard가 힌트와 비교하는 단계에서 한다. |
 
-Inspect is **not a replacement for guard, witness, or punch**. A depth pass on the wrong axis catches the wrong class of problem.
+inspect는 **guard, witness, punch를 대신하지 않는다**. 축을 잘못 잡은 깊이 점검은 엉뚱한 종류의 문제를 잡는다.
 
 ---
 
-## Triggers — the discovery signals
+## 발동 신호 (Triggers)
 
-Inspect fires when a trigger is detected. Triggers are System 1 pattern signals, cheap to evaluate. When one fires, suggest the depth pass once per discovery; if the user accepts (or if the trigger is auto-fire class), the depth pass runs once and exits.
+inspect는 발동 신호가 감지되면 돈다. 발동 신호는 System 1 수준의 패턴 신호라 판정 비용이 싸다. 신호가 오면 발견 하나에 한 번만 깊이 점검을 제안한다. 사용자가 받아들이면(또는 자동 발동 등급의 신호라면) 깊이 점검이 한 번 돌고 끝난다.
 
-| Category | Condition |
+| 분류 | 조건 |
 |----------|-----------|
-| **Blast radius** | Change spans 5+ files, or modifies a file imported by 3+ others |
-| **Shared code** | Editing shared utilities, base classes, config generators, or sync scripts |
-| **Infrastructure** | Touching DB schemas, env vars across services, Milvus/Redis contracts, cron schedules |
-| **Auth/Security** | Modifying authentication, API keys, permissions, or credential paths |
-| **Data migration** | INSERT/UPDATE/DELETE on production data, schema changes, index rebuilds |
-| **Cross-service** | Change requires coordinated deployment to multiple servers/services |
-| **User signal** | User says "risky", "careful", "worried", "double-check" |
+| **Blast radius** (영향 반경) | 변경이 파일 5개 이상에 걸치거나, 다른 파일 3개 이상이 import하는 파일을 고친다 |
+| **Shared code** (공유 코드) | 공유 유틸리티, 기반 클래스, 설정 생성기, 동기화 스크립트를 고친다 |
+| **Infrastructure** (인프라) | DB 스키마, 여러 서비스에 걸친 환경변수, Milvus/Redis 계약, cron 일정을 건드린다 |
+| **Auth/Security** (인증·보안) | 인증, API 키, 권한, 크레덴셜 경로를 고친다 |
+| **Data migration** (데이터 마이그레이션) | 운영 데이터에 INSERT/UPDATE/DELETE를 하거나, 스키마를 바꾸거나, 인덱스를 다시 만든다 |
+| **Cross-service** (서비스 간) | 여러 서버나 서비스에 맞춰서 배포해야 하는 변경이다 |
+| **User signal** (사용자 신호) | 사용자가 "위험", "조심", "걱정", "다시 확인" 같은 말을 한다 |
 
-### Trigger → Check mapping
+### 발동 신호 → 점검 대응표
 
-Each trigger pulls specific checks. This mapping is the discovery-led principle made concrete — the discovery (trigger) determines the depth (which checks fire).
+발동 신호마다 끌어오는 점검이 정해져 있다. 이 대응표는 발견 주도 원칙을 구체적으로 적은 것이다. 발견(발동 신호)이 깊이(어떤 점검을 돌릴지)를 정한다.
 
-| Trigger | Primary check | Secondary check | Why this mapping |
+| 발동 신호 | 1차 점검 | 2차 점검 | 이렇게 대응시킨 이유 |
 |---|---|---|---|
-| **Blast radius** | Dependency trace | Assumption audit | The risk is downstream behavior divergence; depth goes to callers and the assumptions they relied on. |
-| **Shared code** | Dependency trace | Assumption audit | Same pattern as blast radius, but scoped to the shared component's consumers. |
-| **Infrastructure** | Side effect scan | Rollback viability | Infra changes are state mutations with hard-to-reverse failure modes; depth goes to what changes in state and how to undo it. |
-| **Auth / Security** | Assumption audit | Side effect scan | Security bugs live in unstated assumptions (who can call this, what's trusted); depth goes to the assumption layer first. |
-| **Data migration** | Rollback viability | Side effect scan | Data loss is irreversible; rollback viability is the first question. |
-| **Cross-service** | Dependency trace | Rollback viability | Multi-service failures propagate; depth goes to where a partial deploy lands. |
-| **User signal** | All four | — | The user has flagged a general concern without pattern, so all four checks fire. This is the manual override. |
+| **Blast radius** | Dependency trace | Assumption audit | 위험은 하류의 동작이 달라지는 데 있다. 그래서 호출하는 쪽과 그쪽이 기대던 가정으로 깊이 들어간다. |
+| **Shared code** | Dependency trace | Assumption audit | 영향 반경과 같은 패턴이지만, 범위를 그 공유 구성 요소를 쓰는 쪽으로 좁힌다. |
+| **Infrastructure** | Side effect scan | Rollback viability | 인프라 변경은 상태를 바꾸고, 실패하면 되돌리기 어렵다. 그래서 어떤 상태가 바뀌는지와 어떻게 되돌리는지로 깊이 들어간다. |
+| **Auth / Security** | Assumption audit | Side effect scan | 보안 버그는 말하지 않은 가정(누가 이것을 부를 수 있는가, 무엇을 믿는가)에 숨어 있다. 그래서 가정부터 깊이 본다. |
+| **Data migration** | Rollback viability | Side effect scan | 데이터 손실은 되돌릴 수 없다. 그래서 롤백 가능성을 가장 먼저 묻는다. |
+| **Cross-service** | Dependency trace | Rollback viability | 여러 서비스에 걸친 실패는 퍼져 나간다. 그래서 일부만 배포됐을 때 어디에 영향이 닿는지로 깊이 들어간다. |
+| **User signal** | 네 가지 모두 | — | 사용자가 특정 패턴 없이 전반적인 우려를 표했으므로 네 점검을 모두 돌린다. 사용자가 직접 깊이를 고르는 경우다. |
 
-If a trigger fires that is not in this table (a new one added later), default to "all four" for safety until a specific mapping is established.
+이 표에 없는 발동 신호(나중에 새로 더한 것)가 오면, 구체적인 대응이 정해질 때까지 안전하게 "네 가지 모두"를 기본으로 한다.
 
-### Suggestion format
+### 제안 형식
 
-One line, no preamble:
+머리말 없이 한 줄로 쓴다.
 
 ```
 [sonmat] {what was detected}. /inspect 할까요?
 ```
 
-Examples:
+예:
 - `[sonmat] 6개 서비스 filter_env 동시 수정. /inspect 할까요?`
 - `[sonmat] prod DB 스키마 변경 감지. /inspect 할까요?`
 - `[sonmat] sync-env.sh + 4개 .env 배포. /inspect 할까요?`
 
-The wording avoids "켤까요" (turn on) because inspect is not a switch. Each suggestion is a depth-pass offer, not a mode toggle.
+inspect는 스위치가 아니므로 "켤까요"라는 말을 쓰지 않는다. 제안은 모드를 켜자는 것이 아니라 깊이 점검을 한 번 하자는 것이다.
 
-### Depth pass scope
+### 깊이 점검의 범위
 
-- Trigger fires + user accepts → depth pass runs once for the current change
-- Depth pass completes → inspect is done. No "on" state to turn off.
-- Don't re-suggest for the same change after user declines. A *new* discovery with a *new* trigger is a new depth pass.
+- 발동 신호가 오고 사용자가 받아들이면 → 지금 변경에 대해 깊이 점검을 한 번 돌린다.
+- 깊이 점검이 끝나면 → inspect도 끝난다. 꺼야 할 "켬" 상태가 없다.
+- 사용자가 거절한 변경에는 다시 제안하지 않는다. *새로운* 발동 신호를 동반한 *새로운* 발견이 오면 그것은 새 깊이 점검이다.
 
 ---
 
-## Design rationale
+## 설계 근거
 
-**Discovery-led principle**: active discovery pulls depth in. The five verification traditions (surgery checklists, aviation CRM, mindfulness noting, chess blunder checks, pre-mortem) all agree — depth follows a discovery mechanism, it does not precede one. Depth chosen before discovery is false confidence dressed up as thoroughness; it consumes attention without improving outcomes.
+**발견 주도 원칙**: 실제로 무언가를 발견해야 깊이를 끌어온다. 다섯 가지 검증 전통(수술 체크리스트, 항공 CRM, 마음챙김의 알아차림 기록, 체스의 실수 점검, 사전 부검)은 모두 같은 이야기를 한다. 깊이는 무언가를 발견하는 장치를 뒤따르며, 그보다 앞서지 않는다. 발견하기 전에 고른 깊이는 철저함으로 꾸민 거짓 확신이다. 주의만 소모하고 결과는 나아지지 않는다.
 
-Earlier versions of inspect treated depth as a user-flipped dial ("turn on inspect mode"). That framing reversed the order: the user decided to go deep *before* any signal had surfaced, and then the deep checks ran on a target that might or might not have deserved them. The current framing keeps the same check set but ties activation to specific triggering signals — the cost of depth is only paid when a discovery justifies it.
+예전 inspect는 깊이를 사용자가 켜고 끄는 다이얼로 다뤘다("inspect 모드 켜기"). 그 방식은 순서를 거꾸로 세웠다. 아무 신호도 보이기 *전에* 사용자가 깊이 보기로 정했고, 그 뒤 깊은 점검은 그럴 만한지 알 수 없는 대상에 돌았다. 지금 방식은 점검 묶음은 그대로 두되, 특정 발동 신호가 있을 때만 점검이 돌게 묶었다. 깊이에 드는 비용은 발견이 그 비용을 정당화할 때만 치른다.
 
-Triggers are intentionally System 1 patterns (file counts, path matches, keyword signals). They are not themselves deep reasoning — they are cheap pattern-match hooks that let deeper reasoning fire *where it matters*. Automatic suggestion lowers the chance of missing risky changes; user acceptance preserves agency over when to pay the cost.
+발동 신호는 일부러 System 1 패턴(파일 수, 경로 일치, 키워드 신호)으로 만들었다. 신호 자체는 깊은 추론이 아니다. 깊은 추론이 *필요한 곳에서* 돌 수 있게 걸어 두는 값싼 패턴 일치 고리다. 자동 제안은 위험한 변경을 놓칠 가능성을 낮추고, 사용자가 받아들일지 정하게 해서 언제 비용을 치를지는 사용자가 결정하게 한다.
 
-Manual `/inspect` invocation remains available as an override for cases where the user has noticed a signal the automatic triggers did not — but it still runs as a bounded depth pass, not a mode.
+자동 발동 신호가 놓친 신호를 사용자가 알아챈 경우를 위해 `/inspect`를 직접 부르는 방법도 남겨 둔다. 그때도 모드가 아니라 범위가 정해진 깊이 점검으로 한 번 돈다.

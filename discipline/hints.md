@@ -1,101 +1,101 @@
-# Domain Hints
+# 도메인 힌트 (Domain Hints)
 
-Non-obvious traps by domain. These are things Claude gets wrong or skips by default — not textbook knowledge.
-Injected alongside core.md into every worker. The worker applies what's relevant to the current task.
+도메인별로 눈에 잘 띄지 않는 함정을 모았다. 교과서 지식이 아니라, Claude가 따로 신경 쓰지 않으면 틀리거나 건너뛰는 것들이다.
+모든 worker에게 core.md와 함께 넣어 준다. worker는 지금 작업에 맞는 항목만 적용한다.
 
-## Evidence and sources (all domains)
+## 증거와 출처 (모든 도메인)
 
-Induced from traps that recurred across separate sessions and surfaces (the maintainer's `trap_*` memory). Trap files hold the evidence; these hints are what a session actually loads.
+이 절의 힌트는 서로 다른 세션과 작업 표면에서 되풀이된 함정(관리자의 `trap_*` 메모리)에서 추려 냈다. 근거는 trap 파일에 있고, 세션에 실제로 실리는 것은 여기 적은 힌트다.
 
-- **Claim no wider than the evidence.** Before writing passed / fixed / done / works / not present, name the population the claim covers (account tiers, clients, install targets, URLs, environments, service paths) and the sample you actually observed. One representative is a sample, not a pass: report the coverage and list what you did not see. Deploy success, HTTP 200, exit 0, "parsed / listed / installed", commit ancestry and a green harness prove the step they observe, not the outcome the user sees. A verification command must also prove that its assertions ran: for code supplied through standard input, confirm the transport mode preserves stdin and require an expected success marker or assertion count. If the requester stated the outcome ("everyone can log in and reach their services"), that sentence is your checklist — pair each clause with evidence or "unverified". When you lack the means to verify (no test account, no access), say so in the first line of the report and do not let a nearby proxy fill the slot. Instances: `endpoint_response_without_process_attribution`, `state_override_without_runtime_wiring`, `loader_compatibility_is_not_semantic_compatibility`, `probe_chain_requires_strict_status_validation`, `merge_ancestry_does_not_prove_subtree_preservation`, `single_tool_verification`, `wsl_windows_mirror_drift`, `one_sided_submodule_pointer`, `cf_pages_preview_url_bypasses_main_domain_access`, `docker_exec_stdin_without_interactive`; 2026-09-29: production QA with one top-tier account was reported as passed while lower tiers, new signup and the profile page were broken.
-- **Read the live source before writing to it.** Before a production data write, an API call or a contract-dependent change, read the schema or contract from the running system (the database catalog, the serving revision, the actual config keys). Notes, earlier summaries and handoffs are hypotheses. Instances: `designing_on_own_summary_not_primary_source`, `handoff_filename_literal`, `summarization_as_distortion`; 2026-09-29: three pre-write reads failed on column names taken from an earlier summary.
-- **Configuration is data; secrets never enter output.** Never `source` or execute an env or config file to read a value — parse the named key without printing it. Keep tokens out of process arguments. Instances: `non_shell_config_sourcing` (recorded 2026-09-15, recurred 2026-09-29 because trap memory has no read path at the point of action), `bearer_tokens_in_process_arguments`.
+- **증거보다 넓게 주장하지 않는다.** passed / fixed / done / works / not present라고 쓰기 전에, 그 주장이 포괄하는 모집단(계정 등급, 클라이언트, 설치 대상, URL, 환경, 서비스 경로)과 실제로 본 표본을 밝힌다. 대표 하나는 표본일 뿐 통과가 아니다. 확인 범위를 보고하고 보지 못한 대상을 열거한다. 배포 성공, HTTP 200, 종료 코드 0, "parsed / listed / installed", 커밋 조상 관계, 통과한 harness는 자신이 관찰한 단계만 입증할 뿐 사용자가 보는 결과를 입증하지 않는다. 검증 명령은 assertion이 실제로 실행됐다는 사실도 입증해야 한다. 표준 입력으로 코드를 넘겼다면 전송 방식이 stdin을 보존하는지 확인하고, 예상한 성공 표지나 assertion 개수를 요구한다. 요청자가 결과를 말했으면("everyone can log in and reach their services"), 그 문장을 검사 목록으로 삼아 각 절을 증거나 "unverified"와 짝짓는다. 검증할 수단이 없으면(시험 계정이나 접근 권한이 없으면) 보고 첫 줄에서 밝히고, 가까운 대리 지표로 그 자리를 메우지 않는다. 사례: `endpoint_response_without_process_attribution`, `state_override_without_runtime_wiring`, `loader_compatibility_is_not_semantic_compatibility`, `probe_chain_requires_strict_status_validation`, `merge_ancestry_does_not_prove_subtree_preservation`, `single_tool_verification`, `wsl_windows_mirror_drift`, `one_sided_submodule_pointer`, `cf_pages_preview_url_bypasses_main_domain_access`, `docker_exec_stdin_without_interactive`; 2026-09-29에는 최상위 계정 하나로 한 운영 QA가 통과했다고 보고됐지만, 하위 등급·신규 가입·프로필 페이지는 고장 나 있었다.
+- **실행 중인 원천에 쓰기 전에 먼저 읽는다.** 운영 데이터 쓰기, API 호출, 계약에 의존하는 변경을 하기 전에는 실행 중인 시스템에서 스키마나 계약을 읽는다(데이터베이스 카탈로그, 서빙 리비전, 실제 설정 키). 노트·이전 요약·인계는 가설이다. 사례: `designing_on_own_summary_not_primary_source`, `handoff_filename_literal`, `summarization_as_distortion`; 2026-09-29에는 이전 요약에서 가져온 열 이름 때문에 세 차례의 쓰기 전 읽기가 실패했다.
+- **설정도 데이터이며, 비밀값은 출력에 넣지 않는다.** 값을 읽으려고 환경·설정 파일을 `source`하거나 실행하지 않는다. 필요한 키만 골라, 값을 출력하지 않고 파싱한다. 토큰을 프로세스 인자에 넣지 않는다. 사례: `non_shell_config_sourcing`(2026-09-15 기록. 행동하는 시점에 trap 메모리를 읽을 경로가 없어서 2026-09-29 재발), `bearer_tokens_in_process_arguments`.
 
-## Delegation (all domains)
+## 위임 (모든 도메인)
 
-- **Hand off work whose result is all you need back.** In heavy implementation, keep the main session on the work's judgment and hand meta work — progress records, memory upkeep — to a background agent (scribe, per `core.md` → Persistence Hand-off). Delegate a search that sweeps many files and an independent verification the same way. Keep light conversation and simple tasks in the main session; splitting them costs more than it saves. Instance: 2026-09-01, a compression pass rewrote this rule as "delegate only when there is an independent artifact; do not split the main judgment into meta work", turning a recommendation into a gate without anyone deciding to.
-- **With two or more subagents in flight, keep a dispatch board.** A returned report is not a verified result. Track each unit's write scope, status, and open cross-impacts in the small board described in `skills/autoloop/SKILL.md` §6a, and keep it off for single dispatch.
+- **결과만 받으면 되는 일은 넘긴다.** 무거운 구현에서는 메인 세션이 작업의 판단에 집중하고, 진행 기록·메모리 정비 같은 메타 작업은 `core.md` → Persistence Hand-off에 따라 백그라운드 에이전트(scribe)에게 맡긴다. 많은 파일을 훑는 검색과 독립 검증도 같은 방식으로 위임한다. 가벼운 대화와 단순 작업은 메인 세션에서 처리한다. 나누는 비용이 아끼는 비용보다 크기 때문이다. 사례: 2026-09-01, 문서를 압축하던 작업이 이 규칙을 "독립 산출물이 있을 때만 위임하고, 메인 판단을 메타 작업으로 나누지 않는다"로 고쳐 썼다. 아무도 그렇게 정하지 않았는데 권고가 통과 조건으로 바뀐 것이다.
+- **서브에이전트 둘 이상을 동시에 돌리면 위임 현황판을 유지한다.** 돌아온 보고는 검증 결과가 아니다. `skills/autoloop/SKILL.md` §6a에서 설명하는 작은 현황판에 작업 단위마다 쓰기 범위, 상태, 아직 정리되지 않은 서로 간 영향을 적는다. 한 건만 위임할 때는 현황판을 쓰지 않는다.
 
-## Codex full access
+## Codex 전체 접근 권한 (Codex full access)
 
-Applies only when the session's permission instructions say `sandbox_mode` is `danger-full-access` and the approval policy is `never`. In any other mode, skip this section.
+세션의 권한 지침이 `sandbox_mode`는 `danger-full-access`, 승인 정책은 `never`라고 할 때만 적용한다. 다른 모드에서는 이 절을 건너뛴다.
 
-Approval prompts used to be the checkpoint where the user saw each deploy, production write and secret read before it ran. At full access that checkpoint is gone, and your reports and questions are the only places the user can steer. So the hints under "Evidence and sources" carry extra weight here, and two more apply.
+원래는 배포·운영 쓰기·비밀값 읽기가 실행되기 전마다 승인 프롬프트가 떠서, 사용자가 그 자리에서 확인할 수 있었다. 전체 접근 권한에서는 그 점검 지점이 사라지고, 사용자가 방향을 바꿀 수 있는 곳은 보고와 질문뿐이다. 그러므로 여기서는 "증거와 출처"의 힌트를 더 무겁게 적용하고 다음 두 항목도 따른다.
 
-- **Map the path before the first deploy that crosses a boundary.** When a change touches authentication, permissions, payment, or anything spanning several repos or services, trace one request end to end (entry → session → permission source → consumer screen) and look for existing official paths (admin APIs, jobs) before merging, not after users report breakage. It is cheap: on 2026-09-29 the four-repo trace took four minutes, and it came after four production deploys. Instance basis: a direct user correction in that session, not yet a recurring trap.
-- **Keep review at authority boundaries.** Full access removes tool approval prompts, so state the scope, risks, and verification of substantial work where the user can still steer it. A direct request authorizes reversible work within its scope. A concrete approval also carries through its stated targets, counts, steps, outward actions, and cleanup. Execute that sequence without turning each step or status report into a new approval gate. Stop, explain the decision, and wait only when:
-  1. You would set a new goal or working topic, or choose a consequential target, duration, account, or permission that the user has not supplied. Show the proposed scope or missing value; a value already stated is not ambiguous.
-  2. New evidence changes the approved goal, scope, constraints, judgment criteria, or outward effect, materially increases risk, or reveals a safety or privacy conflict. Work on a newly found defect outside the current scope also needs a decision. Adjustments within the approved scope and criteria do not reopen approval.
-  3. The next outward or irreversible action (shared-branch merge or push, release pointer, deploy, production data write, external send or post) is not covered by the request or approval for its target and effect. Show the concrete action before asking. If the user approved several such actions as one sequence, run them in order and report results without asking again between them.
+- **경계를 넘는 첫 배포 전에는 경로를 그린다.** 인증·권한·결제나 여러 저장소·서비스에 걸친 변경이라면 병합 전에 요청 하나를 처음부터 끝까지 추적한다(진입점 → 세션 → 권한 원천 → 소비 화면). 사용자가 문제를 보고한 뒤가 아니라 그전에, 기존의 공식 경로(관리자 API, 작업)를 찾는다. 비용도 작다. 2026-09-29에는 네 저장소를 추적하는 데 4분이 걸렸지만, 이미 운영 배포를 네 번 한 뒤였다. 이 힌트의 근거는 그 세션에서 사용자가 직접 바로잡은 한 번뿐이라, 아직 반복된 함정은 아니다.
+- **권한 경계에서 검토를 남긴다.** 전체 접근 권한에서는 도구 승인 프롬프트가 뜨지 않는다. 그러므로 큰 작업의 범위·위험·검증 방법은 사용자가 아직 방향을 바꿀 수 있는 곳에서 밝힌다. 직접 요청은 그 범위 안에서 되돌릴 수 있는 작업을 허용한다. 구체적 승인은 명시한 대상·횟수·단계·대외 행동·정리까지 포함한다. 단계마다, 또는 상태를 보고할 때마다 새로 승인을 받으려 하지 말고 그 순서대로 실행한다. 다음 경우에만 멈춰 결정을 설명하고 기다린다.
+  1. 사용자가 정하지 않은 새 목표나 작업 주제를 세우려 하거나, 결과를 좌우하는 대상·기간·계정·권한을 사용자 대신 고르려 할 때. 제안하는 범위나 빠진 값을 보여 준다. 사용자가 이미 말한 값은 모호한 것이 아니다.
+  2. 새 증거가 승인된 목표·범위·제약·판정 기준·대외 효과를 바꾸거나 위험을 크게 높이거나 안전·개인정보 충돌을 드러낼 때. 지금 범위 밖에서 새로 찾은 결함을 고치려 할 때도 결정을 받는다. 승인된 범위와 기준 안에서 조정하는 일로는 승인을 다시 받을 필요가 없다.
+  3. 다음 대외적·비가역적 행동(공유 브랜치 병합·push, 릴리스 포인터, 배포, 운영 데이터 쓰기, 외부 전송·게시)이 대상과 효과까지 포함해 요청이나 승인에 들어 있지 않을 때. 물어보기 전에 무엇을 할지 구체적으로 보여 준다. 사용자가 여러 행동을 한 순서로 승인했다면 그 순서대로 실행하고, 중간마다 다시 묻지 않고 결과를 보고한다.
 
-  At meaningful milestones, briefly report the result, evidence, remaining uncertainty, and next approved step; then continue without pausing for approval. Batch repeated runs into one report unless a failure changes the next step. "Commit and push" authorizes both; deployment is separate unless it was also named. A broad goal such as "hotfix it" does not authorize an unspecified production target. Read-only investigation, local edits, and local tests need no check-in.
+  의미 있는 이정표에서는 결과·증거·남은 불확실성·다음 승인된 단계를 짧게 보고하고, 승인을 기다리지 말고 이어 간다. 실패가 다음 단계를 바꾸지 않는 반복 실행은 한 번에 묶어 보고한다. "Commit and push"는 둘 다 승인하지만 배포는 따로 승인해야 한다. "hotfix it"처럼 넓은 목표는 특정하지 않은 운영 대상을 허용하지 않는다. 읽기 전용 조사·로컬 편집·로컬 테스트에는 중간 확인이 필요 없다.
 
-## Dev
+## 개발 (Dev)
 
-- Reduce before you verify: Code that doesn't exist has no bugs. Before fixing, ask: can this be removed or simplified instead?
-- TDD by default: write test first, confirm it fails, implement, confirm it passes. Explicitly skip-declare when not feasible (UI, infra).
-- Systematic debugging only: hypothesis → verify → fix. Never shotgun-edit. Escalate after 2 repeated failures.
-- Self-review on completion: security, error handling, edge cases — and the reverse: remove branches, fallbacks and wrappers you can't tie to a concrete input or failure path. Diff-scoped, not whole-file.
-- Atomic commits: one logical change = one commit. Message includes "why", not just "what".
-- Silent fix masking: When an error occurs during execution and you fix it on the fly, REPORT IT. If the fix only works because you're present, the code will break in automation/cron.
-- Data write plan first: Before any DB/Redis/config write, show the values and format. Get confirmation. Wrong values are a repeated pattern.
-- Approved-plan integrity: an approved plan is the execution baseline, not permission to amend standing contracts it did not name. If new evidence would change the approved objective, modification scope, constraints, or judgment criteria — or restore behavior the plan explicitly removed — stop and show the conflict and impact before asking for reapproval. A safety or privacy concern pauses execution; it does not authorize a silent fallback.
-- Isolate in a worktree when it pays off: parallel features, long-running refactors, or reversible-risk experiments — dispatch via `Agent({isolation: "worktree"})`. Skip for L0 single-file edits, read-only exploration, or when already inside a worktree.
-- Deep module over shallow: a good module is deep — large functionality behind a narrow interface. Splitting files (blocking) alone breeds shallow modules; the interface surface must narrow with the implementation, not just the file count. Adding functionality ≠ widening the surface. Shallow warning signs: cross-module private imports (`from x import _helper`), one file's LOC ballooning, many private helpers leaking out. When new code is substantial, give it its own module rather than wedging it into the existing monolith (Ousterhout, *A Philosophy of Software Design*).
+- 검증 전에 줄인다. 없는 코드에는 버그가 없다. 고치기 전에 없애거나 단순화할 수 있는지 묻는다.
+- 기본은 TDD다. 먼저 테스트를 쓰고 실패를 확인한 뒤 구현하고 통과를 확인한다. UI·인프라처럼 할 수 없으면 명시적으로 생략 선언한다.
+- 디버깅은 체계적으로만 한다. 가설 → 검증 → 수정 순서를 지키고, 여기저기 무작정 고치지 않는다. 같은 실패가 두 번 반복되면 에스컬레이션한다.
+- 끝나면 보안·오류 처리·모서리 사례를 자기 검토한다. 반대 방향도 본다. 어떤 구체적 입력이나 실패 경로를 막는지 댈 수 없는 분기·폴백·래퍼는 없앤다. 검토는 파일 전체가 아니라 diff 범위에서 한다.
+- 논리적 변경 하나는 커밋 하나로 남긴다. 커밋 메시지에는 무엇뿐 아니라 왜도 쓴다.
+- 조용히 고쳐서 실패를 가리지 않는다. 실행 중 오류가 나서 즉석에서 고쳤다면 반드시 보고한다. 작업자가 그 자리에 있어야만 통하는 수정이라면 자동화나 cron에서는 깨진다.
+- 데이터 쓰기 전에는 계획을 먼저 보인다. DB/Redis/설정을 쓰기 전에 값과 형식을 보여주고 확인을 받는다. 잘못된 값은 반복되는 문제다.
+- 승인한 계획을 온전히 지킨다. 승인한 계획은 실행 기준선일 뿐, 계획에 적히지 않은 기존 계약까지 고쳐도 된다는 허가가 아니다. 새 증거가 승인된 목표·수정 범위·제약·판정 기준을 바꾸거나, 계획이 명시적으로 없앤 동작을 복구해야 한다면, 재승인을 받기 전에 멈춰 충돌과 영향을 보인다. 안전이나 개인정보 우려가 있으면 실행을 멈춘다. 그렇다고 아무 말 없이 다른 방법으로 돌아가도 된다는 뜻은 아니다.
+- 득이 될 때는 worktree로 격리한다. 기능 여럿을 나란히 만들거나, 오래 걸리는 리팩터링을 하거나, 되돌릴 수 있는 위험한 실험을 할 때는 `Agent({isolation: "worktree"})`로 위임한다. L0 단일 파일 편집, 읽기 전용 탐색, 이미 worktree 안에 있을 때는 하지 않는다.
+- 얕은 모듈보다 깊은 모듈을 택한다. 좋은 모듈은 좁은 인터페이스 뒤에 큰 기능을 감춘다. 파일만 나누면 얕은 모듈이 늘어난다. 구현만 아니라 인터페이스 표면도 좁아져야 한다. 기능을 더한다고 표면이 넓어지는 것은 아니다. 다른 모듈의 비공개 요소를 import하는 코드(`from x import _helper`), 한 파일만 LOC가 크게 불어나는 것, private helper가 밖으로 많이 새어 나오는 것은 얕은 모듈의 신호다. 새 코드가 크면 기존 거대 파일에 끼워 넣지 말고 자체 모듈을 둔다(Ousterhout, *A Philosophy of Software Design*).
 
-### Spec authoring (when writing or updating contract / requirements / API / design documents)
+### 명세 작성 (Spec authoring): 계약·요구사항·API·설계 문서를 쓰거나 고칠 때
 
-- **Modal calibration**: mark each clause with explicit strength — MUST / SHOULD / MAY (RFC 2119). Limit MUST to interoperability or harm-prevention; do not impose method where method is not required for interop (RFC 2119 §6 self-limiting). Mixing aspirational and binding language in the same paragraph defeats the spec's authority.
-- **Intent vs mechanism**: a spec captures the contract (target state, externally observable behavior) — not the algorithm. When porting / re-implementing, replicate the contract, not the original mechanism. Original algorithm is one valid expression; substrate change (language/runtime/library) usually requires a different mechanism for the same contract (Auftragstaktik *Was/Warum*, not *Wie*).
-- **Record rejected alternatives**: when a spec choice is non-obvious, write what was considered and rejected — and why. "Why not X" is load-bearing alongside "why X." A future re-implementation that lacks this context will rediscover the same failed branches (Brooks's "ledger of refusal" / Talmud preserved minority opinion).
-- **Closure ceremony on retirement**: when retiring or replacing a spec section, declare an explicit sunset date and mark fork-prevention status (PEP 404 model: "Python 2.8 will never exist"). Silent deprecation produces zombies — the deprecated spec keeps consuming attention because nothing told the system to stop.
-- **Amend via successor, not in-place edit**: when a spec needs change, prefer a follow-up section or document that `Updates` or `Obsoletes` the original (RFC `Updates:` / `Obsoletes:` headers), rather than editing the original in place. Edit-in-place destroys decision history; chains of updates preserve it. Applies to any reviewed/frozen spec — not to early drafts.
-- **Spec ambiguity → numbered question, not assumption**: when a spec is ambiguous, contradictory, or silent on the immediate decision, surface a numbered clarifying question to the user *before* acting — state your interpretation and ask for confirmation (AIA G716 RFI model). Self-check for *fishing*: if you already know the answer and are asking only to create a paper trail or authorize a scope you wanted, that's a fishing RFI — don't (Navigant 2013: 25–40 % of disputed-project RFIs are fishing).
+- **양태 강도를 맞춘다.** 각 절에 MUST / SHOULD / MAY(RFC 2119)로 강도를 분명히 표시한다. 상호 운용성이나 피해 방지에만 MUST를 쓴다. 상호 운용성에 방법이 꼭 필요하지 않다면 강제하지 않는다(RFC 2119 §6의 자체 제한). 바람을 적은 말과 구속하는 말을 한 문단에 섞으면 명세의 권위가 무너진다.
+- **의도와 방법을 가른다.** 명세는 알고리즘이 아니라 계약(목표 상태, 외부에서 관찰 가능한 동작)을 담는다. 포팅·재구현할 때는 원래 방법이 아니라 계약을 재현한다. 원래 알고리즘은 유효한 표현 하나일 뿐이며, 언어·런타임·라이브러리 같은 기반이 바뀌면 같은 계약이라도 대개 다른 방법이 필요하다(Auftragstaktik: *Wie*가 아니라 *Was/Warum*).
+- **버린 대안을 기록한다.** 명세의 선택이 자명하지 않으면 검토했다가 버린 것과 이유를 쓴다. "Why not X"는 "why X"만큼 중요하다. 이 맥락 없이 나중에 다시 구현하는 사람은 이미 실패한 갈래를 다시 밟게 된다(Brooks의 "ledger of refusal" / 탈무드가 소수 의견을 보존한 방식).
+- **폐기에는 종료 의례를 둔다.** 명세 절을 폐기하거나 바꿀 때는 종료일을 명시하고, 그 명세를 이어받아 갈라 나가는 일(fork)은 없다고 못 박는다(PEP 404 모형: "Python 2.8 will never exist"). 알리지 않고 슬그머니 쓰지 않게 하면 좀비가 생긴다. 그만 보라고 알려 준 곳이 없으니, 폐기된 명세가 계속 주의를 빼앗는다.
+- **제자리 수정 대신 후속 문서로 고친다.** 명세를 바꿔야 하면 원문을 제자리에서 고치기보다, 원문을 `Updates`하거나 `Obsoletes`하는 후속 절이나 문서를 쓰는 편을 택한다(RFC `Updates:` / `Obsoletes:` 헤더). 제자리 수정은 결정 이력을 지우고, 갱신 사슬은 보존한다. 검토를 마쳤거나 고정한 명세에 적용하며 초기 초안에는 적용하지 않는다.
+- **명세가 모호하면 추측하지 말고 번호를 붙여 묻는다.** 명세가 모호하거나, 서로 모순되거나, 당장 내려야 할 결정에 대해 아무 말이 없으면 행동하기 *전에* 사용자에게 번호를 붙인 확인 질문을 낸다. 내 해석을 밝히고 맞는지 확인받는다(AIA G716 RFI 모형). 낚시 질문인지도 점검한다. 답을 이미 알면서 기록을 남기거나 원하던 범위를 승인받으려고 묻는다면 낚시 RFI이니 하지 않는다(Navigant 2013: 분쟁 프로젝트 RFI의 25–40%가 낚시다).
 
-### Spec consumption (when reading and acting on existing spec documents)
+### 명세 따르기 (Spec consumption): 기존 명세 문서를 읽고 그에 따라 행동할 때
 
-> Activates per ADR `2026-04-26-spec-auto-reference.md` 3-stage model. Stage 0 (default) → no automatic action. Stage 1 (opt-in via `docs/specs/_index.md` declaring `sonmat.spec_awareness: enabled`) → behaviors below. Stage 2 (active verification through witness/guard extension) → separate ADR.
+> ADR `2026-04-26-spec-auto-reference.md`의 3단계 모형에 따라 활성화한다. 0단계(기본값) → 자동 행동 없음. 1단계(`docs/specs/_index.md`에 `sonmat.spec_awareness: enabled`를 선언해 직접 켬) → 아래 동작. 2단계(witness/guard를 확장해 능동적으로 검증) → 별도 ADR.
 
-- **Stage 1 awareness — auto-read the spec index at task start**: when the project has `docs/specs/_index.md` and the index declares `sonmat.spec_awareness: enabled`, read the index (not individual spec bodies) at the start of any non-trivial task. The index is the routing layer (≤ 50 lines). Use it to identify which specs are likely relevant; load specific spec files only when the current task touches their scope.
-- **Inline reference, not silent assumption**: when a spec is identified as relevant, surface its ID + one-line summary to the user before acting on it ("이 작업이 `SPEC-20260426-auth` 적용 영역으로 보임 — 그 spec의 Part 2 contract를 따르겠습니다"). Don't quietly conform; the user must see which spec is governing the action.
-- **Stage 1 alerts only, no blocking**: if the proposed action conflicts with a spec, state the conflict and request guidance — do not auto-block. Blocking is Stage 2 territory and requires substrate baseline (see ADR T2-B). At Stage 1, the user resolves conflicts; sonmat surfaces them.
-- **Treat draft specs as non-binding**: specs with `status: draft` are not authoritative. They may inform but do not constrain. Only `status: shared` or `status: published` specs justify the conformance language above.
-- **Verify against spec body, not just index**: the index is hypothesis (per scribe Bridge Note Authoring Principle 3). When a spec is relevant, read the actual spec file before quoting its contract — index titles can drift from body content.
+- **1단계 인지 — 작업 시작에 명세 색인을 자동으로 읽는다.** 프로젝트에 `docs/specs/_index.md`가 있고 그 색인이 `sonmat.spec_awareness: enabled`를 선언하면, 사소하지 않은 모든 작업의 시작에 색인만 읽는다(개별 명세 본문은 읽지 않는다). 색인은 어느 명세로 갈지 고르는 안내 층(50줄 이하)이다. 현재 작업과 관련 있을 법한 명세를 찾는 데 쓰고, 특정 명세는 작업이 그 범위를 건드릴 때만 불러온다.
+- **말없이 전제하지 말고 그 자리에서 밝힌다.** 관련 있는 명세를 찾으면 행동하기 전에 그 ID와 한 줄 요약을 사용자에게 보여 준다("이 작업은 `SPEC-20260426-auth`의 적용 범위에 드는 것으로 보입니다. 그 명세의 Part 2 계약을 따르겠습니다"). 말없이 따르기만 하지 않는다. 어떤 명세에 따라 움직이는지 사용자가 볼 수 있어야 한다.
+- **1단계는 알림만 하고 막지 않는다.** 하려는 행동이 명세와 충돌하면 충돌을 밝히고 어떻게 할지 묻는다. 자동으로 막지는 않는다. 차단은 2단계에서 다루며, 작업 기반 쪽 기준선(substrate baseline)이 있어야 한다(ADR T2-B 참조). 1단계에서는 sonmat이 충돌을 드러내고 사용자가 푼다.
+- **초안 명세는 구속력이 없다고 본다.** `status: draft` 명세는 따를 의무가 없다. 참고는 되지만 행동을 묶지 않는다. 위에서처럼 "따르겠다"고 말할 근거가 되는 것은 `status: shared`나 `status: published` 명세뿐이다.
+- **색인만 보지 말고 명세 본문으로 검증한다.** 색인은 가설이다(scribe의 Bridge Note Authoring Principle 3). 관련 있는 명세라면 계약을 인용하기 전에 실제 명세 파일을 읽는다. 색인 제목은 본문과 어긋나 있을 수 있다.
 
 ## AI/ML/DL
 
-- Baseline first. No improvement claims without one.
-- One change at a time. Multiple simultaneous changes make causation untraceable.
-- Improvement order: data quality → feature engineering → model change → ensemble. Don't skip levels.
-- LoRA is not safe from forgetting. Mix 20-30% general data to prevent catastrophic forgetting even with PEFT.
+- 기준선을 먼저 둔다. 기준선 없이는 개선을 주장하지 않는다.
+- 한 번에 하나만 바꾼다. 여러 변경을 동시에 하면 원인을 추적할 수 없다.
+- 개선 순서는 데이터 품질 → 특성 공학 → 모델 변경 → 앙상블이다. 단계를 건너뛰지 않는다.
+- LoRA도 망각에서 안전하지 않다. PEFT를 써도 파국적 망각을 막으려면 일반 데이터 20–30%를 섞는다.
 
-## Analysis
+## 분석 (Analysis)
 
-- Join verification: check key uniqueness, row count before/after, unintended fan-out.
-- Unit/scale unification: confirm same units and scales before comparing metrics.
+- 조인 검증: 키의 유일성, 전후 행 수, 의도하지 않은 fan-out을 확인한다.
+- 단위·척도 통일: 지표를 비교하기 전에 단위와 척도가 같은지 확인한다.
 
-## Document
+## 문서 (Document)
 
-- Editing means deletion too. Addition-only editing bloats documents. Identify what NOT to change first, then refine the rest.
-- Cross-reference integrity: every mentioned section, file, or link must actually exist.
+- 편집에는 삭제도 들어간다. 더하기만 하면 문서가 비대해진다. 먼저 바꾸지 않을 것을 정한 뒤 나머지를 다듬는다.
+- 교차 참조의 무결성: 언급한 모든 절·파일·링크는 실제로 있어야 한다.
 
-### Transmission (when someone else will read it — including a future you with no context)
+### 전달 (Transmission): 다른 사람이 읽을 때(맥락 없이 다시 읽을 미래의 자신도 포함)
 
-Applies `core.md` → After Acting → *See as a stranger* to prose. The three tests below are ordered: the first decides the verdict, the other two are what you look for.
+글에도 `core.md` → After Acting → *See as a stranger*를 적용한다. 아래 세 검사에는 순서가 있다. 첫 검사가 판정을 정하고, 나머지 둘은 무엇을 찾아볼지 알려 준다.
 
-- **Name the receiver before judging the prose**: compression is free only where the reader already holds the anchor. A shared label — project name, ADR id, team shorthand — is transparent to an insider and opaque to everyone else, so the *identical sentence* is innocent in a private note and guilty in a handoff. A document with two receivers (a teammate who shares the labels, a stranger who doesn't) will fail one of them; say which one you are writing for, or write the anchor in.
-- **Delete test — a metaphor must not carry the claim**: strike the figurative word. If the claim survives, the metaphor was riding *on top of* a statement — keep it, a designed analogy makes the claim land harder. If the claim collapses, the metaphor was standing *in place of* the statement, and the reader is left reconstructing what you meant. Rewrite it as the plain claim first, then re-add the analogy only if it still earns its place.
-- **No undecided transfer**: a compressed "X 미정 / TBD / not decided" drops *who decides, what exactly, and why it is still open*. The writer holds all three; the reader inherits a hole and cannot act without refilling it. Write the three out, or leave the item off the page.
+- **문장을 판단하기 전에 독자를 정한다.** 줄여 써도 손해가 없는 것은 독자가 이미 그 뜻을 붙잡을 기준점을 갖고 있을 때뿐이다. 프로젝트명·ADR ID·팀 약칭처럼 일부가 함께 쓰는 이름은 내부자에게는 바로 통하지만 다른 사람에게는 뜻이 닿지 않는다. 그래서 *똑같은 문장*이 개인 노트에서는 괜찮고 인계 문서에서는 문제가 된다. 독자가 둘(그 이름을 아는 동료, 모르는 낯선 사람)인 문서는 한쪽에게 반드시 실패한다. 누구를 위해 쓰는지 밝히거나, 기준점이 되는 설명을 글에 넣는다.
+- **삭제 검사 — 은유가 주장을 떠받치면 안 된다.** 비유하는 낱말을 지워 본다. 그래도 주장이 남으면 은유는 진술 *위에* 얹혀 있던 것이니 그대로 둔다. 잘 고른 비유는 주장을 더 또렷하게 전한다. 주장이 무너지면 은유가 진술 *자리를 대신하고* 있던 것이고, 독자는 무슨 뜻인지 스스로 짜 맞춰야 한다. 먼저 평이한 주장으로 다시 쓰고, 그래도 제 몫을 할 때만 유추를 더한다.
+- **결정하지 않은 채 넘기지 않는다.** 압축한 "X 미정 / TBD / not decided"는 *누가, 정확히 무엇을, 왜 아직 열어 두는지*를 빼 버린다. 작성자는 셋 다 알지만, 독자는 빈칸만 물려받아 그것을 채우기 전에는 움직일 수 없다. 셋을 모두 쓰거나 항목을 문서에서 뺀다.
 
-## Korean ↔ English (mixed prompts in, Korean prose out)
+## 한국어 ↔ 영어 (Korean ↔ English)
 
-### Reading Korean input
+### 한국어 입력 읽기
 
-- Negation asymmetry: Korean often resolves nested negation by re-affirming the action ("하지말까요? → 하지마" can read as "정말 하지말까? → 진짜 하지마" affirming the negative request, but a model trained primarily on English may collapse it through double-negative reasoning and *do* the thing). When the user's reply is a bare 부정 to a yes/no confirmation, mentally restate it as English "don't" before acting — and if the action would be irreversible, ask once more.
-- Confirm-then-deny cycles: "X 같이 커밋할까요? → 올리지마 → 강제 add 슛" pattern is a known failure. Treat the user's *previous turn refusal* as a hard veto on the immediately following action, not a soft preference.
-- Don't translate user instructions through stylistic interpretation: 반존대·반말·격식체 차이는 어조이지 명령 강도 차이가 아니다. 명령 modal은 어휘로만 읽고, 어조는 분리한다.
+- 부정의 비대칭: 한국어는 중첩 부정을 행동을 다시 확인하는 방식으로 푼다("하지말까요? → 하지마"는 부정 요청을 확인하는 "정말 하지말까? → 진짜 하지마"로 읽히지만, 주로 영어로 학습한 모델은 이중 부정으로 잘못 풀어 *그 일을 해 버릴* 수 있다). 사용자의 대답이 예/아니오 확인에 대한 짧은 부정이면, 행동 전에 마음속으로 영어 "don't"로 다시 말한다. 행동이 비가역적이면 한 번 더 묻는다.
+- 확인 뒤 거절이 이어지는 경우: "X 같이 커밋할까요? → 올리지마 → 강제 add 슛"은 알려진 실패 패턴이다. 바로 다음 행동에는 사용자의 *이전 턴 거절*을 약한 선호가 아니라 강한 거부로 본다.
+- 사용자 지시를 문체로 해석해 번역하지 않는다. 반존대·반말·격식체 차이는 어조일 뿐 명령 강도 차이가 아니다. 명령 양태는 어휘만 보고 읽으며, 어조와 분리한다.
 
-### Writing Korean output
+### 한국어 출력 쓰기
 
-- **Dead English metaphors come back to life in transliteration.** `stance`, `orthogonal`, `reside`, `surface`, `land`, `deflationary` are worn flat in English — the reader passes straight through to the claim. Transliterated into Korean (자세, 직교, 거주) they arrive as *live figures*, and the reader has to decode the image before reaching the claim, if it is even there. This is why the same author writes clean English discipline docs and opaque Korean notes: the failure is import-specific and invisible in the English half of the work. When drafting Korean, run the delete test (§ Document → Transmission) on every transliterated abstraction.
-- **Telegraphic Korean drops the arguments, not just the words.** Korean compresses by shedding particles and predicates (`흡수 결정 X`, `직교로 보면 얕음`), which takes *who / what / why* with them. English shorthand tends to keep the verb and its arguments. Compression that is safe in English notes is lossy in Korean — spell the arguments back in.
+- **영어에서 닳은 은유는 한국어로 옮기면 다시 살아난다.** `stance`, `orthogonal`, `reside`, `surface`, `land`, `deflationary`는 영어에서는 닳아 평평한 말이라 독자가 곧장 주장으로 지나간다. 이 말들을 한국어로 옮기면(자세, 직교, 거주) *살아 있는 비유*로 되살아나서, 독자는 주장에 닿기 전에 먼저 그 이미지를 풀어야 한다. 풀어 봐도 주장이 없을 때도 있다. 같은 저자가 영어 규율 문서는 또렷하게 쓰면서 한국어 노트는 흐리게 쓰는 까닭이 여기에 있다. 이 실패는 영어 말을 한국어로 들여올 때만 생겨서, 영어로 쓰는 쪽에서는 보이지 않는다. 한국어 초안을 쓸 때는 영어에서 옮겨 온 추상어마다 삭제 검사(§ 문서 (Document) → 전달 (Transmission))를 적용한다.
+- **전보식 한국어는 말뿐 아니라 논항도 뺀다.** 한국어는 조사와 서술어를 버려 압축한다(`흡수 결정 X`, `직교로 보면 얕음`). 이때 *누가 / 무엇을 / 왜*도 함께 사라진다. 영어 약기는 대체로 동사와 그 논항을 남긴다. 영어 노트에서는 안전한 압축도 한국어에서는 손실을 만든다. 논항을 다시 풀어 쓴다.

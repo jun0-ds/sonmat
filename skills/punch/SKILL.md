@@ -1,54 +1,54 @@
 ---
 name: punch
-description: Punch list — completeness and residue check before delivery. Finds what's missing that should exist (omission) and what's left behind that shouldn't (refactor residue). Reconstructs intent, overlays domain checklist, scans for stale references.
+description: 넘기기 전에 완결성과 잔재를 확인하는 펀치 리스트다. 있어야 하는데 없는 것(누락)과 없어야 하는데 남은 것(리팩터링 잔재)을 찾는다. 의도를 재구성하고 도메인 체크리스트를 겹쳐 본 뒤, 낡은 참조를 훑는다. 사용자가 직접 부를 때만 돈다.
 user-invocable: true
 ---
 
-# Punch — Punch List Before Delivery
+# Punch — 넘기기 전 펀치 리스트 (Punch List Before Delivery)
 
-Like a construction punch list: walk the finished building and note everything that's missing or incomplete before handoff.
+건설 현장의 펀치 리스트와 같다. 다 지은 건물을 돌아보며, 넘기기 전에 빠졌거나 덜 된 것을 모두 적는다.
 
-Not "does this work?" (that's guard/inspect) but **"what was supposed to exist that doesn't?"**
+"이게 동작하는가?"(guard/inspect의 질문)가 아니라 **"있어야 했는데 없는 것은 무엇인가?"**를 묻는다.
 
-Invoke: `/punch` (runs once for the current scope, reports, and exits — not a mode). Manual-only; punch does not auto-activate.
-
----
-
-## Why this exists
-
-Vibe coding skips the spec. That's a feature, not a bug — but it removes the safety net that specs provided: a shared checklist of "everything that should exist."
-
-Traditional collaboration solves this with requirements docs, design reviews, and QA teams — multiple humans independently checking completeness. In AI-human collaboration, there's no second human. This skill fills that gap.
-
-Research basis: 40-55% of all implementation errors are **omissions** — things that should exist but don't. Another 20-25% are **ambiguity** — things that exist but in the wrong form. Only 10-15% are outright wrong. **The biggest ROI is finding what's missing, not what's broken.**
+부르는 법: `/punch`. 지금 범위에 대해 한 번 돌고, 보고한 뒤 끝난다. 모드가 아니다. 직접 불러야만 돌며, 저절로 켜지지 않는다.
 
 ---
 
-## Method: Reconstruct + Checklist, then Diff
+## 이 스킬이 있는 이유
 
-Two complementary lenses:
-- **Reconstruct**: derive what should exist from intent and implementation (catches project-specific gaps)
-- **Domain checklist**: apply known must-haves for this type of work (catches gaps the user also forgot)
+바이브 코딩은 명세를 건너뛴다. 그것은 결함이 아니라 장점이다. 다만 명세가 주던 안전망, 곧 "있어야 할 모든 것"을 함께 확인하는 체크리스트도 같이 사라진다.
 
-Neither alone is sufficient. Reconstruction misses what nobody thought of. Checklists miss what's unique to this project. Together they cover both.
+전통적인 협업은 요구사항 문서, 설계 검토, QA 팀으로 이 문제를 푼다. 여러 사람이 각자 따로 완결성을 확인하는 것이다. AI와 사람이 협업할 때는 두 번째 사람이 없다. 이 스킬이 그 빈자리를 채운다.
 
-### Phase short-circuit — residue-only fast path
+연구 근거: 구현 오류의 40–55%는 **누락**, 곧 있어야 하는데 없는 것이다. 20–25%는 **모호함**, 곧 있기는 하지만 잘못된 형태로 있는 것이다. 명백히 틀린 것은 10–15%뿐이다. **가장 큰 효과는 깨진 것이 아니라 빠진 것을 찾는 데서 나온다.**
 
-If punch was invoked as `/punch residue`, or if the trigger was `Structural removal` or `Rename` and the user has not requested reconstruction, **skip Phase 1 and Phase 2 entirely and jump to Phase 3's Residue-free check**. Residue detection is mechanical grep — it does not need intent reconstruction or domain checklists. Running Phase 1 dialogue for pure residue cleanup is overhead that undermines the point of having a fast path for structural changes.
+---
 
-If punch was invoked without a mode and the only session activity was structural removals/renames, suggest the fast path and let the user accept or decline:
+## 방법: 재구성과 체크리스트, 그리고 대조
+
+서로 보완하는 두 렌즈를 쓴다.
+- **재구성**: 의도와 구현에서 무엇이 있어야 하는지 끌어낸다(이 프로젝트에만 있는 빈틈을 잡는다).
+- **도메인 체크리스트**: 이런 종류의 작업에 반드시 있어야 한다고 알려진 항목을 적용한다(사용자도 잊은 빈틈을 잡는다).
+
+어느 하나만으로는 모자라다. 재구성은 아무도 떠올리지 못한 것을 놓치고, 체크리스트는 이 프로젝트에만 있는 것을 놓친다. 둘을 함께 써야 양쪽을 다 덮는다.
+
+### 단계 건너뛰기 — 잔재만 보는 빠른 경로
+
+`/punch residue`로 불렀거나, 발동 신호가 `Structural removal`이나 `Rename`이고 사용자가 재구성을 요청하지 않았다면, **Phase 1과 Phase 2를 통째로 건너뛰고 Phase 3의 Residue-free 검사로 바로 간다**. 잔재 찾기는 기계적인 grep이라 의도 재구성이나 도메인 체크리스트가 필요 없다. 잔재 정리만 하면 되는데 Phase 1 대화를 돌리면, 구조 변경을 위한 빠른 경로를 따로 둔 의미가 없어진다.
+
+모드 없이 불렀는데 이번 세션에서 한 일이 구조 삭제나 이름 바꾸기뿐이라면, 빠른 경로를 제안하고 사용자가 고르게 한다.
 
 ```
 [punch] Session activity: structural removals only (no new features).
 Run residue-only fast path? [Yes / No — I want full reconstruction]
 ```
 
-### Phase 1 — Reconstruct intent (conversational)
+### Phase 1 — 의도 재구성 (대화)
 
-Build a shared understanding of what should exist. Implementation alone can't reveal intent that was never expressed — so this phase is a **dialogue**, not a one-shot analysis.
+무엇이 있어야 하는지 사용자와 같은 그림을 그린다. 한 번도 말로 나온 적 없는 의도는 구현만 봐서는 알 수 없다. 그래서 이 단계는 한 번에 끝내는 분석이 아니라 **대화**다.
 
-1. **Read the implementation**: code, config, UI, data flow — form an initial picture.
-2. **Draft and present**: Lay out what you understood as a starting point, explicitly marking gaps and uncertainties.
+1. **구현을 읽는다**: 코드, 설정, UI, 데이터 흐름을 보고 처음 그림을 잡는다.
+2. **초안을 만들어 보여 준다**: 이해한 내용을 출발점으로 펼쳐 놓고, 빈 곳과 불확실한 곳을 분명히 표시한다.
 
 ```
 [punch] Draft intent — based on implementation:
@@ -59,72 +59,72 @@ Build a shared understanding of what should exist. Implementation alone can't re
   What's missing, wrong, or different from what you had in mind?
 ```
 
-3. **Dialogue**: User corrects, adds, clarifies. This is where the real value is — surfacing what was in the user's head but never made it to code. Each round narrows the gap.
-4. **Lock**: When the user confirms, this becomes the reference for Phase 2. Not a formal spec — a shared, good-enough checklist.
+3. **대화한다**: 사용자가 고치고, 더하고, 분명히 한다. 진짜 가치는 여기서 나온다. 사용자 머릿속에는 있었지만 코드까지 오지 못한 것을 끌어내기 때문이다. 한 번 주고받을 때마다 빈틈이 좁아진다.
+4. **확정한다**: 사용자가 확인하면 이것이 Phase 2의 기준이 된다. 정식 명세가 아니라, 함께 쓰기에 충분한 체크리스트다.
 
-**Optional cross-check**: if the feature is high-stakes and there is reason to suspect main may have mis-synthesized the reconstruction (e.g., long conversation, conflicting user turns, user asked "does this match what I said?"), spawn [witness](../../agents/sonmat-witness.md) on the locked reconstruction at **commit-gate scope** (see witness.md §Scope scales). Witness reads raw user turns against the reconstruction and flags any intent that main-synthesized Phase 1 may have quietly dropped. Punch's axis is completeness-by-checklist; witness's axis is fidelity-to-raw-intent — they are orthogonal and can both be wrong in different ways.
+**선택: 교차 확인**: 위험이 큰 기능이고 메인 세션이 재구성을 잘못 종합했다고 의심할 이유가 있다면(대화가 길었거나, 사용자 발화끼리 부딪치거나, 사용자가 "내가 말한 거랑 맞아?"라고 물은 경우), 확정한 재구성을 대상으로 [witness](../../agents/sonmat-witness.md)를 **commit-gate 범위**로 띄운다(witness.md §Scope scales 참조). witness는 사용자 발화 원문을 재구성과 맞대어 읽고, 메인 세션이 종합한 Phase 1에서 소리 없이 빠졌을지 모를 의도를 표시한다. punch는 체크리스트로 완결성을 보고, witness는 사용자 원문 의도에 충실한지를 본다. 두 축은 서로 독립이라, 각자 다른 방식으로 틀릴 수 있다.
 
-### Phase 2 — Domain checklist overlay
+### Phase 2 — 도메인 체크리스트 겹쳐 보기
 
-After intent is locked, overlay the relevant domain checklist. This catches **what the user also didn't think of** — the "화장실을 까먹은" case.
+의도를 확정한 뒤 관련 도메인 체크리스트를 겹쳐 본다. **사용자도 미처 생각하지 못한 것**, 곧 "화장실을 까먹은" 경우를 잡는다.
 
-#### Built-in checklists
+#### 기본 체크리스트
 
-| Domain | Key items |
+| 도메인 | 핵심 항목 |
 |--------|-----------|
-| **Web app** | Auth/session, input validation, error pages, loading states, responsive, accessibility, CORS, rate limiting |
-| **API** | Versioning, error format, auth, pagination, timeout, idempotency, documentation |
-| **Data pipeline** | Schema validation, null/empty handling, dedup, retry/backoff, monitoring, backfill path |
-| **CLI tool** | Help text, exit codes, stdin/stdout, error messages, config file, --dry-run |
-| **ML/AI** | Baseline comparison, eval metrics, data leakage, inference latency, fallback on failure |
-| **Skill / documentation** | Cross-reference currency (do links still point at existing targets?), terminology consistency (has renamed terminology updated everywhere?), section-to-section alignment (do sibling sections agree on shared definitions?), invocation/example currency (do examples still reflect the current API or flow?), residue from prior edits (see Residue-free check in Phase 3) |
+| **Web app** | 인증/세션, 입력 검증, 오류 페이지, 로딩 상태, 반응형, 접근성, CORS, 요청 빈도 제한 |
+| **API** | 버전 관리, 오류 형식, 인증, 페이지네이션, 타임아웃, 멱등성, 문서 |
+| **Data pipeline** | 스키마 검증, null·빈 값 처리, 중복 제거, 재시도/백오프, 모니터링, 백필 경로 |
+| **CLI tool** | 도움말, 종료 코드, stdin/stdout, 오류 메시지, 설정 파일, --dry-run |
+| **ML/AI** | 기준선 비교, 평가 지표, 데이터 누수, 추론 지연 시간, 실패 시 대체 동작 |
+| **Skill / documentation** | 교차 참조가 최신인가(링크가 아직 있는 대상을 가리키는가?), 용어가 일관된가(바꾼 용어가 모든 곳에 반영됐는가?), 절끼리 맞는가(나란한 절들이 같은 정의를 쓰는가?), 호출법과 예시가 최신인가(예시가 지금 API나 흐름을 반영하는가?), 이전 편집이 남긴 잔재(Phase 3의 Residue-free 검사 참조) |
 
-These are starting points. Only apply items relevant to the current project — don't force-fit.
+출발점일 뿐이다. 지금 프로젝트에 맞는 항목만 적용하고, 억지로 끼워 맞추지 않는다.
 
-#### Accumulated checklists
+#### 쌓아 가는 체크리스트
 
-Domain checklists grow over time. When punch finds a gap that wasn't on any checklist, propose adding it:
+도메인 체크리스트는 시간이 지나며 늘어난다. punch가 어느 체크리스트에도 없던 빈틈을 찾으면 추가를 제안한다.
 
 ```
 [punch] Novel gap found: {description}
   Add to {domain} checklist? [Yes / No]
 ```
 
-Stored in: `$SONMAT_MEMORY_DIR/punch_{domain}.md` (default `~/.sonmat/memory/`)
+저장 위치: `$SONMAT_MEMORY_DIR/punch_{domain}.md` (기본값 `~/.sonmat/memory/`)
 
-### Phase 3 — Systematic gap search
+### Phase 3 — 체계적인 빈틈 찾기 (Systematic gap search)
 
-For each item in the reconstructed intent + domain checklist, check:
+재구성한 의도와 도메인 체크리스트의 항목마다 다음을 확인한다.
 
-| Check | Question | Error type |
+| 검사 | 질문 | 오류 유형 |
 |-------|----------|------------|
-| **Exists?** | Is this capability actually implemented? | Omission |
-| **Complete?** | Does it handle the full path — happy, sad, edge? | Partial omission |
-| **Consistent?** | Does it behave the same across entry points? | Ambiguity |
-| **Bounded?** | Are failure modes handled? What happens at limits? | Missing constraint |
-| **Connected?** | Do components agree on their shared contracts? | Interface gap |
-| **Observable?** | Can the user tell if it worked or failed? | Feedback gap |
-| **Residue-free?** | After this session's removals, renames, or restructures, are all references, cross-links, terminology, examples, and dependent documents updated? | Refactor residue |
+| **Exists?** | 이 기능이 실제로 구현돼 있는가? | Omission |
+| **Complete?** | 정상 경로, 실패 경로, 모서리 경우까지 전부 다루는가? | Partial omission |
+| **Consistent?** | 어느 진입점에서 들어와도 똑같이 동작하는가? | Ambiguity |
+| **Bounded?** | 실패하는 경우를 처리하는가? 한계에 닿으면 어떻게 되는가? | Missing constraint |
+| **Connected?** | 구성 요소들이 서로 공유하는 계약에 동의하는가? | Interface gap |
+| **Observable?** | 성공했는지 실패했는지 사용자가 알 수 있는가? | Feedback gap |
+| **Residue-free?** | 이번 세션에서 지우거나 이름을 바꾸거나 구조를 고친 뒤, 참조·교차 링크·용어·예시·딸린 문서가 모두 갱신됐는가? | Refactor residue |
 
-#### Residue check — what it looks for
+#### 잔재 검사 — 무엇을 찾는가
 
-Structural changes leave debris. When a section is deleted, a function renamed, a concept retired, the removal itself is usually complete — but **references elsewhere** often survive. These stale references are not "missing features" in the traditional sense; they are **the opposite**: ghosts of removed features still cited in places that weren't updated alongside the removal.
+구조를 바꾸면 부스러기가 남는다. 절을 지우거나, 함수 이름을 바꾸거나, 개념을 폐기하면 삭제 자체는 대개 깔끔하게 끝난다. 그러나 **다른 곳의 참조**는 자주 살아남는다. 이런 낡은 참조는 전통적인 의미의 "빠진 기능"이 아니라 **그 반대**다. 이미 없앤 기능이 함께 갱신되지 않은 곳에서 여전히 인용되는 유령이다.
 
-Concrete patterns to scan for during residue check:
+잔재 검사에서 훑어볼 구체적인 패턴은 다음과 같다.
 
-1. **Removed section / renamed section**: grep for the old section title, heading anchor, or internal link target across the whole project. Any match outside the removal point is residue.
-2. **Removed function / method / class**: grep for the old name. Any caller, import, or docstring reference is residue.
-3. **Removed file**: grep for the old path. Any cross-reference, include, or doc link is residue.
-4. **Retired terminology**: when a term is deprecated (e.g., "mode" → "reaction", "cascade principle" → "discovery-led principle"), grep for the old term. Any surviving use is residue, *unless* it appears in historical / changelog / archival context that is supposed to preserve the old term.
-5. **Orphaned examples**: examples that reference the removed/renamed item. Update or remove.
-6. **Severity / category / type tables**: enum-like lists that mentioned the removed item as a valid value. Remove the entry.
-7. **Template strings**: report templates, commit message formats, or prompt fragments that embed the old name. Update.
+1. **지우거나 이름을 바꾼 절**: 옛 절 제목, 헤딩 앵커, 내부 링크 대상을 프로젝트 전체에서 grep한다. 지운 자리 밖에서 걸리는 것은 모두 잔재다.
+2. **지운 함수·메서드·클래스**: 옛 이름을 grep한다. 그것을 부르는 코드, import, docstring 속 언급은 모두 잔재다.
+3. **지운 파일**: 옛 경로를 grep한다. 교차 참조, include, 문서 링크는 모두 잔재다.
+4. **폐기한 용어**: 용어를 폐기했다면(예: "mode" → "reaction", "cascade principle" → "discovery-led principle") 옛 용어를 grep한다. 남아 있는 쓰임은 모두 잔재다. *다만* 옛 용어를 보존해야 하는 이력·변경 기록·보관 문서 안에 있는 것은 예외다.
+5. **고아가 된 예시**: 지우거나 이름을 바꾼 항목을 가리키는 예시다. 고치거나 지운다.
+6. **심각도·분류·유형 표**: 지운 항목을 유효한 값으로 적어 둔 열거형 목록이다. 그 항목을 뺀다.
+7. **템플릿 문자열**: 옛 이름이 박혀 있는 보고 템플릿, 커밋 메시지 형식, 프롬프트 조각이다. 고친다.
 
-This check is mechanical — it is not reasoning, it is grep. The cost is low and the catch rate on structural changes is high, because human attention after a removal typically stays on the removal point and misses the web of downstream references.
+이 검사는 기계적이다. 추론이 아니라 grep이다. 비용은 낮고, 구조 변경에서 잡아내는 비율은 높다. 사람은 무언가를 지운 뒤 지운 자리에만 주의를 두고, 그 아래로 얽힌 참조들은 놓치기 쉽기 때문이다.
 
-**When to run residue check**: after any session that included a removal, rename, or restructure. See Trigger conditions below.
+**잔재 검사를 돌릴 때**: 삭제, 이름 바꾸기, 구조 변경이 있었던 세션 뒤에는 언제나 돌린다. 아래 발동 조건을 참조한다.
 
-### Phase 4 — Report
+### Phase 4 — 보고
 
 ```
 [punch] Punch list:
@@ -146,95 +146,95 @@ This check is mechanical — it is not reasoning, it is grep. The cost is low an
 
 ---
 
-## Gap categories
+## 빈틈 분류
 
-| Category | Description |
+| 분류 | 설명 |
 |----------|-------------|
-| **Omission** | Feature/path that should exist but doesn't |
-| **Partial** | Implemented but incomplete (missing edge cases, error handling) |
-| **Ambiguity** | Behavior differs from reasonable user expectation |
-| **Interface** | Components disagree on contract (types, formats, assumptions) |
-| **Feedback** | User can't tell if action succeeded/failed |
-| **Refactor residue** | A removal or rename left behind references to the old state that were not updated. Dead internal links, orphaned examples, stale enum entries, retired terminology that still appears outside archival context |
+| **Omission** | 있어야 하는데 없는 기능이나 경로 |
+| **Partial** | 구현은 됐지만 덜 됨(모서리 경우나 오류 처리가 빠짐) |
+| **Ambiguity** | 사용자가 합리적으로 기대할 만한 동작과 다르게 동작함 |
+| **Interface** | 구성 요소들이 계약(타입, 형식, 가정)에서 서로 어긋남 |
+| **Feedback** | 행동이 성공했는지 실패했는지 사용자가 알 수 없음 |
+| **Refactor residue** | 지우거나 이름을 바꾼 뒤, 옛 상태를 가리키는 참조가 갱신되지 않고 남음. 끊긴 내부 링크, 고아가 된 예시, 낡은 열거값, 보관 문서 밖에 여전히 나오는 폐기 용어 |
 
 ---
 
-## Invocation modes
+## 호출 모드
 
-Punch is user-invocable and supports several scope aliases. Unlike inspect (which is trigger-reactive and rejects depth dials as anti-discovery-led), punch's modes are **user scope selections**, not depth dials — the user explicitly chooses how much of the punch method to run, based on what kind of check is needed right now. The user knowing they want "just residue" or "just user stories" is the active discovery; the mode just names that discovery.
+punch는 사용자가 직접 부르는 스킬이며, 범위를 고르는 별칭 몇 가지를 지원한다. inspect는 발동 신호에 반응하는 스킬이라, 깊이를 미리 고르는 다이얼을 발견 주도 원칙에 어긋난다며 받지 않는다. punch의 모드는 그런 깊이 다이얼이 아니라 **사용자가 고르는 범위**다. 지금 어떤 확인이 필요한지에 따라 punch의 방법을 어디까지 돌릴지 사용자가 직접 정한다. 사용자가 "잔재만" 또는 "사용자 스토리만" 보고 싶다고 아는 것 자체가 실제 발견이고, 모드는 그 발견에 붙인 이름일 뿐이다.
 
-| Mode | Phases run | Typical use |
+| 모드 | 도는 단계 | 주로 쓰는 때 |
 |---|---|---|
-| `/punch residue` | Phase 3 `Residue-free?` only. Skips Phase 1, Phase 2, and other Phase 3 checks. | After a session of structural removals or renames — the fast path |
-| `/punch quick` | Phase 1 (skipped if user declines dialogue) + Phase 3 `Exists?` check on user stories only | Mid-development smoke check — "did I at least wire up the happy path?" |
-| `/punch` (default) | Full Phase 1 + Phase 2 + Phase 3 including Residue-free | Feature completion — standard punch list |
-| `/punch deep` | Default + edge cases, concurrency, failure modes, all domain checklists regardless of apparent relevance | Pre-release, critical changes, high-stakes |
+| `/punch residue` | Phase 3의 `Residue-free?`만 돈다. Phase 1, Phase 2, 나머지 Phase 3 검사는 건너뛴다. | 구조 삭제나 이름 바꾸기를 한 세션 뒤. 빠른 경로 |
+| `/punch quick` | Phase 1(사용자가 대화를 원하지 않으면 생략) + 사용자 스토리만 대상으로 Phase 3 `Exists?` 검사 | 개발 도중 간단히 확인할 때. "정상 경로라도 이어 놓았나?" |
+| `/punch` (기본) | Phase 1 + Phase 2 + Residue-free를 포함한 Phase 3 전체 | 기능을 마쳤을 때. 표준 펀치 리스트 |
+| `/punch deep` | 기본에 더해 모서리 경우, 동시성, 실패 방식, 관련 있어 보이는지와 상관없이 모든 도메인 체크리스트 | 릴리스 전, 중요한 변경, 위험이 큰 작업 |
 
-Residue-free runs in every mode **except** `/punch quick`, because quick's whole point is minimum overhead and residue is only relevant after structural changes (which quick is not the right tool for). When invoked as `/punch residue`, only the Residue-free check runs.
+Residue-free는 `/punch quick`을 **뺀** 모든 모드에서 돈다. quick은 부담을 최소로 하는 것이 핵심이고, 잔재는 구조 변경 뒤에만 의미가 있는데 구조 변경에는 quick이 맞는 도구가 아니기 때문이다. `/punch residue`로 부르면 Residue-free 검사만 돈다.
 
-### Why punch has modes when inspect does not
+### inspect에는 없는 모드가 punch에는 있는 이유
 
-This is worth flagging because the two skills appear to violate each other's principles. Inspect was reframed to forbid "depth dials" because auto-triggered depth passes must be driven by discovery, not by pre-selected depth. Punch keeps modes because:
+두 스킬이 서로의 원칙을 어기는 것처럼 보이므로 짚어 둔다. inspect는 자동으로 발동하는 깊이 점검이 미리 고른 깊이가 아니라 발견에 따라 움직여야 한다는 이유로 "깊이 다이얼"을 금지하도록 고쳐졌다. punch가 모드를 유지하는 이유는 다음과 같다.
 
-- Punch is **user-invocable**, not auto-triggered. The user's decision to invoke `/punch quick` *is* a discovery signal ("I know I want a cheap smoke check right now").
-- Inspect's triggers (file counts, path patterns) are discovery signals that *precede* the user's awareness; the depth follows the signal. Inspect cannot ask the user "how deep?" because the signal itself is what determines depth.
-- Punch's invocation is the signal. The user chose to invoke at a specific mode — that choice is the active discovery, the mode is its name.
+- punch는 자동으로 발동하지 않고 **사용자가 직접 부른다**. 사용자가 `/punch quick`을 부르기로 한 결정이 *곧* 발견 신호다("지금은 가볍게 확인만 하고 싶다는 걸 안다").
+- inspect의 발동 신호(파일 수, 경로 패턴)는 사용자가 알아채기 *전에* 오는 발견 신호이고, 깊이는 그 신호를 따른다. inspect가 사용자에게 "얼마나 깊이?"라고 물을 수 없는 까닭은 깊이를 정하는 것이 신호 자체이기 때문이다.
+- punch는 부르는 행위가 곧 신호다. 사용자가 특정 모드로 부르기로 고른 것이 실제 발견이고, 모드는 그 발견의 이름이다.
 
-The two positions are consistent: depth follows discovery. For inspect, the discovery is a pattern match. For punch, the discovery is the user's intent in typing the command.
+두 입장은 서로 어긋나지 않는다. 깊이는 발견을 따른다. inspect에서는 패턴 일치가 발견이고, punch에서는 사용자가 명령을 입력한 의도가 발견이다.
 
 ---
 
-## When to suggest activation
+## 언제 제안하는가
 
-Don't activate automatically. Suggest once when trigger conditions are met.
+저절로 켜지 않는다. 발동 조건이 맞으면 한 번 제안한다.
 
-### Trigger conditions
+### 발동 조건
 
-| Category | Signal |
+| 분류 | 신호 |
 |----------|--------|
-| **Feature declared done** | User says "done", "finished", "ship it", "that should be it" |
-| **Structural change** | Architecture, data model, or flow significantly changed |
-| **Structural removal** | Section deleted, function removed, file unlinked, concept retired — residue check strongly recommended |
-| **Rename** | Symbol, file, section, or term renamed — residue check strongly recommended |
-| **Integration point** | Multiple components wired together for the first time |
-| **User uncertainty** | "Am I missing anything?", "What else?", "Is this complete?" |
-| **No spec existed** | Feature was built conversationally without prior requirements |
+| **Feature declared done** (완료 선언) | 사용자가 "다 됐다", "끝났다", "내보내자", "이걸로 될 것 같다" 같은 말을 한다 |
+| **Structural change** (구조 변경) | 아키텍처, 데이터 모델, 흐름이 크게 바뀌었다 |
+| **Structural removal** (구조 삭제) | 절을 지우거나, 함수를 없애거나, 파일 연결을 끊거나, 개념을 폐기했다. 잔재 검사를 강하게 권한다 |
+| **Rename** (이름 바꾸기) | 심볼, 파일, 절, 용어의 이름을 바꿨다. 잔재 검사를 강하게 권한다 |
+| **Integration point** (통합 지점) | 여러 구성 요소를 처음으로 이어 붙였다 |
+| **User uncertainty** (사용자 불확실성) | "빠뜨린 거 없나?", "또 뭐가 있지?", "이거면 다 된 건가?" |
+| **No spec existed** (명세 없음) | 미리 정한 요구사항 없이 대화로 기능을 만들었다 |
 
-### Suggestion format
+### 제안 형식
 
 ```
 [sonmat] {what was detected}. /punch?
 ```
 
-Examples:
+예:
 - `[sonmat] Feature built without spec, declared done. /punch?`
 - `[sonmat] 3 components integrated for the first time. /punch?`
 - `[sonmat] Structural change across 5 files. /punch?`
 - `[sonmat] Guard §2 / §4 migrated to scribe — residue check recommended. /punch?`
 - `[sonmat] Term retired (mode → reaction) — residue check recommended. /punch?`
 
-### Scope
+### 범위
 
-- User accepts -> punch runs for the current feature/change
-- After report is delivered -> punch deactivates
-- Don't re-suggest for the same scope after user declines
-
----
-
-## What punch does NOT do
-
-- **Fix bugs** — punch finds gaps, doesn't fix them. User decides priority.
-- **Write tests** — punch identifies what to test, not how. Test writing is a separate step.
-- **Replace guard/inspect/witness** — guard is main-side verification, inspect is discovery-led depth, witness is intent-artifact match in isolation, punch is completeness against a reconstructed spec. Four different axes; they're complementary.
-- **Check user-intent fidelity** — punch's reconstruction is main-synthesized, so it inherits main's interpretation of user intent. When that fidelity itself is in doubt, use witness (which reads raw user turns without main's interpretation layer).
-- **Require a spec upfront** — the whole point is reconstructing intent from what exists, not demanding documentation.
+- 사용자가 받아들이면 -> 지금 기능이나 변경에 대해 punch가 돈다.
+- 보고를 전하면 -> punch는 꺼진다.
+- 사용자가 거절한 범위에는 다시 제안하지 않는다.
 
 ---
 
-## Design rationale
+## punch가 하지 *않는* 것
 
-guard asks "is this safe?" inspect asks "what could break?" devil asks "is this reasoning sound?" witness asks "does this match what the user asked for?" **punch asks "is anything missing?"**
+- **버그 고치기** — punch는 빈틈을 찾을 뿐 고치지 않는다. 우선순위는 사용자가 정한다.
+- **테스트 쓰기** — punch는 무엇을 시험해야 하는지 짚을 뿐, 어떻게 시험할지는 정하지 않는다. 테스트 작성은 별도 단계다.
+- **guard/inspect/witness 대신하기** — guard는 메인 세션 검증, inspect는 발견 주도 깊이 점검, witness는 격리된 상태에서 의도와 산출물의 일치 확인, punch는 재구성한 명세에 비춘 완결성 확인을 맡는다. 서로 다른 네 축이고, 서로를 보완한다.
+- **사용자 의도에 충실한지 확인하기** — punch의 재구성은 메인 세션이 종합한 것이라, 사용자 의도에 대한 메인 세션의 해석을 그대로 물려받는다. 그 충실도 자체가 의심스러우면 witness를 쓴다(witness는 메인 세션의 해석을 거치지 않고 사용자 발화 원문을 읽는다).
+- **명세를 먼저 요구하기** — 핵심은 문서를 요구하는 것이 아니라, 이미 있는 것에서 의도를 재구성하는 데 있다.
 
-Like a construction punch list — you walk the finished building with the contractor and note every outlet that's missing, every door that doesn't close, every fixture that was in the plan but not in the building. The building works, but it's not complete.
+---
 
-The reconstruct + checklist method works because: (1) reconstruction surfaces project-specific assumptions through dialogue; (2) domain checklists catch universal must-haves that nobody thought to mention; (3) presenting the reconstruction to the user creates a brief-back checkpoint — the cheapest error-catching mechanism known across aviation, surgery, and military operations.
+## 설계 근거
+
+guard는 "안전한가?"를, inspect는 "무엇이 깨질 수 있나?"를, devil은 "이 추론이 타당한가?"를, witness는 "사용자가 요청한 것과 맞는가?"를 묻는다. **punch는 "빠진 것이 있는가?"를 묻는다.**
+
+건설 현장의 펀치 리스트와 같다. 다 지은 건물을 시공사와 함께 돌며, 빠진 콘센트, 닫히지 않는 문, 도면에는 있었지만 건물에는 없는 설비를 하나하나 적는다. 건물은 제 기능을 하지만 아직 완성은 아니다.
+
+재구성과 체크리스트를 함께 쓰는 방법이 통하는 이유는 세 가지다. (1) 재구성은 대화하면서 이 프로젝트에만 있는 가정을 끌어낸다. (2) 도메인 체크리스트는 아무도 말할 생각을 못 한 보편적 필수 항목을 잡는다. (3) 재구성한 내용을 사용자에게 보여 주면 되짚어 확인하는(brief-back) 지점이 생긴다. 항공, 수술, 군사 작전에서 알려진 오류 포착 장치 가운데 가장 값싼 방법이다.
