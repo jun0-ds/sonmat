@@ -104,12 +104,12 @@ L0 안내 뒤에 사용자가 아무 말이 없으면 원래 요청 범위 안�
 
 1. **자기 검토** (메인 세션, System 1) — diff를 쓴 에이전트가 직접 빠르게 다시 읽는다. 이것은 **구조적 격리가 아니다**. sonmat 설계가 없앨 수 없다고 인정한, 규율에 기대는 마지막 층이다(`memory/domain/discipline_forced_protocols.md` §Core Tension 참조). 서브에이전트를 띄우는 비용을 쓰기 전에 눈에 띄는 실수를 싸게 걸러 내는 것이 이 관문의 역할이다. 검증이 아니라 잡음 거르개로 여긴다. 루프가 자기 검토 *하나만* 관문으로 삼는다면 설계가 망가진 것이다.
 2. **guard** (메인 세션, 검증 검사) — 커밋 전 테스트 실행, 민감 파일 차단, 규율 준수, 새 함정 감지를 맡는다. 같은 컨텍스트 안에서 돈다. 여전히 메인 세션 쪽이지만, 의도를 스스로 해석하기보다 구조적 규칙(파일 패턴, 테스트 결과)을 기준으로 삼는다. `skills/guard/SKILL.md`를 본다.
-3. **witness** (따로 띄운 서브에이전트, 절차상 격리) — 산출물이 의도·기준선과 맞는지 확인한다. 사용자 발화 원문을 차례대로 모은 것과, 있을 때는 승인 기준선 묶음을 서로 다른 입력으로 넘겨 띄운다. 메인 세션의 추론 과정은 띄울 때 쓰는 프롬프트 층(규율)과 실행 컨텍스트 층(하네스가 강제)에서 빠진다. 현재 Claude Code에서 이것이 실제로 무엇을 뜻하는지는 `agents/sonmat-witness.md` §Isolation stack에 정직하게 나눠 적어 두었다. 커밋마다 witness를 띄울지는 `loop.yaml`에 정한 구조적 결정이다(`witness.commit: required | optional | skip`). 메인 세션이 실행 중에 판단할 일이 결코 아니다. loop 정의에 아무 말이 없으면 `required`로 본다.
+3. **witness** (따로 띄운 서브에이전트, 절차상 격리) — 산출물이 의도·기준선과 맞는지 확인한다. 사용자 발화 원문을 차례대로 모은 것과, 있을 때는 승인 기준선 묶음을 서로 다른 입력으로 넘겨 띄운다. 메인 세션의 추론 과정은 띄울 때 쓰는 프롬프트 층(규율)과 실행 컨텍스트 층(하네스가 강제)에서 빠진다. 현재 Claude Code에서 이것이 실제로 무엇을 뜻하는지는 `agents/sonmat-witness.md` §격리의 세 층 (Isolation stack)에 정직하게 나눠 적어 두었다. 커밋마다 witness를 띄울지는 `loop.yaml`에 정한 구조적 결정이다(`witness.commit: required | optional | skip`). 메인 세션이 실행 중에 판단할 일이 결코 아니다. loop 정의에 아무 말이 없으면 `required`로 본다.
 
 어느 관문이든 막는 판정(guard 차단 / witness `BLOCK`)을 내면 판단은 keep이 아니라 **refine**이 된다. 막지 않는 발견 사항(guard 경고 / witness `WARN`)은 사용자에게 보여 주고, 사용자가 확인하면 진행한다.
 witness의 `AUTHORITY_CONFLICT`는 어느 쪽 경로도 아니다. refine할 대상을 고르지 말고 판단을 멈춘 뒤, 어느 쪽 지시를 고칠지 사용자에게 묻는다.
 
-witness 판정의 신뢰도에 관한 참고: witness가 비교자로서 지키는 규율(유효한 출처만 인용하고, 출처에 따라 판정을 정하고, 강도를 판단하지 않는 것)은 **프롬프트 수준**이고 실행 중에 강제되지 않는다. 자세한 구분은 `agents/sonmat-witness.md` §Isolation stack에 있다. witness를 쓰기 시작한 초기에는 사람이 판정을 표본으로 골라 지정된 규칙을 실제로 따르는지 확인해야 한다. 규칙에서 벗어나는 모습(예: 인용 없는 판정, 강도를 근거로 매긴 WARN)이 보이면 에이전트 파일을 고쳐야 한다. 이런 일은 journal에 남기는 것이 맞다(scribe가 witness 판정을 기록하는 까닭이 바로 이것이다).
+witness 판정의 신뢰도에 관한 참고: witness가 비교자로서 지키는 규율(유효한 출처만 인용하고, 출처에 따라 판정을 정하고, 강도를 판단하지 않는 것)은 **프롬프트 수준**이고 실행 중에 강제되지 않는다. 자세한 구분은 `agents/sonmat-witness.md` §격리의 세 층 (Isolation stack)에 있다. witness를 쓰기 시작한 초기에는 사람이 판정을 표본으로 골라 지정된 규칙을 실제로 따르는지 확인해야 한다. 규칙에서 벗어나는 모습(예: 인용 없는 판정, 강도를 근거로 매긴 WARN)이 보이면 에이전트 파일을 고쳐야 한다. 이런 일은 journal에 남기는 것이 맞다(scribe가 witness 판정을 기록하는 까닭이 바로 이것이다).
 
 세 관문의 순서는 일부러 정한 것이다. 값싼 검사를 먼저 하고, 서브에이전트를 띄우는 비용이 드는 구조적 격리 검사를 마지막에 둔다. witness가 마지막 관문인 까닭은, 값싼 관문이 어차피 잡지 못했을 내용에서 격리의 가치가 가장 크기 때문이다. **세 관문은 스위스 치즈 모형에서 서로를 보완하는 층이다. 중복도 아니고, 서로 바꿔 쓸 수도 없으며, 하나가 다른 것을 대신할 수는 더더욱 없다. 자기 검토만으로는 가장 얇은 층 하나뿐이고, 정직하게 말할 수 있는 최소 구성은 guard와 witness를 함께 쓰는 것이다.**
 
@@ -145,7 +145,7 @@ scribe에 위임하기 전에, 아래 조건 가운데 하나라도 맞으면 wi
 - `AUTHORITY_CONFLICT` → 평범한 종료라면 scribe에 위임하지도 `[Execute]`로 돌아가지도 않는다. 서로 부딪치는 출처를 보고하고, 어느 쪽 지시를 고칠지 사용자가 정할 때까지 기다린다.
 - `INSUFFICIENT_GROUND_TRUTH` → 사용자에게 보고하고 scribe 위임으로 넘어간다.
 
-메인 세션 혼자서는 세션이 끝날 때 "숲 검토"를 믿을 만하게 해낼 수 없다. 이 확인은 그 검토를 구조로 대신한다. 사용자 발화만 보도록 격리된 비교자는, 여러 파일에 반쯤만 적용했거나 끊긴 참조를 남긴 종류의 누락을 잡는다. 메인 세션의 추론은 이런 누락을 그냥 통과시키기 쉽다. 전체 정의는 `agents/sonmat-witness.md` §Scope scales를 본다.
+메인 세션 혼자서는 세션이 끝날 때 "숲 검토"를 믿을 만하게 해낼 수 없다. 이 확인은 그 검토를 구조로 대신한다. 사용자 발화만 보도록 격리된 비교자는, 여러 파일에 반쯤만 적용했거나 끊긴 참조를 남긴 종류의 누락을 잡는다. 메인 세션의 추론은 이런 누락을 그냥 통과시키기 쉽다. 전체 정의는 `agents/sonmat-witness.md` §범위 규모 (Scope scales)를 본다.
 
 **scribe 위임** (끝낼 때, 숲 범위 witness 다음):
 - **keep**: scribe에 mode `all`(bridge + journal + progress)로 위임한다. loop 보고, git diff, 숲 범위 witness 판정을 산출물로 넣는다.
@@ -215,7 +215,7 @@ loop 정의마다 witness 범위를 지정하는 것이 좋다. 생략하면 `co
 | `witness.commit` | `required` \| `optional` \| `skip` | `[Judge]` keep 파이프라인에서 commit-gate witness를 돌릴지 정한다. `optional`이면 witness를 돌리되 발견 사항은 참고용으로 보여 준다. `skip`이면 아예 끈다(의도와의 일치가 본래 모호한 주관적 분야에만 쓴다). |
 | `witness.forest` | `required` \| `optional` \| `skip` | 루프를 끝낼 때 session-forest witness를 돌릴지 정한다. 세션에서 파일을 3개 이상 건드렸거나 사용자가 범위를 넓히는 지시를 했으면 기본값은 `required`다. `skip`은 명시적으로 파일 하나만 다루는 루프에만 알맞다. |
 
-`witness.commit: skip`은 메인 세션이 실행 중에 스스로 허락할 수 없는 우회다. 그때그때 정하지 말고 `loop.yaml`에 미리 선언해야 한다. 근거는 `agents/sonmat-witness.md` §When witness is invoked를 본다.
+`witness.commit: skip`은 메인 세션이 실행 중에 스스로 허락할 수 없는 우회다. 그때그때 정하지 말고 `loop.yaml`에 미리 선언해야 한다. 근거는 `agents/sonmat-witness.md` §witness를 부르는 때 (When witness is invoked)를 본다.
 
 
 ## 4. 규율 주입 (Discipline Injection)
@@ -226,7 +226,7 @@ loop 정의마다 witness 범위를 지정하는 것이 좋다. 생략하면 `co
 3. 프로젝트 AGENTS.md의 재정의를 적용한다(`## sonmat` 절이 있을 때. AGENTS.md가 없을 때만 예전 방식인 CLAUDE.md를 쓴다)
 4. System 1 처리나 System 2 worker 프롬프트에 주입한다
 
-**제외**: witness에는 규율을 **결코** 주입하지 않는다. witness는 규칙을 따르는 쪽이 아니라 비교하는 쪽이다. witness가 지키는 작동 원칙은 에이전트 정의 안에 들어 있고 core.md 규율과는 별개다(`agents/sonmat-witness.md` §Operating principles 참조). witness의 입력은 사용자 발화 원문, 산출물, 그리고 선택적으로 §6b에서 정의한 승인 기준선 묶음 그대로뿐이다. 그 밖에는 아무것도 넣지 않는다.
+**제외**: witness에는 규율을 **결코** 주입하지 않는다. witness는 규칙을 따르는 쪽이 아니라 비교하는 쪽이다. witness가 지키는 작동 원칙은 에이전트 정의 안에 들어 있고 core.md 규율과는 별개다(`agents/sonmat-witness.md` §작동 원칙 (Operating principles) 참조). witness의 입력은 사용자 발화 원문, 산출물, 그리고 선택적으로 §6b에서 정의한 승인 기준선 묶음 그대로뿐이다. 그 밖에는 아무것도 넣지 않는다.
 
 ### 프로젝트 재정의 형식 (Project override format)
 ```markdown
@@ -345,7 +345,7 @@ worker가 `loop.modify` 밖의 파일을 고쳐야 하면 직접 고치지 말�
 
 ### 6b. witness 위임 (Witness dispatch)
 
-witness는 worker가 **아니다**. 규율을 받지 않고, 작업을 실행하지 않으며, 상태를 바꾸지 않는다. witness가 하는 일은 메인 세션의 추론과 절차상 격리된 채 비교자로서 검증하는 것 하나뿐이다(`agents/sonmat-witness.md` §Isolation stack).
+witness는 worker가 **아니다**. 규율을 받지 않고, 작업을 실행하지 않으며, 상태를 바꾸지 않는다. witness가 하는 일은 메인 세션의 추론과 절차상 격리된 채 비교자로서 검증하는 것 하나뿐이다(`agents/sonmat-witness.md` §격리의 세 층 (Isolation stack)).
 
 **witness를 실제로 띄우는 방법**: autoloop의 [Judge] keep 파이프라인과 [Repeat/Exit] 숲 범위 확인 안에서 Task 도구를 `subagent_type: sonmat-witness`로 호출한다. 문서화되어 있고 지원되는 경로다. Task 도구로 서브에이전트에 맡기는 것이 Claude Code에서 격리된 서브에이전트를 띄우는 기본 수단이다. 이 문서의 초기 초안은 "PreToolUse hook → agent hook → deny" 파이프라인을 언급했지만, 그 경로는 PreToolUse에 대해서는 문서화되어 있지 않은 것으로 드러났고 지금 쓰는 경로도 아니다. 강제는 autoloop 규율에 기댄다. 메인 세션은 [Judge] 파이프라인 순서를 따라야 하고, witness Task 호출은 그 순서의 한 단계다. autoloop의 다른 모든 단계와 같은 방식, 곧 규율로 강제하는 방식이다.
 
@@ -364,7 +364,7 @@ witness는 worker가 **아니다**. 규율을 받지 않고, 작업을 실행하
 [5. Principle candidate] — (optional, principle-coverage only) literal phrase anchored to user turns
 ```
 
-어시스턴트가 쓴 계획 가운데 넣어도 되는 것은 승인 기준선 묶음뿐이다. 승인 발화가 그때 보여 준 바로 그 내용을 가리킨다는 것이 모호하지 않을 때만 넣는다. **절대 넣지 않는 것**: 다른 어시스턴트 계획이나 요약, discipline/core.md, hints.md, 메인 세션의 추론 과정, 메인 세션이 적은 적용 메모나 학습 요약, worker 보고, 이전 witness 판정, bridge note, journal 발췌, 그 밖의 scribe 기록, 별도 입력으로서의 커밋 메시지. 메인 세션은 피드백을 바탕으로 산출물을 고쳐도 된다. 새로 띄운 witness는 이전 피드백을 받지 않고 고친 산출물을 비교한다. 별도 컨텍스트나 대화 이력을 물려받지 않는 분기(no-history fork)를 쓴다고 해서 프롬프트에 직접 넣은 자료가 걸러지지는 않는다. 산출물 안에 들어 있는 주석과 커밋 메시지는 보이지만 인용 근거로 쓸 수 없다(witness.md §Seen-but-unusable 참조).
+어시스턴트가 쓴 계획 가운데 넣어도 되는 것은 승인 기준선 묶음뿐이다. 승인 발화가 그때 보여 준 바로 그 내용을 가리킨다는 것이 모호하지 않을 때만 넣는다. **절대 넣지 않는 것**: 다른 어시스턴트 계획이나 요약, discipline/core.md, hints.md, 메인 세션의 추론 과정, 메인 세션이 적은 적용 메모나 학습 요약, worker 보고, 이전 witness 판정, bridge note, journal 발췌, 그 밖의 scribe 기록, 별도 입력으로서의 커밋 메시지. 메인 세션은 피드백을 바탕으로 산출물을 고쳐도 된다. 새로 띄운 witness는 이전 피드백을 받지 않고 고친 산출물을 비교한다. 별도 컨텍스트나 대화 이력을 물려받지 않는 분기(no-history fork)를 쓴다고 해서 프롬프트에 직접 넣은 자료가 걸러지지는 않는다. 산출물 안에 들어 있는 주석과 커밋 메시지는 보이지만 인용 근거로 쓸 수 없다(witness.md §보이지만 인용할 수 없는 것 (Seen-but-unusable) 참조).
 
 #### witness 판정 → 루프 분기 (Witness verdict → loop routing)
 
