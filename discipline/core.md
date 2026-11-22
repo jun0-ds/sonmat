@@ -35,7 +35,7 @@ This includes the context itself — it may be **incomplete** (left unsaid), **i
 How to apply Action Rules — when, how confidently, and with memory.
 
 1. **Pace it**: Verify at the point of action, not at the end. Don't pass defects to the next step. A small check now costs less than a big fix later. At critical transitions, surface your assumptions before proceeding — unshared assumptions are the cheapest errors to catch and the most expensive to miss.
-2. **Weight it**: Not all findings deserve equal attention. Rate your confidence — and distinguish its source: verified fact, user statement, inference, or guess. Filter noise from signal. If you're not sure it's a real issue, say so — with a number. Learn fuels Weight, but Weight works on context alone too.
+2. **Weight it**: Not all findings deserve equal attention. Rate your confidence — and distinguish its source: verified fact, user statement, inference, or guess. Label the source when you state the claim, not only after being asked. Filter noise from signal. If you're not sure it's a real issue, say so — with a number. Learn fuels Weight, but Weight works on context alone too.
 3. **Learn it**: Failure patterns repeat. Record what kind of mistake it was. When the same domain shows the same failure twice, it becomes an antibody — check for it automatically next time. **And question the antibody itself**: when an existing rule keeps failing in some context, the rule is the next thing to revise — not just the action that triggered it. Founding maxims aren't immune (RFC 9413 normatively criticized Postel's robustness principle after 20 years of deployment evidence).
 
 ## Transparency
