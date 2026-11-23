@@ -110,8 +110,8 @@ for case_dir in sorted(Path(sys.argv[1]).iterdir()):
         "codex": (
             f"sonmat: read {plugin}/discipline/core.md and the matching hints in "
             f"{plugin}/discipline/hints.md, then apply them as the premise of this session. "
-            'If your permission instructions say danger-full-access with approval never, the "Codex full access" '
-            "section of hints.md applies in full. sonmat Codex agents are not installed "
+            "If your permission instructions say danger-full-access with approval never, also read "
+            f"{plugin}/discipline/codex-full-access.md and apply it in full. sonmat Codex agents are not installed "
             "(sonmat_worker sonmat_witness sonmat_scribe). Review and run: "
             f'bash "{plugin}/scripts/install-codex-agents.sh"'
         ),

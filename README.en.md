@@ -168,7 +168,7 @@ Codex uses the same SessionStart hook but follows a different branch. It never c
 ```
 sonmat/
 ├── skills/          # autoloop, guard, inspect, punch, devil, scribe, requery
-├── discipline/      # core.md (verification) + hints.md (domain traps)
+├── discipline/      # core.md (verification) + hints.md (domain traps) + spec.md · codex-full-access.md (on demand)
 ├── agents/          # Claude Code worker, witness, and scribe definitions
 ├── codex/agents/    # Codex-native custom-agent definitions
 ├── scripts/         # explicit Codex agent installer
@@ -190,7 +190,7 @@ Documented: [claude-code#8395](https://github.com/anthropics/claude-code/issues/
 
 | Before | After (sonmat) |
 |--------|---------------|
-| superpowers TDD/debug/review | `discipline/core.md` + `hints.md` |
+| superpowers debug/review | `discipline/core.md` + `hints.md` |
 | superpowers brainstorming | `skills/autoloop/` planning questions |
 | GSD spec → plan → execute | `skills/autoloop/` planning and execution phases |
 | karpathy-skills principles | `discipline/core.md` |

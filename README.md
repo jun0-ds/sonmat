@@ -181,7 +181,7 @@ Codex도 같은 SessionStart 훅을 쓰지만 다른 분기를 탄다. `CLAUDE.m
 ```
 sonmat/
 ├── skills/          # autoloop, guard, inspect, punch, devil, scribe, requery
-├── discipline/      # core.md (verification) + hints.md (domain traps)
+├── discipline/      # core.md (verification) + hints.md (domain traps) + spec.md · codex-full-access.md (on demand)
 ├── agents/          # Claude Code worker, witness, and scribe definitions
 ├── codex/agents/    # Codex-native custom-agent definitions
 ├── scripts/         # explicit Codex agent installer
@@ -189,7 +189,7 @@ sonmat/
 ```
 
 - `skills/`: 일곱 스킬(autoloop, guard, inspect, punch, devil, scribe, requery)
-- `discipline/`: 검증 규칙 `core.md`와 분야별 함정 `hints.md`
+- `discipline/`: 검증 규칙 `core.md`와 분야별 함정 `hints.md`. 명세 작업용 `spec.md`와 Codex 전체 접근 권한용 `codex-full-access.md`는 해당할 때만 읽는다
 - `agents/`: Claude Code용 worker, witness, scribe 정의
 - `codex/agents/`: Codex 네이티브 에이전트 정의
 - `scripts/`: Codex 에이전트를 명시적으로 설치하는 스크립트
@@ -210,7 +210,7 @@ sonmat/
 
 | 예전 | sonmat에서 |
 |--------|---------------|
-| superpowers TDD/디버그/리뷰 | `discipline/core.md` + `hints.md` |
+| superpowers 디버그/리뷰 | `discipline/core.md` + `hints.md` |
 | superpowers 브레인스토밍 | `skills/autoloop/` 기획 질문 |
 | GSD spec → plan → execute | `skills/autoloop/` 기획·실행 단계 |
 | karpathy-skills 원칙 | `discipline/core.md` |

@@ -111,7 +111,7 @@ fi
 
 # --- Codex adapter: engage discipline without mutating AGENTS.md ---
 if [ "$IS_CODEX" = true ]; then
-  MSGS+=("sonmat: read $PLUGIN_ROOT/discipline/core.md and the matching hints in $PLUGIN_ROOT/discipline/hints.md, then apply them as the premise of this session. If your permission instructions say danger-full-access with approval never, the \"Codex full access\" section of hints.md applies in full.")
+  MSGS+=("sonmat: read $PLUGIN_ROOT/discipline/core.md and the matching hints in $PLUGIN_ROOT/discipline/hints.md, then apply them as the premise of this session. If your permission instructions say danger-full-access with approval never, also read $PLUGIN_ROOT/discipline/codex-full-access.md and apply it in full.")
 
   CODEX_HOME_DIR="${CODEX_HOME:-$HOME/.codex}"
   MISSING_AGENTS=()
@@ -123,6 +123,12 @@ if [ "$IS_CODEX" = true ]; then
   if [ "${#MISSING_AGENTS[@]}" -gt 0 ]; then
     MSGS+=("sonmat Codex agents are not installed (${MISSING_AGENTS[*]}). Review and run: bash \"$PLUGIN_ROOT/scripts/install-codex-agents.sh\"")
   fi
+fi
+
+# --- Spec awareness tier 1: only in projects that opted in ---
+# The spec rules live in discipline/spec.md so sessions without specs do not load them.
+if [ -f "docs/specs/_index.md" ] && grep -Eq 'sonmat\.spec_awareness:[[:space:]]*enabled' "docs/specs/_index.md"; then
+  MSGS+=("sonmat: this project enables spec awareness (docs/specs/_index.md). Read $PLUGIN_ROOT/discipline/spec.md and follow its tier-1 rules.")
 fi
 
 # --- Update check (time-based: every 3 hours) — NOTIFY only, opt-in ---
