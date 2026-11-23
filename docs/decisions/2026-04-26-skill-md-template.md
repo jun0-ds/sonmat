@@ -1,5 +1,7 @@
 # 2026-04-26 — SKILL.md template (Inputs / Process / Outputs)
 
+2026-11-23 갱신: 공식 가이드 「The Complete Guide to Building Skills for Claude」의 description 구조에 따라 하는 일과 사용 시점, 쓰지 않는 경우를 적고 꺾쇠 금지와 1024자 상한을 명시했다.
+
 ## Context
 
 ADR `2026-04-25-icm-memory-mapping.md`가 도출한 흡수 후보 4건 중 세 번째. ICM 5층 모델의 L2 Stage Contract는 정형 템플릿 사용:
@@ -26,7 +28,7 @@ sonmat의 각 skill `SKILL.md`는 현재 자유 포맷. 결과적으로:
 ```markdown
 ---
 name: {skill-name}
-description: {one-line — what this skill verifies/does}
+description: {하는 일 + 언제 쓰는지(사용자 발화·신호) + 쓰지 않는 경우, 꺾쇠 금지, 1024자 이하}
 user-invocable: {true | false}
 ---
 

@@ -62,6 +62,18 @@ grep -qx '@AGENTS.md' "$CLAUDE_PROJECT/CLAUDE.md"
 grep -q '## sonmat' "$CLAUDE_HOME_TEST/.claude/CLAUDE.md"
 grep -q 'sonmat:discipline:start' "$CLAUDE_HOME_TEST/.claude/CLAUDE.md"
 
+# An existing core import already supplies the discipline.
+IMPORT_HOME="$TEST_ROOT/import-home"
+IMPORT_PROJECT="$TEST_ROOT/import-project"
+mkdir -p "$IMPORT_HOME/.claude" "$IMPORT_HOME/.sonmat" "$IMPORT_PROJECT/.git"
+printf '@~/control-tower/bedrock/sonmat/discipline/core.md\n' > "$IMPORT_HOME/.claude/CLAUDE.md"
+date +%s > "$IMPORT_HOME/.sonmat/.last_update_check"
+run_hook "$IMPORT_HOME" "$IMPORT_PROJECT" "" >/dev/null
+if grep -q 'sonmat:discipline' "$IMPORT_HOME/.claude/CLAUDE.md"; then
+  printf 'discipline block added despite existing core import\n' >&2
+  exit 1
+fi
+
 # Existing CLAUDE.md is not silently rewritten or migrated.
 LEGACY_PROJECT="$TEST_ROOT/legacy-project"
 mkdir -p "$LEGACY_PROJECT/.git"

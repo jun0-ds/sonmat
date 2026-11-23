@@ -93,10 +93,11 @@ fi
 # discipline. A fresh user therefore gets the file locations but no standing instruction,
 # so the discipline engages only weakly. Plant the working command unless the user already
 # has one — their own discipline section (detected by a core.md + apply-premise sentinel)
-# or this marker. Maintainer machines that keep a hand-written discipline section are skipped,
+# an import of discipline/core.md, or this marker. Maintainer machines that keep a hand-written discipline section are skipped,
 # so it never duplicates one.
 if [ "$IS_CODEX" = false ] && [ -f "$GLOBAL_CLAUDE_MD" ] \
    && ! grep -q 'sonmat:discipline' "$GLOBAL_CLAUDE_MD" \
+   && ! grep -qE '^[[:space:]]*@[^[:space:]]*discipline/core\.md([[:space:]]|$)' "$GLOBAL_CLAUDE_MD" \
    && ! { grep -q 'core\.md' "$GLOBAL_CLAUDE_MD" && grep -qiE '전제|premise' "$GLOBAL_CLAUDE_MD"; }; then
   cat >> "$GLOBAL_CLAUDE_MD" << 'SONMATDISC'
 

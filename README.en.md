@@ -239,6 +239,7 @@ If installation fails, Windows paths get rewritten, or the skills don't show up,
 Run these from the repository root in Linux or WSL:
 
 ```bash
+bash tests/test-static.sh
 bash tests/test-codex-support.sh
 bash tests/test-update-notify.sh
 ```

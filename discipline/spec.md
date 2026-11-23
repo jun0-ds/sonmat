@@ -1,6 +1,6 @@
 # 명세 (Spec)
 
-계약·요구사항·API·설계 문서를 쓰거나 고칠 때, 그리고 `docs/specs/`의 명세를 따라 작업할 때 적용한다. `hints.md` 개발 절이 이 파일을 가리키고, `docs/specs/_index.md`가 `sonmat.spec_awareness: enabled`를 선언한 프로젝트에서는 SessionStart 훅이 세션 시작에 알린다. 명세가 모호할 때 번호를 붙여 묻는 규칙은 `hints.md` 개발 절에 있다.
+계약·요구사항·API·설계 문서를 쓰거나 고칠 때, 그리고 `docs/specs/`의 명세를 따라 작업할 때 적용한다. `hints.md` 개발 절이 이 파일을 가리키고, `$PROJECT_ROOT/docs/specs/_index.md`가 `sonmat.spec_awareness: enabled`를 선언한 프로젝트에서는 SessionStart 훅이 세션 시작에 알린다. 명세가 모호할 때 번호를 붙여 묻는 규칙은 `hints.md` 개발 절에 있다.
 
 ## 명세 작성 (Spec authoring): 계약·요구사항·API·설계 문서를 쓰거나 고칠 때
 
@@ -12,9 +12,9 @@
 
 ## 명세 따르기 (Spec consumption): 기존 명세 문서를 읽고 그에 따라 행동할 때
 
-> ADR `2026-04-26-spec-auto-reference.md`의 3단계 모형에 따라 활성화한다. 0단계(기본값) → 자동 행동 없음. 1단계(`docs/specs/_index.md`에 `sonmat.spec_awareness: enabled`를 선언해 직접 켬) → 아래 동작. 2단계(witness/guard를 확장해 능동적으로 검증) → 별도 ADR.
+> ADR `2026-04-26-spec-auto-reference.md`의 3단계 모형에 따라 활성화한다. 0단계(기본값) → 자동 행동 없음. 1단계(`$PROJECT_ROOT/docs/specs/_index.md`에 `sonmat.spec_awareness: enabled`를 선언해 직접 켬) → 아래 동작. 2단계(witness/guard를 확장해 능동적으로 검증) → 별도 ADR.
 
-- **1단계 인지 — 작업 시작에 명세 색인을 자동으로 읽는다.** 프로젝트에 `docs/specs/_index.md`가 있고 그 색인이 `sonmat.spec_awareness: enabled`를 선언하면, 사소하지 않은 모든 작업의 시작에 색인만 읽는다(개별 명세 본문은 읽지 않는다). 색인은 어느 명세로 갈지 고르는 안내 층(50줄 이하)이다. 현재 작업과 관련 있을 법한 명세를 찾는 데 쓰고, 특정 명세는 작업이 그 범위를 건드릴 때만 불러온다.
+- **1단계 인지 — 작업 시작에 명세 색인을 자동으로 읽는다.** 프로젝트에 `$PROJECT_ROOT/docs/specs/_index.md`가 있고 그 색인이 `sonmat.spec_awareness: enabled`를 선언하면, 사소하지 않은 모든 작업의 시작에 색인만 읽는다(개별 명세 본문은 읽지 않는다). 색인은 어느 명세로 갈지 고르는 안내 층(50줄 이하)이다. 현재 작업과 관련 있을 법한 명세를 찾는 데 쓰고, 특정 명세는 작업이 그 범위를 건드릴 때만 불러온다.
 - **말없이 전제하지 말고 그 자리에서 밝힌다.** 관련 있는 명세를 찾으면 행동하기 전에 그 ID와 한 줄 요약을 사용자에게 보여 준다("이 작업은 `SPEC-20260426-auth`의 적용 범위에 드는 것으로 보입니다. 그 명세의 Part 2 계약을 따르겠습니다"). 말없이 따르기만 하지 않는다. 어떤 명세에 따라 움직이는지 사용자가 볼 수 있어야 한다.
 - **1단계는 알림만 하고 막지 않는다.** 하려는 행동이 명세와 충돌하면 충돌을 밝히고 어떻게 할지 묻는다. 자동으로 막지는 않는다. 차단은 2단계에서 다루며, 작업 기반 쪽 기준선(substrate baseline)이 있어야 한다(ADR T2-B 참조). 1단계에서는 sonmat이 충돌을 드러내고 사용자가 푼다.
 - **초안 명세는 구속력이 없다고 본다.** `status: draft` 명세는 따를 의무가 없다. 참고는 되지만 행동을 묶지 않는다. 위에서처럼 "따르겠다"고 말할 근거가 되는 것은 `status: shared`나 `status: published` 명세뿐이다.

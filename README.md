@@ -259,6 +259,7 @@ A: 된다. 축마다 발동 조건이 따로 있다. guard는 메인 세션에�
 저장소 루트에서 Linux나 WSL로 실행한다.
 
 ```bash
+bash tests/test-static.sh
 bash tests/test-codex-support.sh
 bash tests/test-update-notify.sh
 ```
