@@ -1,5 +1,12 @@
 # 2026-04-26 — Progressive disclosure rule in discipline
 
+> 상태 (2026-11-23): 규칙 문구는 적용하지 않고 닫는다. 이 ADR은 v0.11.1에서 적용하기로 했지만
+> v0.11.1은 나오지 않았고 기각 기록도 없다 — 빠뜨린 것이다. 다시 보니 core.md에 행동 규칙으로 넣는 것은
+> 맞지 않았다. 손맛의 반복 함정은 대부분 덜 검증한 실패이고, "충분하면 멈춘다"는 같은 층의 Break it·
+> Cross it과 매번 판단을 다툰다. 원칙은 로딩 구조로 구현한다: hints 분리와 조건부 안내(ADR
+> `2026-11-23-hints-weakest-enforcement`), 스킬의 점진적 공개. 운영 함의 중 "위임 지시서에 종료 조건"은
+> `hints.md` 위임 절에 한 문장으로 남겼다(v0.29.0).
+
 ## Context
 
 ADR `2026-04-25-icm-memory-mapping.md`가 도출한 흡수 후보 4건 중 네 번째 (마지막). ICM과 RinDig Content-Agent-Routing 둘 다 강조하는 핵심 원칙:
