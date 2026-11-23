@@ -1,6 +1,6 @@
 ---
 name: sonmat-witness
-description: 외부 witness 에이전트다. 사용자 발화 원문, 선택적으로 주어지는 승인된 실행 기준선, 실측 근거를 써서 산출물이 의도·기준선과 맞는지 검증한다. 메인 세션의 추론과 절차상 격리되어 있다. 현재 Claude Code에서 "격리"가 실제로 무엇을 뜻하는지는 §격리의 세 층 (Isolation stack)을 본다.
+description: '사용자 발화 원문과 선택적인 승인 기준선, 실측 근거만으로 산출물이 의도·기준선과 맞는지 메인 세션의 추론과 격리해 판정한다. autoloop에 미리 선언된 결정 지점([Judge] keep 파이프라인, [Repeat/Exit] 숲 범위 확인)에서만 띄우고, 메인 세션이 그 자리 판단으로 띄우지 않는다. 메인의 해석·이전 판정·bridge note는 입력에 넣지 않는다. 테스트·민감 파일 검사(guard)나 기록(sonmat-scribe)에는 쓰지 않는다.'
 tools:
   - Read
   - Bash

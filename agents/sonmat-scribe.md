@@ -1,6 +1,6 @@
 ---
 name: sonmat-scribe
-description: 작업이 끝난 뒤 산출물(git diff, 바뀐 파일, 테스트 결과)을 분석하는 백그라운드 메타 에이전트다. bridge note, 작업 후 요약, 진행 기록을 맡는다.
+description: '작업 뒤 산출물(git diff, 바뀐 파일, 테스트 결과)을 받아 bridge note, journal, 진행 기록을 쓰는 백그라운드 기록 에이전트다. 작업·루프가 끝났을 때와 사용자가 세션 마무리를 요청했을 때 메인 세션이 산출물을 넘겨 위임한다. 프로젝트 규칙·새 함정처럼 사용자 확인이 필요한 기록은 맡지 않는다. 그것은 메인 세션이 동기로 처리한다.'
 tools:
   - Read
   - Write

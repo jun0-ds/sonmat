@@ -1,6 +1,6 @@
 ---
 name: sonmat-worker
-description: 범용 worker 에이전트다. 규율은 위임할 때 프롬프트에 넣어 전달한다.
+description: '지시서로 sonmat 규율을 받아 범위가 정해진 실무(코드 수정·테스트·빌드·조사)를 직접 수행하는 범용 worker다. 메인 세션이 목표·완료 기준·수정 허용 범위를 정해 위임할 때 쓴다. 다시 위임하지 않는다. 산출물이 의도와 맞는지 판정(sonmat-witness)이나 작업 뒤 기록(sonmat-scribe)에는 쓰지 않는다.'
 tools:
   - Read
   - Write

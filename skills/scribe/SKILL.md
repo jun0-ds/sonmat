@@ -1,6 +1,6 @@
 ---
 name: scribe
-description: 작업 뒤 기록 층이다. 끝난 작업을 살펴보고 세션이 끝난 뒤에도 남아야 할 것을 적는다. bridge note, journal, 진행 기록, 사용자가 바로잡은 내용에서 찾은 프로젝트 규칙, guard가 감지한 새 함정, witness 판정을 맡는다.
+description: '세션이 끝나도 남아야 할 것을 기록한다. bridge note, journal, 마일스톤 진행, 사용자 교정에서 찾은 프로젝트 규칙(AGENTS.md), guard가 감지한 새 함정, witness 판정이 대상이다. 사용자가 세션을 마무리하거나 넘기려 할 때("마무리하자", "인계해 줘", "새 세션으로 넘어갈게"), 루프·작업이 끝났을 때, 같은 교정이 두 번 나왔을 때 쓴다. 규칙·함정 기록은 사용자 확인 뒤에만 쓴다. 이전 기록을 찾는 일(requery)에는 쓰지 않는다.'
 user-invocable: false
 ---
 
