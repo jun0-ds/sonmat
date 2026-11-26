@@ -43,9 +43,22 @@ Start a new thread and open `/hooks`. Review the SessionStart hook before trusti
 
 The hook engages the discipline through session context without editing `AGENTS.md`. It also reports the exact path of the optional native-agent installer. Review that script, then run the command it prints to install `sonmat_worker`, `sonmat_witness`, and `sonmat_scribe` under `~/.codex/agents/`. The installer is idempotent and refuses to overwrite a locally modified agent unless you pass `--force`.
 
+### Updating on Codex
+
+The SessionStart hook announces a new version once. Review the changes, then run:
+
+```bash
+codex plugin marketplace upgrade sonmat
+codex plugin add sonmat@sonmat
+```
+
+If the update changes the hook, Codex skips it until you review it again. When Codex warns at startup that hooks need review, trust the hook again in `/hooks`. Claude Code has no such step.
+
 ### Reinstall
 
-If the skills don't show up, run these commands yourself in a terminal:
+If the skills don't show up on Codex, check `codex plugin list` for sonmat and repeat the [Codex](#codex) install if it is missing. If it is installed but the discipline does not load, the hook is usually not trusted yet, so start with `/hooks`.
+
+On Claude Code, run these commands yourself in a terminal:
 
 ```bash
 # Reinstall

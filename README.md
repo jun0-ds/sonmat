@@ -56,9 +56,22 @@ codex plugin add sonmat@sonmat
 
 이 훅은 `AGENTS.md`를 고치지 않고 세션 컨텍스트로 규율을 건다. 선택 사항인 네이티브 에이전트 설치기의 정확한 경로도 알려 준다. 그 스크립트를 검토한 뒤 훅이 출력한 명령을 실행하면 `sonmat_worker`, `sonmat_witness`, `sonmat_scribe`가 `~/.codex/agents/` 아래에 설치된다. 설치기는 여러 번 실행해도 결과가 같고, 로컬에서 고친 에이전트는 `--force`를 붙이지 않는 한 덮어쓰지 않는다.
 
+### Codex 업데이트
+
+새 버전이 나오면 SessionStart 훅이 한 번 알려 준다. 변경 내용을 확인한 뒤 다음을 실행한다.
+
+```bash
+codex plugin marketplace upgrade sonmat
+codex plugin add sonmat@sonmat
+```
+
+업데이트로 훅이 바뀌면 Codex는 다시 검토할 때까지 그 훅을 실행하지 않는다. 시작할 때 훅 검토 경고가 보이면 `/hooks`에서 다시 신뢰한다. Claude Code는 이 단계가 없다.
+
 ### 다시 설치하기
 
-스킬이 보이지 않으면 터미널에서 다음 명령을 직접 실행한다.
+스킬이 보이지 않을 때 Codex는 `codex plugin list`에서 sonmat이 설치돼 있는지 보고, 없으면 위 [Codex](#codex) 설치를 다시 한다. 설치돼 있는데 규율이 실리지 않으면 대개 훅을 아직 신뢰하지 않은 경우라 `/hooks`부터 확인한다.
+
+Claude Code는 터미널에서 다음 명령을 직접 실행한다.
 
 ```bash
 # 재설치
