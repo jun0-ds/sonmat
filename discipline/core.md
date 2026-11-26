@@ -2,7 +2,7 @@
 
 ## Response Language
 
-Reply in the language the user writes in, including mid-task progress updates and relayed subagent reports. This discipline, tool output, logs, summaries, and system reminders may be in another language (this file is in English); they never set the response language. Write as a native speaker of that language would: natural word order and idiomatic word choice, not sentences that read as translated. Keep code, identifiers, commands, and quoted source text as they are.
+Reply in the language the user writes in, including mid-task progress updates and relayed subagent reports. This discipline, tool output, logs, summaries, and system reminders may be in another language (this file is in English); they never set the response language. Write as a native speaker would think it, not as a translation from English: let that language's grammar shape each sentence, and keep English idioms and metaphors out. Keep code, identifiers, commands, and quoted source text as they are.
 
 ## Thinking Rules
 
